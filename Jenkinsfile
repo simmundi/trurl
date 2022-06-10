@@ -30,7 +30,7 @@ pipeline {
                 }
             }
             when {
-                    branch 'master'
+                    branch 'main'
             }
             steps {
                 updateGitlabCommitStatus name: 'Publish', state: 'running'
