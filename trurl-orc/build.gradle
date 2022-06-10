@@ -1,0 +1,27 @@
+dependencies {
+    implementation project(":trurl-core")
+    implementation "org.apache.orc:orc-core:${orcVersion}"
+    implementation ("org.apache.hadoop:hadoop-client:${hadoopVersion}") {
+        exclude (group: "org.slf4j")
+        exclude (group: "log4j")
+    }
+    implementation ("org.apache.hadoop:hadoop-hdfs:${hadoopVersion}") {
+        exclude (group: "org.slf4j")
+        exclude (group: "log4j")
+    }
+}
+
+publishing {
+    publications {
+        orcPublication(MavenPublication) {
+            from components.java
+            artifact sourceJar
+            artifact javadocJar
+
+            groupId rootProject.getGroup()
+            artifactId project.name
+            version rootProject.getVersion()
+        }
+    }
+}
+

@@ -1,0 +1,25 @@
+dependencies {
+    implementation project(":trurl-core")
+
+    implementation "org.roaringbitmap:RoaringBitmap:${roaringBitmapVersion}"
+
+    implementation "com.google.guava:guava:${guavaVersion}"
+    api ("tech.tablesaw:tablesaw-core:${tablesawVersion}") {
+        exclude group: "org.roaringbitmap", module: "RoaringBitmap"
+    }
+}
+
+publishing {
+    publications {
+        tablesawPublication(MavenPublication) {
+            from components.java
+            artifact sourceJar
+            artifact javadocJar
+
+            groupId rootProject.getGroup()
+            artifactId project.name
+            version rootProject.getVersion()
+        }
+    }
+}
+

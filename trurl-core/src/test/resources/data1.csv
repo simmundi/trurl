@@ -1,0 +1,4 @@
+name,number,age,letter,entities,entity,bool
+Jan,1,45,A,"1,2,3",,true
+Filip,2,45,B,"7,8",2,false
+Adam,3,45,C,,,

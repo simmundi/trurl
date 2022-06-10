@@ -1,0 +1,26 @@
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+dependencies {
+    implementation project(":trurl-core")
+    implementation "com.google.guava:guava:${guavaVersion}"
+    implementation "com.squareup:javapoet:${javaPoetVersion}"
+}
+
+publishing {
+    publications {
+        generatorPublication(MavenPublication) {
+            from components.java
+            artifact sourceJar
+            artifact javadocJar
+
+            groupId rootProject.getGroup()
+            artifactId project.name
+            version rootProject.getVersion()
+        }
+    }
+}
+

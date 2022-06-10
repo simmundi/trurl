@@ -1,0 +1,14 @@
+<trf xmlns="https://icm.edu.pl/ns/trf/1.0">
+    <meta count="123" />
+    <components>
+        <component></component>
+        <component></component>
+        <component></component>
+        <component></component>
+    </components>
+    <attributes>
+        <attribute name="x">
+            <file path=""/>
+        </attribute>
+    </attributes>
+</trf>
