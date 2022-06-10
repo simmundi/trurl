@@ -16,11 +16,6 @@ subprojects {
         classifier 'sources'
     }
 
-    task javadocJar(type: Jar) {
-        from javadoc
-        classifier 'javadoc'
-    }
-
     publishing {
         repositories {
             maven {

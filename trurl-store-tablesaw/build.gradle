@@ -14,7 +14,6 @@ publishing {
         tablesawPublication(MavenPublication) {
             from components.java
             artifact sourceJar
-            artifact javadocJar
 
             groupId rootProject.getGroup()
             artifactId project.name
