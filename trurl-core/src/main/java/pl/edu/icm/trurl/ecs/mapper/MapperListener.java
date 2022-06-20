@@ -18,4 +18,5 @@ package pl.edu.icm.trurl.ecs.mapper;
  */
 public interface MapperListener<T> {
     void savingComponent(int id, T newValue);
+    default void lifecycleEvent(LifecycleEvent lifecycleEvent) {}
 }

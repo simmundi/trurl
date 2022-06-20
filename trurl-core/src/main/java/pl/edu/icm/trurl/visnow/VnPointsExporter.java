@@ -1,7 +1,11 @@
 package pl.edu.icm.trurl.visnow;
 
+import pl.edu.icm.trurl.ecs.Engine;
+import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.SessionFactory;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
+import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayStore;
 import pl.edu.icm.trurl.util.DefaultFilesystem;
@@ -25,6 +29,7 @@ public class VnPointsExporter<T extends VnCoords> {
     private final List<ColumnWrapper> columns;
     private final DataOutputStream dataOut;
     private final Filesystem filesystem;
+    private final Session session;
 
     private VnPointsExporter(Mapper<T> mapper, Filesystem filesystem, String baseFilePath) throws FileNotFoundException {
         File file = new File(baseFilePath);
@@ -43,6 +48,7 @@ public class VnPointsExporter<T extends VnCoords> {
         dataOut = new DataOutputStream(new BufferedOutputStream(
                 filesystem.openForWriting(new File(baseDir, baseFileName + ".vnd")),
                 1024 * 128));
+        session = new SessionFactory(null, Session.Mode.STUB_ENTITIES).create();
     }
 
     public static <T extends VnCoords> VnPointsExporter<T> create(Class<T> componentClass, String baseFileName) {
@@ -64,7 +70,7 @@ public class VnPointsExporter<T extends VnCoords> {
     public void append(T item) {
         try {
             rows++;
-            mapper.save(item, 0);
+            mapper.save(session, item, 0);
             dataOut.writeFloat(item.getX());
             dataOut.writeFloat(item.getY());
             dataOut.writeFloat(0);

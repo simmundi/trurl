@@ -20,7 +20,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -67,9 +71,9 @@ class VnAreaExporterTest {
         verify(areaInfoMapper).configureStore(notNull());
         verify(areaInfoMapper).attachStore(notNull());
         verify(areaInfoMapper, times(2)).ensureCapacity(200);
-        verify(areaInfoMapper).save(areaA, 0);
-        verify(areaInfoMapper).save(areaB, 199);
-        verify(areaInfoMapper).save(areaC, 104);
+        verify(areaInfoMapper).save(any(), same(areaA), eq(0));
+        verify(areaInfoMapper).save(any(), same(areaB), eq(199));
+        verify(areaInfoMapper).save(any(), same(areaC), eq(104));
     }
 
     @Test

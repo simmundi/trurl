@@ -5,8 +5,9 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
-import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.CommonTypes;
+import pl.edu.icm.trurl.generator.model.BeanMetadata;
+import pl.edu.icm.trurl.generator.model.ComponentFeature;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
 
 import javax.lang.model.element.Modifier;
@@ -22,17 +23,21 @@ public class LoadFeature implements Feature {
 
     @Override
     public Stream<FieldSpec> fields() {
-        return Stream.empty();
+        return beanMetadata.componentFeatures.contains(ComponentFeature.CAN_RESOLVE_CONFLICTS)
+                ? Stream.of(FieldSpec.builder(CommonTypes.ATOMIC_INTEGER_ARRAY, "owners", Modifier.PRIVATE).build())
+                : Stream.empty();
     }
 
     @Override
     public Stream<MethodSpec> methods() {
-        return Stream.of(overrideLoad(beanMetadata));
+        return Stream.of(
+                overrideLoad(),
+                fetchValues()
+        );
     }
 
-    private MethodSpec overrideLoad(BeanMetadata beanMetadata) {
+    private MethodSpec overrideLoad() {
         ClassName component = beanMetadata.componentName;
-        List<ComponentProperty> componentProperties = beanMetadata.getComponentProperties();
         MethodSpec.Builder methodSpec = MethodSpec
                 .methodBuilder("load")
                 .addModifiers(Modifier.PUBLIC)
@@ -40,6 +45,47 @@ public class LoadFeature implements Feature {
                 .addParameter(component, "component")
                 .addParameter(TypeName.INT, "row")
                 .addAnnotation(Override.class);
+        if (beanMetadata.componentFeatures.contains(ComponentFeature.CAN_RESOLVE_CONFLICTS)) {
+            methodSpec
+                    .addCode(CodeBlock.builder()
+                            .beginControlFlow("while (true)")
+                            .addStatement("int currentOwner = owners.get(row)")
+                            .addStatement("if (currentOwner < 0) continue")
+                            .add(callFetchValues())
+                            .beginControlFlow("if (owners.get(row) == currentOwner)")
+                            .addStatement("component.setOwnerId(currentOwner)")
+                            .addStatement("break")
+                            .endControlFlow()
+                            .endControlFlow()
+                            .build());
+        } else {
+            methodSpec.addCode(callFetchValues());
+        }
+        return methodSpec.build();
+    }
+
+    private CodeBlock callFetchValues() {
+        CodeBlock.Builder codeBlock = CodeBlock.builder();
+        codeBlock
+                .addStatement("fetchValues(session, component, row)");
+        if (beanMetadata.componentFeatures.contains(ComponentFeature.REQUIRES_ORIGINAL_COPY)) {
+            codeBlock
+                    .addStatement("$T copy = create()", beanMetadata.componentName)
+                    .addStatement("fetchValues(session, copy, row)")
+                    .addStatement("component.setOriginalCopy(copy)");
+        }
+        return codeBlock.build();
+    }
+
+    private MethodSpec fetchValues() {
+        ClassName component = beanMetadata.componentName;
+        List<ComponentProperty> componentProperties = beanMetadata.getComponentProperties();
+        MethodSpec.Builder methodSpec = MethodSpec
+                .methodBuilder("fetchValues")
+                .addModifiers(Modifier.PRIVATE)
+                .addParameter(CommonTypes.SESSION, "session")
+                .addParameter(component, "component")
+                .addParameter(TypeName.INT, "row");
 
         for (ComponentProperty property : componentProperties) {
             if (property.synthetic) continue;

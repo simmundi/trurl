@@ -2,8 +2,9 @@ package pl.edu.icm.trurl.ecs;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import pl.edu.icm.trurl.ecs.mapper.ComponentOwner;
 
-public final class Session {
+public final class Session implements ComponentOwner {
     private final Engine engine;
     private final Int2ObjectMap<Entity> entities;
 
@@ -11,12 +12,15 @@ public final class Session {
     private final boolean createStubEntities;
     private final boolean persist;
 
-    Session(Engine engine, int expectedEntityCount, Mode mode) {
+    private final int ownerId;
+
+    Session(Engine engine, int expectedEntityCount, Mode mode, int ownerId) {
         this.engine = engine;
         this.createStubEntities = mode == Mode.STUB_ENTITIES;
         this.detachedEntities = mode == Mode.DETACHED_ENTITIES;
         this.persist = mode == Mode.NORMAL;
-        this.entities = detachedEntities ? null : new Int2ObjectOpenHashMap<>(expectedEntityCount);
+        this.entities = (detachedEntities || expectedEntityCount == 0) ? null : new Int2ObjectOpenHashMap<>(expectedEntityCount);
+        this.ownerId = ownerId;
     }
 
     public void close() {
@@ -51,6 +55,11 @@ public final class Session {
 
     public int getCount() {
         return entities == null ? 0 : entities.size();
+    }
+
+    @Override
+    public int getOwnerId() {
+        return ownerId;
     }
 
     public enum Mode {

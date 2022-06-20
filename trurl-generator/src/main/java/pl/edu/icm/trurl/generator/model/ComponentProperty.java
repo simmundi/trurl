@@ -4,12 +4,14 @@ import com.google.common.base.Strings;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import pl.edu.icm.trurl.ecs.annotation.NotMapped;
 import pl.edu.icm.trurl.generator.CommonTypes;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 import java.util.Locale;
 import java.util.Optional;
@@ -58,6 +60,8 @@ public class ComponentProperty {
         Optional<? extends Element> optionalAttribute = meta.method.getEnclosingElement().getEnclosedElements().stream()
                 .filter(e -> !(e instanceof ExecutableElement))
                 .filter(e -> e.getSimpleName().toString().equals(propertyName))
+                .filter(e -> !e.getModifiers().contains(Modifier.VOLATILE))
+                .filter(e -> e.getAnnotation(NotMapped.class) == null)
                 .findFirst();
 
         return new ComponentProperty(propertyName, meta.namespace, type, methodName, businessType, TypeName.get(meta.method.getReturnType()), false, optionalAttribute);

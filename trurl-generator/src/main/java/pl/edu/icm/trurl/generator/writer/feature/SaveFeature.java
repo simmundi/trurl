@@ -8,6 +8,7 @@ import com.squareup.javapoet.TypeName;
 import pl.edu.icm.trurl.ecs.annotation.MappedCollection;
 import pl.edu.icm.trurl.generator.CommonTypes;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
+import pl.edu.icm.trurl.generator.model.ComponentFeature;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
 
 import javax.lang.model.element.Modifier;
@@ -28,18 +29,55 @@ public class SaveFeature implements Feature {
 
     @Override
     public Stream<MethodSpec> methods() {
-        return Stream.of(overrideSave(beanMetadata));
+        return Stream.of(overrideSave(), writeStoreValues());
     }
 
-    private MethodSpec overrideSave(BeanMetadata beanMetadata) {
-        ClassName component = beanMetadata.componentName;
+    private MethodSpec overrideSave() {
         MethodSpec.Builder methodSpec = MethodSpec
                 .methodBuilder("save")
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(CommonTypes.LANG_OBJECT, "component")
+                .addParameter(CommonTypes.SESSION, "session")
+                .addParameter(beanMetadata.componentName, "component")
                 .addParameter(TypeName.INT, "row")
-                .addAnnotation(Override.class)
-                .addStatement("$T source = ($T)component", component, component)
+                .addAnnotation(Override.class);
+
+        if (beanMetadata.componentFeatures.contains(ComponentFeature.CAN_RESOLVE_CONFLICTS)) {
+            methodSpec.addCode(CodeBlock.builder()
+                    .beginControlFlow("if (owners == null)")
+                    .addStatement("storeValues(component, row)")
+                    .addStatement("return")
+                    .endControlFlow()
+                    .addStatement("int ownerId = session.getOwnerId()")
+                    .beginControlFlow("while (true)")
+                    .addStatement("int currentOwnerId = owners.get(row)")
+                    .addStatement("if (currentOwnerId < 0) continue")
+                    .beginControlFlow("if (owners.compareAndSet(row, currentOwnerId, -ownerId))")
+                    .addStatement("$T resolved = component", beanMetadata.componentName)
+                    .beginControlFlow("if (currentOwnerId != component.getOwnerId())")
+                    .addStatement("$T other = create()", beanMetadata.componentName)
+                    .addStatement("fetchValues(session, other, row)")
+                    .addStatement("resolved = component.resolve(other)")
+                    .endControlFlow()
+                    .addStatement("storeValues(resolved, row)")
+                    .addStatement("owners.set(row, ownerId)")
+                    .addStatement("break")
+                    .endControlFlow()
+                    .endControlFlow()
+                    .build());
+
+        } else {
+            methodSpec.addStatement("storeValues(component, row)");
+        }
+
+        return methodSpec.build();
+    }
+
+    private MethodSpec writeStoreValues() {
+        MethodSpec.Builder methodSpec = MethodSpec
+                .methodBuilder("storeValues")
+                .addModifiers(Modifier.PRIVATE)
+                .addParameter(beanMetadata.componentName, "component")
+                .addParameter(TypeName.INT, "row")
                 .addStatement("int current = count.get()")
                 .addStatement("if (row < current && !isModified(component, row)) return")
                 .addCode(CodeBlock.builder()
@@ -51,49 +89,49 @@ public class SaveFeature implements Feature {
                         .endControlFlow().build());
 
         methodSpec
-                .addStatement("mapperListeners.fireSavingComponent(source, row)");
+                .addStatement("mapperListeners.fireSavingComponent(component, row)");
 
         for (ComponentProperty property : beanMetadata.getComponentProperties()) {
             if (property.synthetic) continue;
             switch (property.type) {
                 case INT_PROP:
-                    methodSpec.addStatement("$L.setInt(row, source.$L())", property.name, property.getterName);
+                    methodSpec.addStatement("$L.setInt(row, component.$L())", property.name, property.getterName);
                     break;
                 case BOOLEAN_PROP:
-                    methodSpec.addStatement("$L.setBoolean(row, source.$L())", property.name, property.getterName);
+                    methodSpec.addStatement("$L.setBoolean(row, component.$L())", property.name, property.getterName);
                     break;
                 case BYTE_PROP:
-                    methodSpec.addStatement("$L.setByte(row, source.$L())", property.name, property.getterName);
+                    methodSpec.addStatement("$L.setByte(row, component.$L())", property.name, property.getterName);
                     break;
                 case DOUBLE_PROP:
-                    methodSpec.addStatement("$L.setDouble(row, source.$L())", property.name, property.getterName);
+                    methodSpec.addStatement("$L.setDouble(row, component.$L())", property.name, property.getterName);
                     break;
                 case ENUM_PROP:
-                    methodSpec.addStatement("$L.setEnum(row, source.$L())", property.name, property.getterName);
+                    methodSpec.addStatement("$L.setEnum(row, component.$L())", property.name, property.getterName);
                     break;
                 case FLOAT_PROP:
-                    methodSpec.addStatement("$L.setFloat(row, source.$L())", property.name, property.getterName);
+                    methodSpec.addStatement("$L.setFloat(row, component.$L())", property.name, property.getterName);
                     break;
                 case SHORT_PROP:
-                    methodSpec.addStatement("$L.setShort(row, source.$L())", property.name, property.getterName);
+                    methodSpec.addStatement("$L.setShort(row, component.$L())", property.name, property.getterName);
                     break;
                 case STRING_PROP:
-                    methodSpec.addStatement("$L.setString(row, source.$L())", property.name, property.getterName);
+                    methodSpec.addStatement("$L.setString(row, component.$L())", property.name, property.getterName);
                     break;
                 case ENTITY_LIST_PROP:
-                    methodSpec.addStatement("$L.saveIds(row, source.$L().size(), (idx) -> source.$L().get(idx).getId())", property.name, property.getterName, property.getterName);
+                    methodSpec.addStatement("$L.saveIds(row, component.$L().size(), (idx) -> component.$L().get(idx).getId())", property.name, property.getterName, property.getterName);
                     break;
                 case ENTITY_PROP:
-                    methodSpec.addStatement("$L.setEntity(row, source.$L())", property.name, property.getterName);
+                    methodSpec.addStatement("$L.setEntity(row, component.$L())", property.name, property.getterName);
                     break;
                 case EMBEDDED_PROP:
-                    methodSpec.addStatement("if (source.$L() != null) $L.save(source.$L(), row)", property.getterName, property.name, property.getterName);
+                    methodSpec.addStatement("if (component.$L() != null) $L.save(component.$L(), row)", property.getterName, property.name, property.getterName);
                     break;
                 case EMBEDDED_LIST:
                     createEmbeddedList(methodSpec, property);
                     break;
                 default:
-                    throw new IllegalStateException("Unknown entity type " + property.type);
+                    throw new IllegalStateException("Unknown property type " + property.type);
             }
         }
 
@@ -111,7 +149,7 @@ public class SaveFeature implements Feature {
                     .addCode(
                             CodeBlock.builder()
                                     .beginControlFlow("")
-                                    .addStatement("int size = source.$L().size()", property.getterName)
+                                    .addStatement("int size = component.$L().size()", property.getterName)
                                     .beginControlFlow("if (size > 127)")
                                     .addStatement("throw new IllegalStateException(\"Embedded lists over 127 elements are not supported\")")
                                     .endControlFlow()
@@ -131,7 +169,7 @@ public class SaveFeature implements Feature {
                                     .addStatement("throw new IllegalStateException(\"resizing this list over \" + length + \" is not supported\")")
                                     .endControlFlow()
                                     .beginControlFlow("for (int i = 0; i < size; i++)")
-                                    .addStatement("$L.save(source.$L().get(i), i + start)", property.name, property.getterName)
+                                    .addStatement("$L.save(component.$L().get(i), i + start)", property.name, property.getterName)
                                     .endControlFlow()
                                     .beginControlFlow("if (size < length)")
                                     .addStatement("$L.setEmpty(start + size)", property.name)

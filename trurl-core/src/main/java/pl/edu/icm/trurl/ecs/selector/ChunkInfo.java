@@ -1,6 +1,7 @@
 package pl.edu.icm.trurl.ecs.selector;
 
 public class ChunkInfo {
+
     private final int chunkId;
     private final int approximateSize;
 

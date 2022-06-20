@@ -96,7 +96,7 @@ public class MapperIT {
         mapper.getMapperListeners().addSavingListener(mapperListener);
 
         // execute
-        mapper.save(dto, 5);
+        mapper.save(null, dto, 5);
 
         // assert
         List<Entity> entityList = new ArrayList<>();
@@ -126,7 +126,7 @@ public class MapperIT {
         dto.setLooksProp(new Looks(Color.SILVER, Texture.SHINY));
 
         // execute
-        mapper.save(dto, 10);
+        mapper.save(null, dto, 10);
 
         // assert
         assertThat(looksPropColor.getEnum(10)).isEqualTo(Color.SILVER);

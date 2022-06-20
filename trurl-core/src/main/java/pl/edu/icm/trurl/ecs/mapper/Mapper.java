@@ -5,10 +5,12 @@ import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreMetadata;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
+import java.awt.*;
 import java.util.List;
 import java.util.Locale;
 
 public interface Mapper<T> {
+
     void attachStore(Store store);
     void configureStore(StoreMetadata metadata);
     default void configureAndAttach(Store store) {
@@ -18,8 +20,11 @@ public interface Mapper<T> {
     T create();
     boolean isPresent(int index);
     void load(Session session, T component, int index);
-    void save(Object component, int index);
-    boolean isModified(Object component, int index);
+    default void save(T component, int index) {
+        save(null, component, index);
+    }
+    void save(Session owner, T component, int index);
+    boolean isModified(T component, int index);
     void ensureCapacity(int row);
     List<Attribute> attributes();
     MapperListeners<T> getMapperListeners();
@@ -37,4 +42,5 @@ public interface Mapper<T> {
         load(session, created, row);
         return created;
     }
+    void lifecycleEvent(LifecycleEvent lifecycleEvent);
 }

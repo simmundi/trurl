@@ -8,7 +8,7 @@ public final class MapperListeners<T> {
     public void fireSavingComponent(T component, int row) {
         if (!listeners.isEmpty()) {
             for (MapperListener<T> listener : listeners) {
-                listener.savingComponent(row, (T)component);
+                listener.savingComponent(row, component);
             }
         }
     }

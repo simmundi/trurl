@@ -12,7 +12,6 @@ import javax.tools.Diagnostic;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,20 +20,25 @@ public final class BeanMetadata {
     public final String namespace;
     public final ClassName componentName;
 
+    public final Set<ComponentFeature> componentFeatures;
+
     private final ProcessingEnvironment processingEnvironment;
     private final SyntheticPropertiesSynthesizer synthesizer;
 
-    public BeanMetadata(ProcessingEnvironment processingEnvironment, TypeElement componentClass, String namespace, SyntheticPropertiesSynthesizer syntheticPropertiesSynthesizer) {
+    public BeanMetadata(ProcessingEnvironment processingEnvironment,
+                        TypeElement componentClass,
+                        String namespace,
+                        Set<ComponentFeature> componentFeatures,
+                        SyntheticPropertiesSynthesizer syntheticPropertiesSynthesizer) {
         this.processingEnvironment = processingEnvironment;
         this.componentClass = componentClass;
         this.namespace = namespace;
         this.componentName = ClassName.get(componentClass);
+        this.componentFeatures = componentFeatures;
         this.synthesizer = syntheticPropertiesSynthesizer;
-
     }
 
     public List<ComponentProperty> getComponentProperties() {
-        Set<String> attributeNames = getAttributeNames(componentClass);
         List<ComponentProperty> properties = new ArrayList<>();
 
         for (Element enclosedElement : componentClass.getEnclosedElements()) {
@@ -51,7 +55,7 @@ public final class BeanMetadata {
                     } else {
                         processingEnvironment
                                 .getMessager()
-                                .printMessage(Diagnostic.Kind.NOTE, "Skipping " + property.name + ", because relevant attribute is not found");
+                                .printMessage(Diagnostic.Kind.OTHER, "Skipping " + property.name);
                     }
                 }
             }
@@ -61,18 +65,4 @@ public final class BeanMetadata {
                 .flatMap(synthesizer::synthesize)
                 .collect(Collectors.toList());
     }
-
-
-    private Set<String> getAttributeNames(TypeElement componentClass) {
-        Set<String> attributeNames = new HashSet<>();
-
-        for (Element enclosedElement : componentClass.getEnclosedElements()) {
-            if (!(enclosedElement instanceof ExecutableElement)) {
-                attributeNames.add(enclosedElement.getSimpleName().toString());
-            }
-        }
-        return attributeNames;
-    }
-
-
 }

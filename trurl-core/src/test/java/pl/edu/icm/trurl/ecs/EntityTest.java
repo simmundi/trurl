@@ -95,7 +95,7 @@ class EntityTest {
         entity.persist();
 
         // assert
-        verify(mapper).save(newLooks, ID);
+        verify(mapper).save(session, newLooks, ID);
     }
 
     @Test

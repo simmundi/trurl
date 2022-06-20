@@ -5,7 +5,6 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import pl.edu.icm.trurl.generator.CommonTypes;
-import pl.edu.icm.trurl.generator.SyntheticPropertiesSynthesizer;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.writer.feature.AttachStoreFeature;
 import pl.edu.icm.trurl.generator.writer.feature.AttributesFeature;
@@ -18,6 +17,7 @@ import pl.edu.icm.trurl.generator.writer.feature.EnsureCapacityFeature;
 import pl.edu.icm.trurl.generator.writer.feature.Feature;
 import pl.edu.icm.trurl.generator.writer.feature.IsModifiedFeature;
 import pl.edu.icm.trurl.generator.writer.feature.IsPresentFeature;
+import pl.edu.icm.trurl.generator.writer.feature.LifecycleEventFeature;
 import pl.edu.icm.trurl.generator.writer.feature.LoadFeature;
 import pl.edu.icm.trurl.generator.writer.feature.MapperListenersFeature;
 import pl.edu.icm.trurl.generator.writer.feature.SaveFeature;
@@ -54,7 +54,8 @@ public class MapperWriter {
                 new EnsureCapacityFeature(beanMetadata),
                 new AttributesFeature(beanMetadata),
                 new MapperListenersFeature(beanMetadata),
-                new ColumnarAccessFeature(beanMetadata));
+                new ColumnarAccessFeature(beanMetadata),
+                new LifecycleEventFeature(beanMetadata));
 
         features.stream()
                 .flatMap(Feature::fields)

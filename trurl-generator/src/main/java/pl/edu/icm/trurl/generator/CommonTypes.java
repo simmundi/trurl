@@ -4,6 +4,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.mapper.ComponentOwner;
+import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.MapperListeners;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
@@ -26,11 +28,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 public class CommonTypes {
     public static final ClassName COMPONENT_STORE_METADATA = ClassName.get(StoreMetadata.class);
     public static final ClassName STORE = ClassName.get(Store.class);
     public static final ClassName PREFIXED_STORE = ClassName.get(PrefixedStore.class);
+    public static final ClassName LIFECYCLE_EVENT = ClassName.get(LifecycleEvent.class);
     public static final ClassName MAPPER = ClassName.get(Mapper.class);
     public static final ClassName MAPPERS = ClassName.get(Mappers.class);
     public static final ClassName MAPPER_LISTENERS = ClassName.get(MapperListeners.class);
@@ -44,7 +48,7 @@ public class CommonTypes {
     public static final ParameterizedTypeName ATTRIBUTE_LIST = ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(Attribute.class));
     public static final ParameterizedTypeName ATTRIBUTE_ARRAY_LIST = ParameterizedTypeName.get(ClassName.get(ArrayList.class), ClassName.get(Attribute.class));
     public static final ClassName ENTITY = ClassName.get(Entity.class);
-
+    public static final ClassName ATOMIC_INTEGER_ARRAY = ClassName.get(AtomicIntegerArray.class);
     public static final ClassName INT_COLUMN = ClassName.get(IntAttribute.class);
     public static final ClassName DOUBLE_COLUMN = ClassName.get(DoubleAttribute.class);
     public static final ClassName FLOAT_COLUMN = ClassName.get(FloatAttribute.class);

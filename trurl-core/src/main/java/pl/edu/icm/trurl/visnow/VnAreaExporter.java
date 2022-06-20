@@ -1,6 +1,8 @@
 package pl.edu.icm.trurl.visnow;
 
 import com.google.common.base.Preconditions;
+import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.SessionFactory;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
 import pl.edu.icm.trurl.store.Store;
@@ -26,6 +28,7 @@ public class VnAreaExporter<T> {
     private final List<ColumnWrapper> columns;
     private final DataOutputStream dataOut;
     private final Filesystem filesystem;
+    private final Session session;
     private final int fromX;
     private final int width;
     private final int fromY;
@@ -62,13 +65,14 @@ public class VnAreaExporter<T> {
                 .map(c -> ColumnWrapper.from(c))
                 .collect(Collectors.toList());
         dataOut = new DataOutputStream(new BufferedOutputStream(filesystem.openForWriting(new File(baseDir, baseFileName + ".vnd")), 1024 * 128));
+        session = new SessionFactory(null, Session.Mode.STUB_ENTITIES).create();
     }
 
     public void append(int x, int y, T object) throws IOException {
         Preconditions.checkArgument(x >= fromX && x < fromX + width, "x out of bounds: %s", x);
         Preconditions.checkArgument(y >= fromY && y < fromY + height, "y out of bounds: %s", y);
         int index = (x - fromX) + (y - fromY) * width;
-        mapper.save(object, index);
+        mapper.save(session, object, index);
     }
 
     public void close() throws IOException {

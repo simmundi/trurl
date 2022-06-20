@@ -89,7 +89,7 @@ class MapperTest {
         mapper.getMapperListeners().addSavingListener(mapperListener);
 
         // execute
-        mapper.save(looks, 99);
+        mapper.save(null, looks, 99);
 
         // assert
         verify(colorAttribute).setEnum(99, Color.BLUE);
@@ -117,7 +117,7 @@ class MapperTest {
         mapper.getMapperListeners().addSavingListener(mapperListener);
 
         // execute
-        mapper.save(looks, 99);
+        mapper.save(null, looks, 99);
 
         // assert
         verify(mapperListener, times(0)).savingComponent(anyInt(), notNull());

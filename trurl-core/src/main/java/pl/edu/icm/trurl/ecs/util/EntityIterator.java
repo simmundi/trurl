@@ -4,6 +4,7 @@
  import pl.edu.icm.trurl.ecs.EntitySystem;
  import pl.edu.icm.trurl.ecs.Session;
  import pl.edu.icm.trurl.ecs.SessionFactory;
+ import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
  import pl.edu.icm.trurl.ecs.selector.Chunk;
  import pl.edu.icm.trurl.ecs.selector.Selector;
 
@@ -82,6 +83,9 @@ public class EntityIterator {
     public <Context> EntitySystem forEach(Function<Chunk, Context> contextFactory, Systems.IdxProcessor<Context> idxProcessor) {
         return initialSessionFactory -> {
             SessionFactory sessionFactory = initialSessionFactory.withModeAndCount(mode, selector.estimatedChunkSize() * 8);
+            if (parallel) {
+                initialSessionFactory.lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
+            }
             (parallel ? selector.chunks().parallel() : selector.chunks()).forEach(chunk -> {
                 final Session session = sessionFactory.create();
                 Context context = contextFactory.apply(chunk);
@@ -90,6 +94,9 @@ public class EntityIterator {
                 );
                 session.close();
             });
+            if (parallel) {
+                initialSessionFactory.lifecycleEvent(LifecycleEvent.POST_PARALLEL_ITERATION);
+            }
         };
     }
 }

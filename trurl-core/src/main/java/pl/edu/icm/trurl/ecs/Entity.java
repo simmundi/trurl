@@ -48,7 +48,7 @@ public final class Entity {
         for (int idx = 0; idx < components.length; idx++) {
             if (components[idx] != null) {
                 Mapper<Object> mapper = mapperSet.indexToMapper(idx);
-                mapper.save(components[idx], id);
+                mapper.save(session, components[idx], id);
             }
         }
     }

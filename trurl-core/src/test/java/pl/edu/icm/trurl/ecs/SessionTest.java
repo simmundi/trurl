@@ -12,6 +12,7 @@ import pl.edu.icm.trurl.exampledata.Stats;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -21,6 +22,7 @@ import static org.mockito.Mockito.verify;
 class SessionTest {
 
     public static final int ID = 123;
+    public static final int OWNER_ID = 77;
 
     @Mock
     Engine engine;
@@ -45,7 +47,7 @@ class SessionTest {
     @DisplayName("Should create attached entities in NORMAL mode")
     void getEntity() {
         // given
-        Session session = new Session(engine, 10, Session.Mode.NORMAL);
+        Session session = new Session(engine, 10, Session.Mode.NORMAL, 1);
 
         // execute
         Entity entity1 = session.getEntity(ID);
@@ -62,7 +64,7 @@ class SessionTest {
     @DisplayName("Should create detached entities in DETACHED mode")
     void getEntity__detached() {
         // given
-        Session session = new Session(engine, 10, Session.Mode.DETACHED_ENTITIES);
+        Session session = new Session(engine, 10, Session.Mode.DETACHED_ENTITIES, OWNER_ID);
         // execute
         Entity entity1 = session.getEntity(ID);
         Entity entity2 = session.getEntity(ID);
@@ -76,7 +78,7 @@ class SessionTest {
     @DisplayName("Should create stub entities in STUB mode")
     void getEntity__stubs() {
         // given
-        Session session = new Session(engine, 10, Session.Mode.STUB_ENTITIES);
+        Session session = new Session(engine, 10, Session.Mode.STUB_ENTITIES, OWNER_ID);
         // execute
         Entity entity1 = session.getEntity(ID);
         Entity entity2 = session.getEntity(ID);
@@ -90,7 +92,7 @@ class SessionTest {
     @DisplayName("Should persist entities using mapper")
     void persist() {
         // given
-        Session session = new Session(engine, 10, Session.Mode.NORMAL);
+        Session session = new Session(engine, 10, Session.Mode.NORMAL, OWNER_ID);
         Entity entity1 = session.getEntity(ID);
         Entity entity2 = session.getEntity(ID + 1);
         entity1.add(new Stats());
@@ -100,14 +102,14 @@ class SessionTest {
         session.close();
 
         // assert
-        verify(statsMapper, times(2)).save(any(), anyInt());
+        verify(statsMapper, times(2)).save(eq(session), any(), anyInt());
     }
 
     @Test
     @DisplayName("Should return the engine")
     void getEngine() {
         // given
-        Session session = new Session(engine, 10, Session.Mode.NORMAL);
+        Session session = new Session(engine, 10, Session.Mode.NORMAL, OWNER_ID);
 
         // execute
         Engine engine = session.getEngine();
