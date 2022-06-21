@@ -9,5 +9,6 @@ package pl.edu.icm.trurl.ecs.mapper.feature;
  * might require writing back (component can change due to a call to #resolve).
  */
 public interface IsDirtyMarked {
+    void markAsClean();
     boolean isDirty();
 }

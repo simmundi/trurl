@@ -74,6 +74,10 @@ public class LoadFeature implements Feature {
                     .addStatement("fetchValues(session, copy, row)")
                     .addStatement("component.setOriginalCopy(copy)");
         }
+        if (beanMetadata.componentFeatures.contains(ComponentFeature.IS_DIRTY_MARKED)) {
+            codeBlock
+                    .addStatement("component.markAsClean()");
+        }
         return codeBlock.build();
     }
 

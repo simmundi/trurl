@@ -59,4 +59,9 @@ public class ParallelCounter implements RequiresOriginalCopy<ParallelCounter>, C
     public boolean isDirty() {
         return true;
     }
+
+    @Override
+    public void markAsClean() {
+
+    }
 }

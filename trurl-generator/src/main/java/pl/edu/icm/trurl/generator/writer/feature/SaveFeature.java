@@ -77,10 +77,16 @@ public class SaveFeature implements Feature {
                 .methodBuilder("storeValues")
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(beanMetadata.componentName, "component")
-                .addParameter(TypeName.INT, "row")
-                .addStatement("int current = count.get()")
-                .addStatement("if (row < current && !isModified(component, row)) return")
+                .addParameter(TypeName.INT, "row");
+
+        if (beanMetadata.componentFeatures.contains(ComponentFeature.CAN_BE_NORMALIZED)) {
+            methodSpec.addStatement("component.normalize()");
+        }
+
+        methodSpec
                 .addCode(CodeBlock.builder()
+                        .addStatement("int current = count.get()")
+                        .addStatement("if (row < current && !isModified(component, row)) return")
                         .beginControlFlow("while (row >= current)")
                         .addStatement("boolean ok = count.compareAndSet(current, row + 1)")
                         .addStatement("current = count.get()")
