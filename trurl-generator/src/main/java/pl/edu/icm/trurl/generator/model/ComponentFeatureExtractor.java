@@ -4,6 +4,7 @@ import pl.edu.icm.trurl.ecs.mapper.feature.CanBeNormalized;
 import pl.edu.icm.trurl.ecs.mapper.feature.CanResolveConflicts;
 import pl.edu.icm.trurl.ecs.mapper.feature.IsDirtyMarked;
 import pl.edu.icm.trurl.ecs.mapper.feature.RequiresOriginalCopy;
+import pl.edu.icm.trurl.ecs.mapper.feature.RequiresSetup;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
@@ -19,6 +20,7 @@ public class ComponentFeatureExtractor {
     private final TypeMirror requiresOriginalCopyInterface;
     private final TypeMirror canResolveConflictsInterface;
     private final TypeMirror canBeNormalized;
+    private final TypeMirror requiresSetupInterface;
     private final Types types;
     private final Elements elements;
 
@@ -29,6 +31,7 @@ public class ComponentFeatureExtractor {
         isDirtyMarkedInterface = elements.getTypeElement(IsDirtyMarked.class.getCanonicalName()).asType();
         requiresOriginalCopyInterface = elements.getTypeElement(RequiresOriginalCopy.class.getCanonicalName()).asType();
         canResolveConflictsInterface = elements.getTypeElement(CanResolveConflicts.class.getCanonicalName()).asType();
+        requiresSetupInterface = elements.getTypeElement(RequiresSetup.class.getCanonicalName()).asType();
         canBeNormalized = elements.getTypeElement(CanBeNormalized.class.getCanonicalName()).asType();
     }
 
@@ -46,6 +49,9 @@ public class ComponentFeatureExtractor {
         }
         if (types.isSubtype(types.erasure(type), types.erasure(canBeNormalized))) {
             results.add(ComponentFeature.CAN_BE_NORMALIZED);
+        }
+        if (types.isAssignable(type, types.erasure(requiresSetupInterface))) {
+            results.add(ComponentFeature.REQUIRES_SETUP);
         }
         return results;
     }

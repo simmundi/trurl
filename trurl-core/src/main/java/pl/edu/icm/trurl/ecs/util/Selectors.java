@@ -8,6 +8,7 @@ import pl.edu.icm.trurl.ecs.selector.Chunk;
 import pl.edu.icm.trurl.ecs.selector.Selector;
 
 import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 
 public class Selectors {
     private final int DEFAULT_CHUNK_SIZE = 25_000;
@@ -57,8 +58,17 @@ public class Selectors {
 
     public Selector filtered(Selector selector, IntPredicate predicate) {
         return () -> selector.chunks()
-                        .map(chunk -> new Chunk(chunk.getChunkInfo(), chunk.ids().
-                                filter(predicate)));
+                .map(chunk -> new Chunk(chunk.getChunkInfo(), chunk.ids().
+                        filter(predicate)));
+    }
+
+    public <M> Selector filtered(Selector selector, Class<M> mappedType, Predicate<M> predicate) {
+        final Mapper<M> mMapper = getEngine().getMapperSet().classToMapper(mappedType);
+        return () -> selector.chunks()
+                .map(chunk -> new Chunk(
+                        chunk.getChunkInfo(),
+                        chunk.ids()
+                                .filter(id -> mMapper.isPresent(id) && predicate.test(mMapper.createAndLoad(id)))));
     }
 
     private Engine getEngine() {

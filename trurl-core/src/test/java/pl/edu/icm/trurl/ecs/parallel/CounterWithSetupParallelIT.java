@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.*;
 
-public class CounterParallelIT {
+public class CounterWithSetupParallelIT {
     final int SIZE = 10_000;
     final int CONTENTION = 4;
     final int PER_SESSION = 1000;

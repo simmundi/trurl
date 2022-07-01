@@ -39,8 +39,8 @@ public class LifecycleEventFeature implements Feature {
         if (beanMetadata.componentFeatures.contains(ComponentFeature.CAN_RESOLVE_CONFLICTS)) {
             methodSpec.addCode(CodeBlock.builder()
                     .beginControlFlow("switch (event)")
-                    .addStatement("case PRE_PARALLEL_ITERATION: this.owners = new $T(this.count.get()); break", CommonTypes.ATOMIC_INTEGER_ARRAY)
-                    .addStatement("case POST_PARALLEL_ITERATION: this.owners = null; break")
+                    .addStatement("case PRE_PARALLEL_ITERATION: this.owners = this.owners.length() >= this.count.get() ? this.owners : new $T(this.count.get()); this.parallelMode = true; break", CommonTypes.ATOMIC_INTEGER_ARRAY)
+                    .addStatement("case POST_PARALLEL_ITERATION: this.parallelMode = false; break")
                     .endControlFlow()
                     .build());
         }

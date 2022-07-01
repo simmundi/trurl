@@ -11,7 +11,7 @@ import pl.edu.icm.trurl.exampledata.PersonMapper;
 import pl.edu.icm.trurl.store.array.ArrayStore;
 
 @ExtendWith(MockitoExtension.class)
-public class MapperFeaturesIT {
+public class MapperNormalizationIT {
     ArrayStore store = new ArrayStore(1);
     PersonMapper personMapper = new PersonMapper();
 

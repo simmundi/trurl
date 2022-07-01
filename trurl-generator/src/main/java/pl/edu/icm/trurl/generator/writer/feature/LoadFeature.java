@@ -24,7 +24,9 @@ public class LoadFeature implements Feature {
     @Override
     public Stream<FieldSpec> fields() {
         return beanMetadata.componentFeatures.contains(ComponentFeature.CAN_RESOLVE_CONFLICTS)
-                ? Stream.of(FieldSpec.builder(CommonTypes.ATOMIC_INTEGER_ARRAY, "owners", Modifier.PRIVATE).build())
+                ? Stream.of(FieldSpec.builder(CommonTypes.ATOMIC_INTEGER_ARRAY, "owners", Modifier.PRIVATE)
+                .initializer("new $T(0)", CommonTypes.ATOMIC_INTEGER_ARRAY).build(),
+                FieldSpec.builder(ClassName.BOOLEAN, "parallelMode").build())
                 : Stream.empty();
     }
 
@@ -48,6 +50,10 @@ public class LoadFeature implements Feature {
         if (beanMetadata.componentFeatures.contains(ComponentFeature.CAN_RESOLVE_CONFLICTS)) {
             methodSpec
                     .addCode(CodeBlock.builder()
+                            .beginControlFlow("if (!parallelMode)")
+                            .add(callFetchValues())
+                            .addStatement("return")
+                            .endControlFlow()
                             .beginControlFlow("while (true)")
                             .addStatement("int currentOwner = owners.get(row)")
                             .addStatement("if (currentOwner < 0) continue")
@@ -77,6 +83,10 @@ public class LoadFeature implements Feature {
         if (beanMetadata.componentFeatures.contains(ComponentFeature.IS_DIRTY_MARKED)) {
             codeBlock
                     .addStatement("component.markAsClean()");
+        }
+        if (beanMetadata.componentFeatures.contains(ComponentFeature.REQUIRES_SETUP)) {
+            codeBlock
+                    .addStatement("component.setup()");
         }
         return codeBlock.build();
     }

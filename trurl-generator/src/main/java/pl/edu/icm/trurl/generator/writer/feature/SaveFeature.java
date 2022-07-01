@@ -43,7 +43,7 @@ public class SaveFeature implements Feature {
 
         if (beanMetadata.componentFeatures.contains(ComponentFeature.CAN_RESOLVE_CONFLICTS)) {
             methodSpec.addCode(CodeBlock.builder()
-                    .beginControlFlow("if (owners == null)")
+                    .beginControlFlow("if (!parallelMode)")
                     .addStatement("storeValues(component, row)")
                     .addStatement("return")
                     .endControlFlow()
