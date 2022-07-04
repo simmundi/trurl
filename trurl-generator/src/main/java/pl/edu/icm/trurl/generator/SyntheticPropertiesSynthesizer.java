@@ -1,6 +1,8 @@
 package pl.edu.icm.trurl.generator;
 
 import com.squareup.javapoet.TypeName;
+import pl.edu.icm.trurl.ecs.annotation.CollectionType;
+import pl.edu.icm.trurl.ecs.annotation.MappedCollection;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
 import pl.edu.icm.trurl.generator.model.PropertyType;
 
@@ -19,6 +21,8 @@ public class SyntheticPropertiesSynthesizer {
     }
 
     private Stream<ComponentProperty> embeddedList(ComponentProperty base) {
+        Optional<MappedCollection> mappedCollection = Optional.ofNullable(base.attribute.getAnnotation(MappedCollection.class));
+        CollectionType collectionType = mappedCollection.map(MappedCollection::collectionType).orElse(CollectionType.RANGE);
         return Stream.of(
                 base,
                 new ComponentProperty(

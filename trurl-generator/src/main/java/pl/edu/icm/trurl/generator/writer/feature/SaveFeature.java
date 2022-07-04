@@ -5,6 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
+import pl.edu.icm.trurl.ecs.annotation.CollectionType;
 import pl.edu.icm.trurl.ecs.annotation.MappedCollection;
 import pl.edu.icm.trurl.generator.CommonTypes;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
@@ -150,40 +151,56 @@ public class SaveFeature implements Feature {
             Optional<MappedCollection> mappedCollection = Optional.ofNullable(property.attribute.getAnnotation(MappedCollection.class));
             int sizeMin = mappedCollection.map(MappedCollection::minReservation).orElse(1);
             int sizeMargin = mappedCollection.map(MappedCollection::margin).orElse(2);
-
-            methodSpec
-                    .addCode(
-                            CodeBlock.builder()
-                                    .beginControlFlow("")
-                                    .addStatement("int size = component.$L().size()", property.getterName)
-                                    .beginControlFlow("if (size > 127)")
-                                    .addStatement("throw new IllegalStateException(\"Embedded lists over 127 elements are not supported\")")
-                                    .endControlFlow()
-                                    .beginControlFlow("if (size > 0 && $L_start.isEmpty(row))", property.name)
-                                    .addStatement("byte sizeMin = $L", sizeMin)
-                                    .addStatement("byte sizeMargin = $L", sizeMargin)
-                                    .addStatement("byte length = (byte) (Math.max(size, sizeMin - sizeMargin ) + sizeMargin)")
-                                    .addStatement("$L_start.setInt(row, $L.getCount())", property.name, property.name)
-                                    .addStatement("$L_length.setByte(row, length)", property.name)
-                                    .addStatement("$L.setCount($L.getCount() + length)", property.name, property.name)
-                                    .endControlFlow()
-                                    .beginControlFlow("if (size > 0)", property.name)
-                                    .addStatement("int length = $L_length.getByte(row)", property.name)
-                                    .addStatement("int start = $L_start.getInt(row)", property.name)
-                                    .addStatement("int end = start + size")
-                                    .beginControlFlow("if (size > length)")
-                                    .addStatement("throw new IllegalStateException(\"resizing this list over \" + length + \" is not supported\")")
-                                    .endControlFlow()
-                                    .beginControlFlow("for (int i = 0; i < size; i++)")
-                                    .addStatement("$L.save(component.$L().get(i), i + start)", property.name, property.getterName)
-                                    .endControlFlow()
-                                    .beginControlFlow("if (size < length)")
-                                    .addStatement("$L.setEmpty(start + size)", property.name)
-                                    .endControlFlow()
-                                    .endControlFlow()
-                                    .endControlFlow()
-                                    .build()
-                    );
+            CollectionType collectionType = mappedCollection.map(MappedCollection::collectionType).orElse(CollectionType.RANGE);
+            switch (collectionType) {
+                case RANGE:
+                    methodSpec
+                            .addCode(
+                                    CodeBlock.builder()
+                                            .beginControlFlow("")
+                                            .addStatement("int size = component.$L().size()", property.getterName)
+                                            .beginControlFlow("if (size > 127)")
+                                            .addStatement("throw new IllegalStateException(\"Embedded lists over 127 elements are not supported\")")
+                                            .endControlFlow()
+                                            .beginControlFlow("if (size > 0 && $L_start.isEmpty(row))", property.name)
+                                            .addStatement("byte sizeMin = $L", sizeMin)
+                                            .addStatement("byte sizeMargin = $L", sizeMargin)
+                                            .addStatement("byte length = (byte) (Math.max(size, sizeMin - sizeMargin ) + sizeMargin)")
+                                            .addStatement("$L_start.setInt(row, $L.getCount())", property.name, property.name)
+                                            .addStatement("$L_length.setByte(row, length)", property.name)
+                                            .addStatement("$L.setCount($L.getCount() + length)", property.name, property.name)
+                                            .endControlFlow()
+                                            .beginControlFlow("if (size > 0)", property.name)
+                                            .addStatement("int length = $L_length.getByte(row)", property.name)
+                                            .addStatement("int start = $L_start.getInt(row)", property.name)
+                                            .addStatement("int end = start + size")
+                                            .beginControlFlow("if (size > length)")
+                                            .addStatement("throw new IllegalStateException(\"resizing this list over \" + length + \" is not supported\")")
+                                            .endControlFlow()
+                                            .beginControlFlow("for (int i = 0; i < size; i++)")
+                                            .addStatement("$L.save(component.$L().get(i), i + start)", property.name, property.getterName)
+                                            .endControlFlow()
+                                            .beginControlFlow("if (size < length)")
+                                            .addStatement("$L.setEmpty(start + size)", property.name)
+                                            .endControlFlow()
+                                            .endControlFlow()
+                                            .endControlFlow()
+                                            .build()
+                            );
+                    break;
+                case ARRAY_LIST:
+                    methodSpec
+                            .addCode(
+                                    CodeBlock.builder()
+                                            .beginControlFlow("")
+                                            .addStatement("throw new IllegalStateException(\"ARRAY_LIST is not a valid collection type yet\")")
+                                            .endControlFlow()
+                                            .build()
+                            );
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + collectionType);
+            }
         }
     }
 }

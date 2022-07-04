@@ -90,6 +90,11 @@ public final class ArrayStore implements Store {
     }
 
     @Override
+    public void addValueObjectList(String name) {
+        attributes.putIfAbsent(name, new ValueObjectListArrayAttribute(new IntListArrayAttributeWithPadding(name, defaultCapacity)));
+    }
+
+    @Override
     public <E extends Enum<E>> void addEnum(String name, Class<E> enumType) {
         attributes.putIfAbsent(name, new EnumArrayAttribute<>(enumType, name, defaultCapacity));
     }

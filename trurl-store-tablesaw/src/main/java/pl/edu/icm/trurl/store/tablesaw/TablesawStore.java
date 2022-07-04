@@ -80,6 +80,11 @@ public class TablesawStore implements StoreMetadata, Store {
     }
 
     @Override
+    public void addValueObjectList(String name) {
+
+    }
+
+    @Override
     public <E extends Enum<E>> void addEnum(String name, Class<E> enumType) {
         attributes.putIfAbsent(name, new TablesawEnumAttribute<E>(enumType, name));
     }

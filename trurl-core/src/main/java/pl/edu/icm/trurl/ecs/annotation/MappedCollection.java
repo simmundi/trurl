@@ -10,4 +10,5 @@ import java.lang.annotation.Target;
 public @interface MappedCollection {
     int minReservation() default 1;
     int margin() default 2;
+    CollectionType collectionType() default CollectionType.RANGE;
 }

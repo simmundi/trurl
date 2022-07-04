@@ -13,6 +13,7 @@ public interface StoreMetadata {
     void addDouble(String name);
     void addEntity(String name);
     void addEntityList(String name);
+    void addValueObjectList(String name);
     <E extends Enum<E>> void addEnum(String name, Class<E> enumType);
     void addFloat(String name);
     void addInt(String name);

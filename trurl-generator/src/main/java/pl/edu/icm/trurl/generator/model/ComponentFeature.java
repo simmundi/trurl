@@ -5,6 +5,5 @@ public enum ComponentFeature {
     REQUIRES_ORIGINAL_COPY,
     CAN_RESOLVE_CONFLICTS,
     CAN_BE_NORMALIZED,
-
     REQUIRES_SETUP
 }
