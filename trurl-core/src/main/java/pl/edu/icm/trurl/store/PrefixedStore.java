@@ -83,6 +83,11 @@ public class PrefixedStore implements Store {
     }
 
     @Override
+    public void addValueObjectList(String name) {
+        wrappedMeta.addValueObjectList(wrap(name));
+    }
+
+    @Override
     public <E extends Enum<E>> void addEnum(String name, Class<E> enumType) {
         wrappedMeta.addEnum(wrap(name), enumType);
     }

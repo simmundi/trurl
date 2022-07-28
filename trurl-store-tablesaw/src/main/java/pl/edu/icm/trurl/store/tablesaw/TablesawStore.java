@@ -1,12 +1,12 @@
 package pl.edu.icm.trurl.store.tablesaw;
 
-import pl.edu.icm.trurl.ecs.Session;
-import pl.edu.icm.trurl.ecs.SessionFactory;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreListener;
 import pl.edu.icm.trurl.store.StoreMetadata;
 import pl.edu.icm.trurl.store.attribute.Attribute;
+import pl.edu.icm.trurl.store.attribute.generic.GenericEntityListOverIntArrayAttribute;
 import pl.edu.icm.trurl.store.attribute.generic.GenericEntityListOverStringAttribute;
+import pl.edu.icm.trurl.store.attribute.generic.GenericValueObjectListOverStringAttribute;
 import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawAttribute;
 import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawBooleanAttribute;
 import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawByteAttribute;
@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -77,6 +76,11 @@ public class TablesawStore implements StoreMetadata, Store {
     @Override
     public void addEntityList(String name) {
         attributes.putIfAbsent(name, new GenericEntityListOverStringAttribute(new TablesawStringAttribute(name)));
+    }
+
+    @Override
+    public void addValueObjectList(String name) {
+        attributes.putIfAbsent(name, new GenericValueObjectListOverStringAttribute(new TablesawStringAttribute(name)));
     }
 
     @Override

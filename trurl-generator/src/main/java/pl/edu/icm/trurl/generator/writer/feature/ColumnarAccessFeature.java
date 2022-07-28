@@ -29,7 +29,8 @@ public class ColumnarAccessFeature implements Feature {
                         && property.type != PropertyType.EMBEDDED_LIST
                         && property.type != PropertyType.EMBEDDED_PROP
                         && property.type != PropertyType.ENTITY_PROP
-                        && property.type != PropertyType.ENTITY_LIST_PROP)
+                        && property.type != PropertyType.ENTITY_LIST_PROP
+                        && property.type != PropertyType.VALUE_OBJECT_LIST_PROP)
                 .map(property -> {
                     MethodSpec.Builder methodSpec = MethodSpec.methodBuilder(property.getterName)
                             .addModifiers(Modifier.PUBLIC)

@@ -1,7 +1,5 @@
 package pl.edu.icm.trurl.store.array;
 
-import pl.edu.icm.trurl.ecs.Session;
-import pl.edu.icm.trurl.ecs.SessionFactory;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreListener;
 import pl.edu.icm.trurl.store.attribute.Attribute;
@@ -12,7 +10,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -87,6 +84,11 @@ public final class ArrayStore implements Store {
     @Override
     public void addEntityList(String name) {
         attributes.putIfAbsent(name, new GenericEntityListOverIntArrayAttribute(new IntListArrayAttribute(name, defaultCapacity)));
+    }
+
+    @Override
+    public void addValueObjectList(String name) {
+        attributes.putIfAbsent(name, new ValueObjectListArrayAttribute(name, defaultCapacity));
     }
 
     @Override

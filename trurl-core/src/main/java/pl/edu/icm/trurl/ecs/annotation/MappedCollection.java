@@ -8,6 +8,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.FIELD)
 public @interface MappedCollection {
+    CollectionType collectionType() default CollectionType.RANGE;
     int minReservation() default 1;
     int margin() default 2;
 }

@@ -18,7 +18,6 @@ import static org.assertj.core.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 public class MapperCollectionsIT {
     Mapper<Pizza> mapper;
-
     Store store = new ArrayStore(100);
 
     @BeforeEach
@@ -82,14 +81,11 @@ public class MapperCollectionsIT {
             pizzaC.getToppings().add(Topping.of(Ingredient.ANCHOVIS, 0.001f));
         }
         mapper.save(pizzaA, 45);
+        mapper.save(pizzaB, 100);
         mapper.save(pizzaC, 255);
 
-        // assert
-        assertThatThrownBy(() -> mapper.save(pizzaB, 100))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("resizing this list over 10 is not supported");
-
         assertThat(mapper.createAndLoad(45).getToppings()).hasSize(10);
+        assertThat(mapper.createAndLoad(100).getToppings()).hasSize(15);
         assertThat(mapper.createAndLoad(255).getToppings()).hasSize(15);
         assertThat(mapper.createAndLoad(255).getOlives()).hasSize(2);
     }

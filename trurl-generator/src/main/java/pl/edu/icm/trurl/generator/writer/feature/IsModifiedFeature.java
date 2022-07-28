@@ -5,12 +5,15 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
+import pl.edu.icm.trurl.ecs.annotation.CollectionType;
+import pl.edu.icm.trurl.ecs.annotation.MappedCollection;
 import pl.edu.icm.trurl.generator.CommonTypes;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentFeature;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
 
 import javax.lang.model.element.Modifier;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class IsModifiedFeature implements Feature {
@@ -106,21 +109,47 @@ public class IsModifiedFeature implements Feature {
 
     private void createEmbeddedList(MethodSpec.Builder methodSpec, ComponentProperty property) {
         {
-            methodSpec
-                    .addCode(
-                            CodeBlock.builder()
-                                    .beginControlFlow("")
-                                    .addStatement("int size = component.$L().size()", property.getterName)
-                                    .addStatement("if ($L_start.isEmpty(row) && size > 0) return true", property.name)
-                                    .addStatement("int start = $L_start.getInt(row)", property.name)
-                                    .beginControlFlow("for (int i = 0; i < size; i++)")
-                                    .addStatement("if ($L.isModified(component.$L().get(i), start + i)) return true", property.name, property.getterName)
-                                    .endControlFlow()
-                                    .addStatement("byte length = $L_length.getByte(row)", property.name)
-                                    .addStatement("if (length > size && $L.isPresent(start + size)) return true", property.name)
-                                    .endControlFlow()
-                                    .build()
-                    );
+            CollectionType collectionType = Optional.ofNullable(property.attribute.getAnnotation(MappedCollection.class))
+                    .map(MappedCollection::collectionType).orElse(CollectionType.RANGE);
+            switch (collectionType) {
+                case ARRAY_LIST:
+                    methodSpec
+                            .addCode(
+                                    CodeBlock.builder()
+                                            .beginControlFlow("")
+                                            .addStatement("int size = component.$L().size()", property.getterName)
+                                            .addStatement("if ($L_ids.isEmpty(row) && size > 0) return true", property.name)
+                                            .addStatement("int rowSize = $L_ids.getSize(row)", property.name)
+                                            .addStatement("if (rowSize != size) return true")
+                                            .addStatement("int[] ids = new int[rowSize]")
+                                            .addStatement("$L_ids.loadIds(row, (index, value) -> ids[index] = value)", property.name)
+                                            .beginControlFlow("for (int i = 0; i < size; i++)")
+                                            .addStatement("if ($L.isModified(component.$L().get(i), ids[i])) return true", property.name, property.getterName)
+                                            .endControlFlow()
+                                            .endControlFlow()
+                                            .build()
+                            );
+                    break;
+                case RANGE:
+                    methodSpec
+                            .addCode(
+                                    CodeBlock.builder()
+                                            .beginControlFlow("")
+                                            .addStatement("int size = component.$L().size()", property.getterName)
+                                            .addStatement("if ($L_start.isEmpty(row) && size > 0) return true", property.name)
+                                            .addStatement("int start = $L_start.getInt(row)", property.name)
+                                            .beginControlFlow("for (int i = 0; i < size; i++)")
+                                            .addStatement("if ($L.isModified(component.$L().get(i), start + i)) return true", property.name, property.getterName)
+                                            .endControlFlow()
+                                            .addStatement("byte length = $L_length.getByte(row)", property.name)
+                                            .addStatement("if (length > size && $L.isPresent(start + size)) return true", property.name)
+                                            .endControlFlow()
+                                            .build()
+                            );
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + collectionType);
+            }
         }
     }
 }

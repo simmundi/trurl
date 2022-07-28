@@ -12,17 +12,7 @@ import pl.edu.icm.trurl.ecs.mapper.Mappers;
 import pl.edu.icm.trurl.store.PrefixedStore;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreMetadata;
-import pl.edu.icm.trurl.store.attribute.Attribute;
-import pl.edu.icm.trurl.store.attribute.BooleanAttribute;
-import pl.edu.icm.trurl.store.attribute.ByteAttribute;
-import pl.edu.icm.trurl.store.attribute.DoubleAttribute;
-import pl.edu.icm.trurl.store.attribute.EntityAttribute;
-import pl.edu.icm.trurl.store.attribute.EntityListAttribute;
-import pl.edu.icm.trurl.store.attribute.EnumAttribute;
-import pl.edu.icm.trurl.store.attribute.FloatAttribute;
-import pl.edu.icm.trurl.store.attribute.IntAttribute;
-import pl.edu.icm.trurl.store.attribute.ShortAttribute;
-import pl.edu.icm.trurl.store.attribute.StringAttribute;
+import pl.edu.icm.trurl.store.attribute.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,6 +48,7 @@ public class CommonTypes {
     public static final ClassName ENUM_COLUMN = ClassName.get(EnumAttribute.class);
     public static final ClassName BOOLEAN_COLUMN = ClassName.get(BooleanAttribute.class);
     public static final ClassName ENTITY_LIST_COLUMN = ClassName.get(EntityListAttribute.class);
+    public static final ClassName VALUE_OBJECT_LIST_COLUMN = ClassName.get(ValueObjectListAttribute.class);
     public static final ClassName ENTITY_COLUMN = ClassName.get(EntityAttribute.class);
 
     private CommonTypes() {

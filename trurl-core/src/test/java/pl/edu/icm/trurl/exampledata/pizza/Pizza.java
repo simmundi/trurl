@@ -1,5 +1,6 @@
 package pl.edu.icm.trurl.exampledata.pizza;
 
+import pl.edu.icm.trurl.ecs.annotation.CollectionType;
 import pl.edu.icm.trurl.ecs.annotation.MappedCollection;
 import pl.edu.icm.trurl.ecs.annotation.WithMapper;
 
@@ -10,7 +11,7 @@ import java.util.List;
 public class Pizza {
     @MappedCollection(margin = 2)
     List<Olive> olives = new ArrayList<>();
-    @MappedCollection(minReservation = 10)
+    @MappedCollection(collectionType = CollectionType.ARRAY_LIST)
     List<Topping> toppings = new ArrayList<>();
 
     public List<Olive> getOlives() {

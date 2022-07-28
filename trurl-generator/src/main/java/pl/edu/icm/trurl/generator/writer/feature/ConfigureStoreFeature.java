@@ -69,6 +69,9 @@ public class ConfigureStoreFeature implements Feature {
                 case ENTITY_LIST_PROP:
                     methodSpec.addStatement("meta.addEntityList($S)", name);
                     break;
+                case VALUE_OBJECT_LIST_PROP:
+                    methodSpec.addStatement("meta.addValueObjectList($S)", name);
+                    break;
                 case ENTITY_PROP:
                     methodSpec.addStatement("meta.addEntity($S)", name);
                     break;
@@ -78,6 +81,7 @@ public class ConfigureStoreFeature implements Feature {
                     methodSpec.addStatement("$L.configureStore($T.wrap(meta, $S))",
                             property.name, CommonTypes.PREFIXED_STORE, property.name);
                     break;
+
                 default:
                     throw new IllegalStateException("Unknown entity type " + property.type);
             }
@@ -85,7 +89,6 @@ public class ConfigureStoreFeature implements Feature {
 
         return methodSpec.build();
     }
-
 
 
 }

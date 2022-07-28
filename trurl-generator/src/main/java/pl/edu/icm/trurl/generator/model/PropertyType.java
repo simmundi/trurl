@@ -21,6 +21,7 @@ public enum PropertyType {
     ENUM_PROP(CommonTypes.ENUM_COLUMN),
     ENTITY_LIST_PROP(CommonTypes.ENTITY_LIST_COLUMN),
     ENTITY_PROP(CommonTypes.ENTITY_COLUMN),
+    VALUE_OBJECT_LIST_PROP(CommonTypes.VALUE_OBJECT_LIST_COLUMN),
     EMBEDDED_LIST(CommonTypes.MAPPER),
     EMBEDDED_PROP(CommonTypes.MAPPER);
 
