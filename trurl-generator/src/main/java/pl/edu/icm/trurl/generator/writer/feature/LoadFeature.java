@@ -27,7 +27,7 @@ public class LoadFeature implements Feature {
     @Override
     public Stream<FieldSpec> fields() {
         return beanMetadata.componentFeatures.contains(ComponentFeature.CAN_RESOLVE_CONFLICTS)
-                ? Stream.of(FieldSpec.builder(CommonTypes.ATOMIC_INTEGER_ARRAY, "owners", Modifier.PRIVATE)
+                ? Stream.of(FieldSpec.builder(CommonTypes.ATOMIC_INTEGER_ARRAY, "owners", Modifier.PRIVATE, Modifier.VOLATILE)
                         .initializer("new $T(0)", CommonTypes.ATOMIC_INTEGER_ARRAY).build(),
                 FieldSpec.builder(ClassName.BOOLEAN, "parallelMode").build())
                 : Stream.empty();
@@ -60,6 +60,7 @@ public class LoadFeature implements Feature {
                             .beginControlFlow("while (true)")
                             .addStatement("int currentOwner = owners.get(row)")
                             .addStatement("if (currentOwner < 0) continue")
+                            .addStatement("if (currentOwner == 0 && !owners.compareAndSet(row, 0, currentOwner)) continue;")
                             .add(callFetchValues())
                             .beginControlFlow("if (owners.get(row) == currentOwner)")
                             .addStatement("component.setOwnerId(currentOwner)")
@@ -188,6 +189,7 @@ public class LoadFeature implements Feature {
                                             .beginControlFlow("if (!$L_start.isEmpty(row))", property.name)
                                             .addStatement("int length = $L_length.getByte(row)", property.name)
                                             .addStatement("int start = $L_start.getInt(row)", property.name)
+                                            .addStatement("component.$L().clear()", property.getterName)
                                             .beginControlFlow("for (int i = start; i < start + length; i++)")
                                             .addStatement("if (!$L.isPresent(i)) break", property.name)
                                             .addStatement("$T element = ($T) $L.create()", property.businessType, property.businessType, property.name)

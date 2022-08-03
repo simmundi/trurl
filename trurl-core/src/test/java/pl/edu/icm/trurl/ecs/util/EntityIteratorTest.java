@@ -53,7 +53,7 @@ class EntityIteratorTest {
         when(selector.estimatedChunkSize()).thenReturn(1);
         when(sessionFactory.withModeAndCount(Session.Mode.NORMAL, 8))
                 .thenReturn(configuredSessionFactory);
-        when(configuredSessionFactory.create()).thenReturn(session);
+        when(configuredSessionFactory.create(anyInt())).thenReturn(session);
 
         EntitySystem iterator = EntityIterator
                 .select(selector)
@@ -63,7 +63,7 @@ class EntityIteratorTest {
         iterator.execute(sessionFactory);
 
         // assert
-        verify(configuredSessionFactory, times(4)).create();
+        verify(configuredSessionFactory, times(4)).create(anyInt());
         verify(processor, times(5)).process(eq("1x"), eq(session), anyInt());
         verify(processor, times(15)).process(eq("2x"), eq(session), anyInt());
         verify(processor, times(25)).process(eq("3x"), eq(session), anyInt());
@@ -77,7 +77,7 @@ class EntityIteratorTest {
         when(selector.chunks()).thenReturn(IntStream.range(0, 1000).mapToObj(id ->
                 new Chunk(ChunkInfo.of(1, 100), IntStream.range(id * 100, id * 100 + 40))));
         when(sessionFactory.withModeAndCount(any(), anyInt())).thenReturn(configuredSessionFactory);
-        when(configuredSessionFactory.create()).thenReturn(session);
+        when(configuredSessionFactory.create(anyInt())).thenReturn(session);
 
         EntitySystem iterator = EntityIterator
                 .select(selector)
@@ -88,7 +88,7 @@ class EntityIteratorTest {
         iterator.execute(sessionFactory);
 
         // assert
-        verify(configuredSessionFactory, times(1000)).create();
+        verify(configuredSessionFactory, times(1000)).create(anyInt());
         verify(processor, times(40000)).process(any(), any(), anyInt());
     }
 

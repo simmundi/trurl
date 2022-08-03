@@ -2,4 +2,5 @@ rootProject.name = 'trurl'
 include 'trurl-core',
         'trurl-generator',
         'trurl-orc',
+        'trurl-xml',
         'trurl-store-tablesaw'

@@ -43,4 +43,7 @@ public interface Mapper<T> {
         return created;
     }
     void lifecycleEvent(LifecycleEvent lifecycleEvent);
+    default void ensureCapacityHeadroom(int headroom) {
+        this.ensureCapacity(getCount() + headroom);
+    }
 }

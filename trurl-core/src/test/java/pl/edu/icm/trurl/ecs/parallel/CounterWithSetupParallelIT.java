@@ -40,7 +40,7 @@ public class CounterWithSetupParallelIT {
 
         IntStream.range(0, SIZE * CONTENTION).parallel().forEach(chunkId -> {
             int startId = ThreadLocalRandom.current().nextInt(0, SIZE);
-            Session session = sessionFactory.create(chunkId);
+            Session session = sessionFactory.create(chunkId + 1);
             for (int i = 0; i < PER_SESSION; i++) {
                 int id = (startId + i) % SIZE;
                 ParallelCounter counter = parallelMapper.create();

@@ -1,14 +1,13 @@
 package pl.edu.icm.trurl.ecs.util;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import net.snowyhollows.bento2.annotation.WithFactory;
+import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.EngineConfiguration;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.selector.Chunk;
 import pl.edu.icm.trurl.ecs.selector.ChunkInfo;
 import pl.edu.icm.trurl.ecs.selector.Selector;
 
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.IntStream.range;

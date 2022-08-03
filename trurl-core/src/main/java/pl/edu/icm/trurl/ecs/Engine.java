@@ -20,15 +20,35 @@ public final class Engine implements StoreListener {
     private final Mapper<?>[] mappers;
     private final SessionFactory defaultSessionFactory;
 
-    public Engine(StoreFactory storeFactory, MapperSet mapperSet) {
-        this.store = storeFactory.create();
+    private int capacityHeadroom;
+
+    public Engine(StoreFactory storeFactory, int initialCapacity, int capacityHeadroom, MapperSet mapperSet, boolean shared) {
+        this.store = storeFactory.create(initialCapacity);
         this.store.addStoreListener(this);
+        this.capacityHeadroom = capacityHeadroom;
         this.mapperSet = mapperSet;
-        this.defaultSessionFactory = new SessionFactory(this, Session.Mode.NORMAL);
+        if (shared) {
+            this.defaultSessionFactory = new SessionFactory(this, Session.Mode.SHARED, initialCapacity + capacityHeadroom);
+        } else {
+            this.defaultSessionFactory = new SessionFactory(this, Session.Mode.NORMAL);
+        }
         mappers = this.mapperSet.streamMappers().peek(mapper -> {
             mapper.configureStore(store);
             mapper.attachStore(store);
         }).collect(toList()).toArray(new Mapper<?>[0]);
+    }
+
+    public Engine(Store store, int capacityHeadroom, MapperSet mapperSet, boolean shared) {
+        this.store = store;
+        this.capacityHeadroom = capacityHeadroom;
+        this.store.addStoreListener(this);
+        this.mapperSet = mapperSet;
+        this.defaultSessionFactory = new SessionFactory(this, shared ? Session.Mode.SHARED : Session.Mode.NORMAL);
+        this.count.set(mapperSet.streamMappers().mapToInt(m -> m.getCount()).max().getAsInt());
+        mappers = this.mapperSet
+                .streamMappers()
+                .collect(toList())
+                .toArray(new Mapper<?>[0]);
     }
 
     public Selector allIds() {
@@ -42,19 +62,8 @@ public final class Engine implements StoreListener {
         return allIds().chunks().flatMapToInt(chunk -> chunk.ids()).mapToObj(session::getEntity);
     }
 
-    public Engine(Store store, MapperSet mapperSet) {
-        this.store = store;
-        this.store.addStoreListener(this);
-        this.mapperSet = mapperSet;
-        this.defaultSessionFactory = new SessionFactory(this, Session.Mode.NORMAL);
-        this.count.set(mapperSet.streamMappers().mapToInt(m -> m.getCount()).max().getAsInt());
-        mappers = this.mapperSet
-                .streamMappers()
-                .collect(toList())
-                .toArray(new Mapper<?>[0]);
-    }
-
     public void execute(EntitySystem system) {
+        ensureHeadroom();
         system.execute(defaultSessionFactory);
     }
 
@@ -103,5 +112,12 @@ public final class Engine implements StoreListener {
                 }
             }
         }
+    }
+
+    private void ensureHeadroom() {
+        int targetCapacity = count.get() + capacityHeadroom;
+        mapperSet.streamMappers().forEach(mapper -> {
+            mapper.ensureCapacity(targetCapacity);
+        });
     }
 }

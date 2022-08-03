@@ -5,7 +5,7 @@ import pl.edu.icm.trurl.store.StoreFactory;
 
 public class TablesawStoreFactory implements StoreFactory {
     @Override
-    public Store create() {
+    public Store create(int ignoredInitialCapacity) {
         return new TablesawStore();
     }
 }

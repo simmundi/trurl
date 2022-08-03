@@ -1,0 +1,23 @@
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+dependencies {
+    implementation "com.google.guava:guava:${guavaVersion}"
+}
+
+publishing {
+    publications {
+        xmlPublication(MavenPublication) {
+            from components.java
+            artifact sourceJar
+
+            groupId rootProject.getGroup()
+            artifactId project.name
+            version rootProject.getVersion()
+        }
+    }
+}
+

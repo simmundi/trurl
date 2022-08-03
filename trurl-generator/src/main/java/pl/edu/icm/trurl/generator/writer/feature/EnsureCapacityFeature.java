@@ -5,6 +5,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
+import pl.edu.icm.trurl.generator.model.PropertyType;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;

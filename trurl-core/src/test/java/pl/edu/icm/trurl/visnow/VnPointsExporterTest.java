@@ -2,6 +2,7 @@ package pl.edu.icm.trurl.visnow;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
+import net.snowyhollows.bento.config.WorkDir;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,12 +10,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.exampledata.Color;
-import pl.edu.icm.trurl.util.Filesystem;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class VnPointsExporterTest {
 
     @Mock
-    Filesystem filesystem;
+    WorkDir workDir;
 
     VnPointsExporter<Mushroom> vnPointsExporter;
 
@@ -35,11 +34,11 @@ class VnPointsExporterTest {
         // given
         ByteArrayOutputStream vnd = new ByteArrayOutputStream();
         ByteArrayOutputStream vnf = new ByteArrayOutputStream();
-        Mockito.when(filesystem.openForWriting(new File("mushrooms.vnd"))).thenReturn(vnd);
-        Mockito.when(filesystem.openForWriting(new File("mushrooms.vnf"))).thenReturn(vnf);
+        Mockito.when(workDir.openForWriting(new File("mushrooms.vnd"))).thenReturn(vnd);
+        Mockito.when(workDir.openForWriting(new File("mushrooms.vnf"))).thenReturn(vnf);
         VnPointsExporter exporter = VnPointsExporter.create(
                 Mushroom.class,
-                filesystem,
+                workDir,
                 "mushrooms");
 
         // execute

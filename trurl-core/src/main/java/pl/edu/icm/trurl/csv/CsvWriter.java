@@ -1,10 +1,10 @@
 package pl.edu.icm.trurl.csv;
 
-import net.snowyhollows.bento2.annotation.WithFactory;
+import net.snowyhollows.bento.annotation.WithFactory;
+import net.snowyhollows.bento.config.DefaultWorkDir;
+import net.snowyhollows.bento.config.WorkDir;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.attribute.Attribute;
-import pl.edu.icm.trurl.util.DefaultFilesystem;
-import pl.edu.icm.trurl.util.Filesystem;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,16 +17,16 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class CsvWriter {
-    private final Filesystem filesystem;
+    private final WorkDir workDir;
     private final Pattern NEEDS_ESCAPE = Pattern.compile("[,\\n\\r\"]");
 
     @WithFactory
     public CsvWriter() {
-        this(new DefaultFilesystem());
+        this(new DefaultWorkDir());
     }
 
-    public CsvWriter(Filesystem filesystem) {
-        this.filesystem = filesystem;
+    public CsvWriter(WorkDir workDir) {
+        this.workDir = workDir;
     }
 
     public void writeCsv(String outputPath, Store store) throws IOException {
@@ -35,7 +35,7 @@ public class CsvWriter {
 
     public void writeCsv(String outputPath, Store store, int fromInclusive, int toExclusive) throws IOException {
         try (
-                OutputStream outputStream = this.filesystem.openForWriting(new File(outputPath));
+                OutputStream outputStream = this.workDir.openForWriting(new File(outputPath));
                 OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
                 BufferedWriter bufferedWriter = new BufferedWriter(streamWriter, 1024 * 1024 * 128)
         ) {

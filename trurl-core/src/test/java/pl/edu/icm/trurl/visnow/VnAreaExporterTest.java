@@ -1,6 +1,7 @@
 package pl.edu.icm.trurl.visnow;
 
-import org.assertj.core.api.Assertions;
+import net.snowyhollows.bento.config.WorkDir;
+import org.assertj.core.api.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,18 +12,15 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
-import pl.edu.icm.trurl.util.Filesystem;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.times;
@@ -32,7 +30,7 @@ import static org.mockito.Mockito.verify;
 class VnAreaExporterTest {
 
     @Mock
-    Filesystem filesystem;
+    WorkDir workDir;
 
     @Spy
     Mapper<AreaInfo> areaInfoMapper = Mappers.create(AreaInfo.class);
@@ -42,7 +40,7 @@ class VnAreaExporterTest {
     @BeforeEach
     void before() throws FileNotFoundException {
         vnAreaExporter = VnAreaExporter.create(
-                filesystem,
+                workDir,
                 AreaInfo.class,
                 "mushrooms",
                 0, 10, 10, 10);
@@ -53,7 +51,7 @@ class VnAreaExporterTest {
     void append() throws IOException {
         // given
         vnAreaExporter = VnAreaExporter.create(
-                filesystem,
+                workDir,
                 areaInfoMapper,
                 "trees",
                 10, 10, 1000, 20);
@@ -81,10 +79,10 @@ class VnAreaExporterTest {
         // given
         ByteArrayOutputStream vnd = new ByteArrayOutputStream();
         ByteArrayOutputStream vnf = new ByteArrayOutputStream();
-        Mockito.when(filesystem.openForWriting(new File("trees.vnd"))).thenReturn(vnd);
-        Mockito.when(filesystem.openForWriting(new File("trees.vnf"))).thenReturn(vnf);
+        Mockito.when(workDir.openForWriting(new File("trees.vnd"))).thenReturn(vnd);
+        Mockito.when(workDir.openForWriting(new File("trees.vnf"))).thenReturn(vnf);
         vnAreaExporter = VnAreaExporter.create(
-                filesystem,
+                workDir,
                 areaInfoMapper,
                 "trees",
                 10, 10, 1000, 20);

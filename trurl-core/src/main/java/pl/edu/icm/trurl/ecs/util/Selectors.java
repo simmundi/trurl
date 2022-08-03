@@ -1,6 +1,6 @@
 package pl.edu.icm.trurl.ecs.util;
 
-import net.snowyhollows.bento2.annotation.WithFactory;
+import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.Engine;
 import pl.edu.icm.trurl.ecs.EngineConfiguration;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;

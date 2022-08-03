@@ -1,5 +1,6 @@
 package pl.edu.icm.trurl.csv;
 
+import net.snowyhollows.bento.config.WorkDir;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.attribute.Attribute;
-import pl.edu.icm.trurl.util.Filesystem;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 class CsvWriterTest {
 
     @Mock
-    Filesystem filesystem;
+    WorkDir workDir;
     @Mock
     Attribute columnA;
     @Mock
@@ -51,7 +51,7 @@ class CsvWriterTest {
         when(columnB.name()).thenReturn("b");
         when(columnC.name()).thenReturn("c");
         when(store.attributes()).thenReturn(Stream.of(columnA, columnB, columnC));
-        when(filesystem.openForWriting(file.capture())).thenReturn(results);
+        when(workDir.openForWriting(file.capture())).thenReturn(results);
     }
 
     @Test
@@ -107,5 +107,4 @@ class CsvWriterTest {
             }
         }
     }
-
 }

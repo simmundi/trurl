@@ -52,10 +52,6 @@ public final class BeanMetadata {
                     ));
                     if (property.isAttachedToAttribute()) {
                         properties.add(property);
-                    } else {
-                        processingEnvironment
-                                .getMessager()
-                                .printMessage(Diagnostic.Kind.OTHER, "Skipping " + property.name);
                     }
                 }
             }

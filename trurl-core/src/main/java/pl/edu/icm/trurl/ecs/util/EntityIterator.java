@@ -87,7 +87,7 @@ public class EntityIterator {
                 initialSessionFactory.lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
             }
             (parallel ? selector.chunks().parallel() : selector.chunks()).forEach(chunk -> {
-                final Session session = sessionFactory.create();
+                final Session session = sessionFactory.create(chunk.getChunkInfo().getChunkId() + 1);
                 Context context = contextFactory.apply(chunk);
                 chunk.ids().forEach(id ->
                         idxProcessor.process(context, session, id)

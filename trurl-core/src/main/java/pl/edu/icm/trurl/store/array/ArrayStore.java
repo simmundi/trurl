@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public final class ArrayStore implements Store {
-    public final static int DEFAULT_CAPACITY = 1000;
+    public final static int DEFAULT_INITIAL_CAPACITY = 1000;
     private final CopyOnWriteArrayList<StoreListener> listeners = new CopyOnWriteArrayList();
     private final Map<String, Attribute> attributes = new LinkedHashMap<>(40);
     private final int defaultCapacity;
@@ -26,7 +26,7 @@ public final class ArrayStore implements Store {
     }
 
     public ArrayStore() {
-        this(DEFAULT_CAPACITY);
+        this(DEFAULT_INITIAL_CAPACITY);
     }
 
     @Override

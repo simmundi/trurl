@@ -18,7 +18,7 @@ public final class Session implements ComponentOwner {
         this.engine = engine;
         this.createStubEntities = mode == Mode.STUB_ENTITIES;
         this.detachedEntities = mode == Mode.DETACHED_ENTITIES;
-        this.persist = mode == Mode.NORMAL;
+        this.persist = (mode == Mode.NORMAL || mode == Mode.SHARED);
         this.entities = (detachedEntities || expectedEntityCount == 0) ? null : new Int2ObjectOpenHashMap<>(expectedEntityCount);
         this.ownerId = ownerId;
     }
@@ -66,6 +66,7 @@ public final class Session implements ComponentOwner {
         NORMAL,
         STUB_ENTITIES,
         DETACHED_ENTITIES,
-        NO_PERSIST
+        NO_PERSIST,
+        SHARED
     }
 }

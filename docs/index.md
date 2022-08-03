@@ -7,9 +7,9 @@ sizes: from mobile games to scientific simulations running on supercomputer node
 It consists of:
 
 - a dataframe implementation optimized for simulations (i.e. mutable)
-- a built-in Object-Dataframe-Mapper
-- importer / exporter of the dataframe data (imports ORC, CSV and tiled (!); exports ORC, CSV, RDBMS, VisNow)
-- framework for writing and chaining functions that modify the dataframe (also in parallel).
+- a built-in Object-Dataframe-Mapper - to express simulation logic in terms of mutating objects
+- framework for writing, chaining and parallelizing functions that modify the dataframe (also in parallel).
+- generic importer / exporter of the dataframe data (imports ORC, CSV and tiled (!); exports ORC, CSV, RDBMS, VisNow)
 
 ## Store: a mutable, typed data frame
 

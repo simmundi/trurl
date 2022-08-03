@@ -2,7 +2,7 @@ package pl.edu.icm.trurl.csv;
 
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
-import net.snowyhollows.bento2.annotation.WithFactory;
+import net.snowyhollows.bento.annotation.WithFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
@@ -28,7 +28,7 @@ public class CsvReader {
     }
 
     public <T> Mapper<T> load(InputStream stream, StoreFactory storeFactory, Class<T> model, String... columns) {
-        Store store = storeFactory.create();
+        Store store = storeFactory.create(storeFactory.defaultInitialCapacity());
         Mapper<T> mapper = Mappers.create(model);
         mapper.configureStore(store);
         int count = load(stream, store, columns);

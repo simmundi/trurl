@@ -6,5 +6,8 @@ package pl.edu.icm.trurl.store;
  *
  */
 public interface StoreFactory {
-    Store create();
+    Store create(int initialCapacity);
+    default int defaultInitialCapacity() {
+        return 1024;
+    }
 }
