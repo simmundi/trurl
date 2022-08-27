@@ -26,6 +26,7 @@ public class CountFeature implements Feature {
     public Stream<MethodSpec> methods() {
         return Stream.of(
                 overrideGetCount(),
+                buildGetAndUpdateCount(),
                 overrideSetCount());
     }
 
@@ -45,6 +46,19 @@ public class CountFeature implements Feature {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(TypeName.INT)
                 .addStatement("return this.count.get()")
+                .build();
+
+    }
+
+    private MethodSpec buildGetAndUpdateCount() {
+        return MethodSpec.methodBuilder("getAndUpdateCount")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(TypeName.INT, "delta")
+                .returns(TypeName.INT)
+                .addStatement("int newCount = this.count.getAndAdd(delta)")
+                .addStatement("ensureCapacity(newCount + delta)")
+                .addStatement("return newCount")
                 .build();
     }
 }

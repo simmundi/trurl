@@ -30,6 +30,7 @@ public interface Mapper<T> {
     MapperListeners<T> getMapperListeners();
     int getCount();
     void setCount(int count);
+    int getAndUpdateCount(int delta);
     void setEmpty(int row);
     default String name() {
         return this.create().getClass().getSimpleName().toLowerCase(Locale.ROOT);
