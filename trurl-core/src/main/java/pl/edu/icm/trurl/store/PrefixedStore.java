@@ -1,10 +1,7 @@
 package pl.edu.icm.trurl.store;
 
-import pl.edu.icm.trurl.ecs.Session;
-import pl.edu.icm.trurl.ecs.SessionFactory;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class PrefixedStore implements Store {

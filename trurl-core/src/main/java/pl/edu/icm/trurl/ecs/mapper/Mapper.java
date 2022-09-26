@@ -5,7 +5,7 @@ import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreMetadata;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
-import java.awt.*;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -46,5 +46,8 @@ public interface Mapper<T> {
     void lifecycleEvent(LifecycleEvent lifecycleEvent);
     default void ensureCapacityHeadroom(int headroom) {
         this.ensureCapacity(getCount() + headroom);
+    }
+    default List<Mapper> getChildMappers() {
+        return Collections.emptyList();
     }
 }

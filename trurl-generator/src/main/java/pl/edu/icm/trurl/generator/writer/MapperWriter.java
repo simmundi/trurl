@@ -6,22 +6,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import pl.edu.icm.trurl.generator.CommonTypes;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
-import pl.edu.icm.trurl.generator.writer.feature.AttachStoreFeature;
-import pl.edu.icm.trurl.generator.writer.feature.AttributesFeature;
-import pl.edu.icm.trurl.generator.writer.feature.ColumnarAccessFeature;
-import pl.edu.icm.trurl.generator.writer.feature.CommonFieldsFeature;
-import pl.edu.icm.trurl.generator.writer.feature.ConfigureStoreFeature;
-import pl.edu.icm.trurl.generator.writer.feature.CountFeature;
-import pl.edu.icm.trurl.generator.writer.feature.CreateFeature;
-import pl.edu.icm.trurl.generator.writer.feature.EnsureCapacityFeature;
-import pl.edu.icm.trurl.generator.writer.feature.Feature;
-import pl.edu.icm.trurl.generator.writer.feature.IsModifiedFeature;
-import pl.edu.icm.trurl.generator.writer.feature.IsPresentFeature;
-import pl.edu.icm.trurl.generator.writer.feature.LifecycleEventFeature;
-import pl.edu.icm.trurl.generator.writer.feature.LoadFeature;
-import pl.edu.icm.trurl.generator.writer.feature.MapperListenersFeature;
-import pl.edu.icm.trurl.generator.writer.feature.SaveFeature;
-import pl.edu.icm.trurl.generator.writer.feature.SetEmptyFeature;
+import pl.edu.icm.trurl.generator.writer.feature.*;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
@@ -55,6 +40,7 @@ public class MapperWriter {
                 new AttributesFeature(beanMetadata),
                 new MapperListenersFeature(beanMetadata),
                 new ColumnarAccessFeature(beanMetadata),
+                new GetChildMappersFeature(beanMetadata),
                 new LifecycleEventFeature(beanMetadata));
 
         features.stream()
