@@ -71,6 +71,80 @@ public class Selectors {
                                 .filter(id -> mMapper.isPresent(id) && predicate.test(mMapper.createAndLoad(id)))));
     }
 
+
+    /**
+     * Filters selector with given predicates, allowing to choose whether accept ID of entity without a component on
+     * which the predicate is given or not.
+     * @param selector        Selector to be filtered.
+     * @param mClass          Class on which predicate will be provided.
+     * @param mPredicate      The predicate.
+     * @param mAcceptIfAbsent If true - entity will pass the predicate even if mClass is not one of its components
+     * @param kClass
+     * @param kPredicate
+     * @param kAcceptIfAbsent
+     * @param <M>
+     * @param <K>
+     * @return Filtered Selector.
+     */
+    public <M, K> Selector filtered(Selector selector,
+                                    Class<M> mClass, Predicate<M> mPredicate, boolean mAcceptIfAbsent,
+                                    Class<K> kClass, Predicate<K> kPredicate, boolean kAcceptIfAbsent) {
+        final Mapper<M> mMapper = getEngine().getMapperSet().classToMapper(mClass);
+        final Mapper<K> kMapper = getEngine().getMapperSet().classToMapper(kClass);
+
+        return () -> selector.chunks().map(chunk -> new Chunk(chunk.getChunkInfo(), chunk.ids().filter(i ->
+                (mAcceptIfAbsent ? !mMapper.isPresent(i) || mPredicate.test(mMapper.createAndLoad(i)) :
+                        mMapper.isPresent(i) && mPredicate.test(mMapper.createAndLoad(i))) &&
+                (kAcceptIfAbsent ? !kMapper.isPresent(i) || kPredicate.test(kMapper.createAndLoad(i)) :
+                        kMapper.isPresent(i) && kPredicate.test(kMapper.createAndLoad(i)))
+
+        )));
+    }
+
+    /**
+     * Filters selector with given predicates, allowing to choose whether accept ID of entity without a component on
+     * which the predicate is given or not.
+     * @param selector Selector to be filtered.
+     * @param mClass Class on which predicate will be provided.
+     * @param mPredicate The predicate.
+     * @param mAcceptIfAbsent If true - entity will pass the predicate even if mClass is not one of its components
+     * @param kClass
+     * @param kPredicate
+     * @param kAcceptIfAbsent
+     * @param lClass
+     * @param lPredicate
+     * @param lAcceptIfAbsent
+     * @param wClass
+     * @param wPredicate
+     * @param wAcceptIfAbsent
+     * @param <M>
+     * @param <K>
+     * @param <L>
+     * @param <W>
+     * @return Filtered Selector.
+     */
+    public <M, K, L, W> Selector filtered(Selector selector,
+                                          Class<M> mClass, Predicate<M> mPredicate, boolean mAcceptIfAbsent,
+                                          Class<K> kClass, Predicate<K> kPredicate, boolean kAcceptIfAbsent,
+                                          Class<L> lClass, Predicate<L> lPredicate, boolean lAcceptIfAbsent,
+                                          Class<W> wClass, Predicate<W> wPredicate, boolean wAcceptIfAbsent) {
+        final Mapper<M> mMapper = getEngine().getMapperSet().classToMapper(mClass);
+        final Mapper<K> kMapper = getEngine().getMapperSet().classToMapper(kClass);
+        final Mapper<L> lMapper = getEngine().getMapperSet().classToMapper(lClass);
+        final Mapper<W> wMapper = getEngine().getMapperSet().classToMapper(wClass);
+        return () -> selector.chunks().map(chunk -> new Chunk(chunk.getChunkInfo(), chunk.ids().filter(i ->
+                (mAcceptIfAbsent ? !mMapper.isPresent(i) || mPredicate.test(mMapper.createAndLoad(i)) :
+                        mMapper.isPresent(i) && mPredicate.test(mMapper.createAndLoad(i))) &&
+                (kAcceptIfAbsent ? !kMapper.isPresent(i) || kPredicate.test(kMapper.createAndLoad(i)) :
+                        kMapper.isPresent(i) && kPredicate.test(kMapper.createAndLoad(i))) &&
+                (lAcceptIfAbsent ? !lMapper.isPresent(i) || lPredicate.test(lMapper.createAndLoad(i)) :
+                        lMapper.isPresent(i) && lPredicate.test(lMapper.createAndLoad(i))) &&
+                (wAcceptIfAbsent ? !wMapper.isPresent(i) || wPredicate.test(wMapper.createAndLoad(i)) :
+                        wMapper.isPresent(i) && wPredicate.test(wMapper.createAndLoad(i)))
+
+        )));
+    }
+
     private Engine getEngine() {
         return engine == null ? engineConfiguration.getEngine() : engine;
     }

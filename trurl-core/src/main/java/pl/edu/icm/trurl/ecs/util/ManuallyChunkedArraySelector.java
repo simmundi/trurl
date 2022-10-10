@@ -4,15 +4,11 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import pl.edu.icm.trurl.ecs.selector.Chunk;
 import pl.edu.icm.trurl.ecs.selector.ChunkInfo;
 import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
-import pl.edu.icm.trurl.ecs.selector.Selector;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import static java.util.stream.IntStream.range;
-import static java.util.stream.Stream.of;
 
 public class ManuallyChunkedArraySelector implements RandomAccessSelector {
     private final static int DEFAULT_INITIAL_SIZE = 1_000_000;
@@ -63,7 +59,7 @@ public class ManuallyChunkedArraySelector implements RandomAccessSelector {
                     int lastExc = chunks.getInt(chunkId + 1);
                     int size = lastExc - firstInc;
                     return
-                            new Chunk(ChunkInfo.of(chunkId, size),
+                            new Chunk(ChunkInfo.of(chunkId, size, labels.get(chunkId)),
                                     IntStream.range(firstInc, lastExc)
                                             .map(i -> ids.getInt(i)));
                 });
