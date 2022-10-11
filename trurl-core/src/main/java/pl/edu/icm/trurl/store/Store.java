@@ -42,47 +42,6 @@ import java.util.stream.Stream;
  *     </li>
  * </ul>
  */
-public interface Store extends StoreMetadata {
-    /**
-     * Returns an attribute of the given name, if exists
-     *
-     * @param name
-     * @param <T>
-     * @return attribute or null, if none found
-     */
-    <T extends Attribute> T get(String name);
-
-    /**
-     * Adds a listener to the store. Neither the store nor its attributes
-     * fire events, so the events are fired on a cooperative basis - any
-     * user of the store performing changes that might be of interest to someone
-     * is expected to call fireUnderlyingDataChanged.
-     *
-     * @param storeListener
-     */
-    void addStoreListener(StoreListener storeListener);
-
-    /**
-     * Part of the cooperative event system - calling this method notifies
-     * all the storeListeners.
-     *
-     * @param fromInclusive
-     * @param toExclusive
-     * @param excludedListeners list of listers to ignore while sending the event
-     */
-    void fireUnderlyingDataChanged(int fromInclusive, int toExclusive, StoreListener... excludedListeners);
-
-    /**
-     * returns stream of all the attributes.
-     *
-     * @return attributes
-     */
-    Stream<Attribute> attributes();
-
-    /**
-     * Returns the max value passed to fireUnderlyingDataChanged event
-     * as toExclusive.
-     */
-    int getCount();
+public interface Store extends StoreConfigurer, StoreInspector, StoreObservable {
 
 }

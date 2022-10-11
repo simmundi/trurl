@@ -6,7 +6,7 @@ package pl.edu.icm.trurl.store;
  * It is used by store clients to configure the store (i.e. associate
  * column names with column types).
  */
-public interface StoreMetadata {
+public interface StoreConfigurer {
     void addBoolean(String name);
 
     void addByte(String name);

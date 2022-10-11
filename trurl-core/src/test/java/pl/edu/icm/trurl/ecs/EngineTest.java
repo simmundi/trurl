@@ -113,7 +113,7 @@ class EngineTest {
         Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);
 
         // execute
-        Store result = engine.getComponentStore();
+        Store result = engine.getStore();
 
         // assert
         assertThat(result).isSameAs(store);

@@ -1,10 +1,9 @@
 package pl.edu.icm.trurl.store.tablesaw;
 
 import pl.edu.icm.trurl.store.Store;
+import pl.edu.icm.trurl.store.StoreConfigurer;
 import pl.edu.icm.trurl.store.StoreListener;
-import pl.edu.icm.trurl.store.StoreMetadata;
 import pl.edu.icm.trurl.store.attribute.Attribute;
-import pl.edu.icm.trurl.store.attribute.generic.GenericEntityListOverIntArrayAttribute;
 import pl.edu.icm.trurl.store.attribute.generic.GenericEntityListOverStringAttribute;
 import pl.edu.icm.trurl.store.attribute.generic.GenericValueObjectListOverStringAttribute;
 import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawAttribute;
@@ -27,7 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-public class TablesawStore implements StoreMetadata, Store {
+public class TablesawStore implements StoreConfigurer, Store {
     private final CopyOnWriteArrayList<StoreListener> listeners = new CopyOnWriteArrayList();
     private AtomicInteger count = new AtomicInteger();
 

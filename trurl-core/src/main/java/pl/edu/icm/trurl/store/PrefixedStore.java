@@ -6,14 +6,14 @@ import java.util.stream.Stream;
 
 public class PrefixedStore implements Store {
     private final Store wrapped;
-    private final StoreMetadata wrappedMeta;
+    private final StoreConfigurer wrappedMeta;
     private final String prefix;
 
     public static Store wrap(Store wrappedStore, String prefix) {
         return new PrefixedStore(wrappedStore, prefix);
     }
 
-    public static Store wrap(StoreMetadata wrappedMeta, String prefix) {
+    public static Store wrap(StoreConfigurer wrappedMeta, String prefix) {
         return new PrefixedStore(wrappedMeta, prefix);
     }
 
@@ -23,7 +23,7 @@ public class PrefixedStore implements Store {
         this.prefix = prefix;
     }
 
-    private PrefixedStore(StoreMetadata wrappedMeta, String prefix) {
+    private PrefixedStore(StoreConfigurer wrappedMeta, String prefix) {
         this.wrappedMeta = wrappedMeta;
         this.wrapped = null;
         this.prefix = prefix;

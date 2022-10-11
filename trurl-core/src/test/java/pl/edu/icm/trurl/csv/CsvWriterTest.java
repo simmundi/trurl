@@ -61,7 +61,7 @@ class CsvWriterTest {
         csvWriter.writeCsv("a/b/test.csv", store);
 
         // assert
-        assertThat(file.getValue().toString()).isEqualTo("a/b/test.csv");
+        assertThat(file.getValue()).isEqualTo(new File("a/b/test.csv"));
         assertThat(results.toString()).isEqualTo("a,b,c\n");
     }
 

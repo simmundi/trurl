@@ -2,7 +2,7 @@ package pl.edu.icm.trurl.ecs.mapper;
 
 import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.StoreMetadata;
+import pl.edu.icm.trurl.store.StoreConfigurer;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
 import java.util.Collections;
@@ -12,7 +12,7 @@ import java.util.Locale;
 public interface Mapper<T> {
 
     void attachStore(Store store);
-    void configureStore(StoreMetadata metadata);
+    void configureStore(StoreConfigurer metadata);
     default void configureAndAttach(Store store) {
         configureStore(store);
         attachStore(store);

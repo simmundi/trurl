@@ -10,14 +10,14 @@ import pl.edu.icm.trurl.ecs.mapper.MapperListeners;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
 import pl.edu.icm.trurl.store.PrefixedStore;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.StoreMetadata;
+import pl.edu.icm.trurl.store.StoreConfigurer;
 import pl.edu.icm.trurl.store.attribute.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 public class CommonTypes {
-    public static final ClassName COMPONENT_STORE_METADATA = ClassName.get(StoreMetadata.class);
+    public static final ClassName COMPONENT_STORE_METADATA = ClassName.get(StoreConfigurer.class);
     public static final ClassName STORE = ClassName.get(Store.class);
     public static final ClassName PREFIXED_STORE = ClassName.get(PrefixedStore.class);
     public static final ClassName LIFECYCLE_EVENT = ClassName.get(LifecycleEvent.class);

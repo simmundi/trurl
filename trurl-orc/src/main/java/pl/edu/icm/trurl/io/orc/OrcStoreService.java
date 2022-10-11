@@ -9,6 +9,7 @@ import org.apache.orc.TypeDescription;
 import org.apache.orc.Writer;
 import pl.edu.icm.trurl.io.orc.wrapper.AbstractColumnWrapper;
 import pl.edu.icm.trurl.store.Store;
+import pl.edu.icm.trurl.store.StoreInspector;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class OrcStoreService {
         return new File(fileName).exists();
     }
 
-    public void read(Store store, String fileName) throws IOException {
+    public void read(StoreInspector store, String fileName) throws IOException {
 
         Reader reader = orcImplementationsService.createReader(fileName);
         TypeDescription schema = reader.getSchema();
@@ -66,7 +67,7 @@ public class OrcStoreService {
         store.fireUnderlyingDataChanged(0, targetRow);
     }
 
-    public void write(Store store, String fileName) throws IOException {
+    public void write(StoreInspector store, String fileName) throws IOException {
         int count = store.getCount();
         TypeDescription typeDescription = TypeDescription.createStruct();
         List<AbstractColumnWrapper> wrappers = store.attributes().map(AbstractColumnWrapper::create).collect(Collectors.toList());

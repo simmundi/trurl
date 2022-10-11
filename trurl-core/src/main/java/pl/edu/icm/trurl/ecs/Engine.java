@@ -67,7 +67,7 @@ public final class Engine implements StoreListener {
         system.execute(defaultSessionFactory);
     }
 
-    public Store getComponentStore() {
+    public Store getStore() {
         return store;
     }
 
