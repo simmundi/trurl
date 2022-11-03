@@ -31,6 +31,7 @@ public class EngineConfiguration {
 
     public void setComponentIndexer(ComponentAccessor componentAccessor) {
         preconditionEngineNotCreated();
+
         Preconditions.checkState(this.componentAccessor == null, "ComponentIndexer already set");
         this.componentAccessor = componentAccessor;
     }
