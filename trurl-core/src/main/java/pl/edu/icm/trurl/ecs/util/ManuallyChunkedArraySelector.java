@@ -36,10 +36,14 @@ public class ManuallyChunkedArraySelector implements RandomAccessSelector {
     private final IntArrayList chunks;
     private final List<String> labels;
 
-    public ManuallyChunkedArraySelector(int initialSize, int chunkCount) {
+    public ManuallyChunkedArraySelector() {
+        this(DEFAULT_INITIAL_SIZE, DEFAULT_INITIAL_CHUNKS);
+    }
+
+    public ManuallyChunkedArraySelector(int initialSize, int initialChunkCount) {
         ids = new IntArrayList(initialSize);
-        chunks = new IntArrayList(chunkCount + 1);
-        labels = new ArrayList<>(chunkCount);
+        chunks = new IntArrayList(initialChunkCount + 1);
+        labels = new ArrayList<>(initialChunkCount);
         chunks.add(0);
     }
 
@@ -71,6 +75,9 @@ public class ManuallyChunkedArraySelector implements RandomAccessSelector {
 
     @Override
     public synchronized Stream<Chunk> chunks() {
+        if (getRunningSize() > 0) {
+            endChunk();
+        }
         return IntStream.range(0, chunks.size() - 1)
                 .mapToObj(chunkId -> {
                     int firstInc = chunks.getInt(chunkId);
