@@ -43,13 +43,29 @@ public class SampleSpace<Label> {
     }
 
     /**
-     * Adds a possible outcome.
+     * Changes a possible outcome.
      *
      * @param label
      * @param probability
      */
-    public void addOutcome(Label label, float probability) {
+    public void changeOutcome(Label label, float probability) {
         outcomes.put(label, probability);
+        normalized = false;
+    }
+
+    /**
+     * Changes possible outcome, so that:
+     * new value = old value + delta. Delta has to be >= 0.
+     * Adds a new outcome if it doesn't exist.
+     *
+     * @param label
+     * @param delta
+     */
+    public void increaseOutcome(Label label, float delta) {
+        if (delta < 0) {
+            throw new IllegalArgumentException("delta < 0");
+        }
+        outcomes.compute(label, (k,v) -> (v==null) ? delta : v + delta);
         normalized = false;
     }
 
@@ -211,6 +227,20 @@ public class SampleSpace<Label> {
 
     public Map<Label, Float> toMap() {
         return outcomes;
+    }
+
+    /**
+     * Performs multiplication of outcome values in SampleSpaces for each label.
+     *
+     * @param sampleSpace
+     */
+    public void multiply(SampleSpace<Label> sampleSpace) {
+        for (Label key : outcomes.keySet()) {
+            if (sampleSpace.contains(key)) {
+                outcomes.compute(key, (k,v) -> (v==null) ? 0.0f : v* sampleSpace.getProbability(key));
+            } else outcomes.put(key, 0.0f);
+        }
+        normalized = false;
     }
 
     @Override

@@ -23,11 +23,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.Set;
-
 import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class SampleSpaceTest {
@@ -47,8 +44,9 @@ class SampleSpaceTest {
 
         assertThat(cities.getProbability(Cities.LUBLIN)).isEqualTo(-1);
 
-        cities.addOutcome(Cities.KATOWICE, 0.1f);
-        cities.addOutcome(Cities.SZCZECIN, 0.9f);
+        cities.changeOutcome(Cities.KATOWICE, 0.05f);
+        cities.increaseOutcome(Cities.KATOWICE, 0.05f);
+        cities.increaseOutcome(Cities.SZCZECIN, 0.9f);
 
         assertThat(cities.getProbability(Cities.KATOWICE)).isEqualTo(0.1f);
         assertThat(cities.getProbability(Cities.SZCZECIN)).isEqualTo(0.9f);
@@ -58,8 +56,8 @@ class SampleSpaceTest {
     void removeOutcome() {
         SampleSpace<Cities> cities = new SampleSpace<>();
 
-        cities.addOutcome(Cities.KATOWICE, 0.1f);
-        cities.addOutcome(Cities.SZCZECIN, 0.9f);
+        cities.changeOutcome(Cities.KATOWICE, 0.1f);
+        cities.changeOutcome(Cities.SZCZECIN, 0.9f);
         cities.removeOutcome(Cities.KATOWICE);
 
         assertThat(cities.getProbability(Cities.KATOWICE)).isEqualTo(-1);
@@ -76,8 +74,8 @@ class SampleSpaceTest {
 
         assertThat(cities.sampleOrDefault(0.9)).isEqualTo(Cities.WARSZAWA);
 
-        cities.addOutcome(Cities.LUBLIN, 0.1f);
-        cities.addOutcome(Cities.SZCZECIN, 0.4f);
+        cities.changeOutcome(Cities.LUBLIN, 0.1f);
+        cities.changeOutcome(Cities.SZCZECIN, 0.4f);
 
         assertThat(cities.sampleOrDefault(0.7)).isEqualTo(Cities.WARSZAWA);
         assertThat(cities.sampleOrDefault(10)).isEqualTo(Cities.WARSZAWA);
@@ -87,10 +85,10 @@ class SampleSpaceTest {
     @Test
     void changeTwoOutcomes() {
         SampleSpace<Cities> cities = new SampleSpace<>();
-        cities.addOutcome(Cities.LUBLIN, 0.01f);
-        cities.addOutcome(Cities.WARSZAWA, 0.1f);
-        cities.addOutcome(Cities.KATOWICE, 0.09f);
-        cities.addOutcome(Cities.SZCZECIN, 0.8f);
+        cities.changeOutcome(Cities.LUBLIN, 0.01f);
+        cities.changeOutcome(Cities.WARSZAWA, 0.1f);
+        cities.changeOutcome(Cities.KATOWICE, 0.09f);
+        cities.changeOutcome(Cities.SZCZECIN, 0.8f);
 
         cities.changeTwoOutcomes(Cities.SZCZECIN, 0.125f, Cities.WARSZAWA);
 
@@ -103,9 +101,9 @@ class SampleSpaceTest {
     @Test
     void normalize() {
         SampleSpace<Cities> cities = new SampleSpace<>();
-        cities.addOutcome(Cities.LUBLIN, 0.015f);
-        cities.addOutcome(Cities.WARSZAWA, 0.025f);
-        cities.addOutcome(Cities.KATOWICE, 0.01f);
+        cities.changeOutcome(Cities.LUBLIN, 0.015f);
+        cities.changeOutcome(Cities.WARSZAWA, 0.025f);
+        cities.changeOutcome(Cities.KATOWICE, 0.01f);
 
         cities.normalize();
 
@@ -118,12 +116,32 @@ class SampleSpaceTest {
     @Test
     void sample() {
         SampleSpace<Cities> cities = new SampleSpace<>();
-        cities.addOutcome(Cities.LUBLIN, 0.02f);
-        cities.addOutcome(Cities.WARSZAWA, 0.02f);
-        cities.addOutcome(Cities.KATOWICE, 0.02f);
+        cities.changeOutcome(Cities.LUBLIN, 0.02f);
+        cities.changeOutcome(Cities.WARSZAWA, 0.02f);
+        cities.changeOutcome(Cities.KATOWICE, 0.02f);
         cities.normalize();
 
         assertThat(asList(cities.sample(0.1), cities.sample(0.34), cities.sample(0.67)))
-                .containsExactlyInAnyOrder(Cities.KATOWICE, Cities.LUBLIN, Cities.WARSZAWA);
+                .asList().containsExactlyInAnyOrder(Cities.KATOWICE, Cities.LUBLIN, Cities.WARSZAWA);
+    }
+
+    @Test
+    void multiply() {
+        SampleSpace<SampleSpaceTest.Cities> cities = new SampleSpace<>();
+        SampleSpace<SampleSpaceTest.Cities> multipliers = new SampleSpace<>();
+
+        cities.changeOutcome(SampleSpaceTest.Cities.LUBLIN, 0.01f);
+        cities.changeOutcome(SampleSpaceTest.Cities.WARSZAWA, 0.01f);
+        cities.changeOutcome(SampleSpaceTest.Cities.KATOWICE, 0.04f);
+
+        multipliers.changeOutcome(SampleSpaceTest.Cities.LUBLIN, 20.0f);
+        multipliers.changeOutcome(SampleSpaceTest.Cities.WARSZAWA, 40.0f);
+        multipliers.changeOutcome(SampleSpaceTest.Cities.KATOWICE, 10.0f);
+
+        cities.multiply(multipliers);
+
+        assertThat((double)Math.round(cities.getProbability(SampleSpaceTest.Cities.LUBLIN) * 10d) / 10d).isEqualTo(0.2);
+        assertThat((double)Math.round(cities.getProbability(SampleSpaceTest.Cities.WARSZAWA) * 10d) / 10d).isEqualTo(0.4);
+        assertThat((double)Math.round(cities.getProbability(SampleSpaceTest.Cities.KATOWICE) * 10d) / 10d).isEqualTo(0.4);
     }
 }

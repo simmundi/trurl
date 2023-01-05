@@ -24,8 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Set;
-
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -119,9 +117,9 @@ class EnumSampleSpaceTest {
     @Test
     void sample() {
         SampleSpace<Cities> cities = new SampleSpace<>();
-        cities.addOutcome(Cities.LUBLIN, 0.02f);
-        cities.addOutcome(Cities.WARSZAWA, 0.02f);
-        cities.addOutcome(Cities.KATOWICE, 0.02f);
+        cities.changeOutcome(Cities.LUBLIN, 0.02f);
+        cities.changeOutcome(Cities.WARSZAWA, 0.02f);
+        cities.changeOutcome(Cities.KATOWICE, 0.02f);
         cities.normalize();
 
         Assertions.assertThat(asList(cities.sample(0.1), cities.sample(0.34), cities.sample(0.67)))

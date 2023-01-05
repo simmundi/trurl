@@ -57,12 +57,15 @@ public class EnumSampleSpace<Label extends Enum<Label>> {
 
     /**
      * Changes possible outcome, so that:
-     * new value = old value + delta.
+     * new value = old value + delta. Delta has to be >= 0.
      *
      * @param label
      * @param delta
      */
     public void increaseOutcome(Label label, float delta) {
+        if (delta < 0) {
+            throw new IllegalArgumentException("delta < 0");
+        }
         outcomes[label.ordinal()] += delta;
         normalized = false;
     }
