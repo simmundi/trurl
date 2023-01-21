@@ -1,5 +1,5 @@
 group 'pl.edu.icm.em'
-version '1.1'
+version '1.2-SNAPSHOT'
 
 subprojects {
     apply plugin: 'java-library'
@@ -14,6 +14,10 @@ subprojects {
     task sourceJar(type: Jar) {
         from sourceSets.main.allJava
         classifier 'sources'
+    }
+
+    configurations.all {
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
     }
 
     publishing {
@@ -53,7 +57,7 @@ subprojects {
 
     ext {
         guavaVersion = '30.1-jre'
-        bentoVersion = '1.4'
+        bentoVersion = '1.5-SNAPSHOT'
         geotoolsVersion = '26-RC'
         grasshopperVersion = '4.0'
         univocityVersion = '2.8.4'
