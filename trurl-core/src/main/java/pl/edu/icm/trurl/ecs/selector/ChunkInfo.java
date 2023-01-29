@@ -20,15 +20,18 @@ package pl.edu.icm.trurl.ecs.selector;
 
 public class ChunkInfo {
 
+    public static final String DEFAULT_LABEL = "";
+
     private final int chunkId;
     private final int approximateSize;
+
 
     private final String label;
 
     private ChunkInfo(int chunkId, int approximateSize) {
         this.chunkId = chunkId;
         this.approximateSize = approximateSize;
-        label = "";
+        label = DEFAULT_LABEL;
     }
 
     public ChunkInfo(int chunkId, int approximateSize, String label) {

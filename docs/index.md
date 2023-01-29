@@ -1,4 +1,5 @@
 # Trurl ECS
+
 ## Entity / Component / System toolkit for the tinkerers
 
 Trurl is a set of libraries for writing simulations in Java. It can be used to write simulations of different
@@ -6,9 +7,9 @@ sizes: from mobile games to scientific simulations running on supercomputer node
 
 It consists of:
 
-- a dataframe implementation optimized for simulations (i.e. mutable)
-- a built-in Object-Dataframe-Mapper - to express simulation logic in terms of mutating objects
-- framework for writing, chaining and parallelizing functions that modify the dataframe (also in parallel).
+- Store a dataframe implementation optimized for simulations (i.e. mutable)
+- an Object-Dataframe-Mapper - mapping dataframe rows to objects and vice versa, so that the simulation logic can be expressed in terms of reading and mutating objects
+- framework for writing, chaining and parallelizing functions that modify the dataframe.
 - generic importer / exporter of the dataframe data (imports ORC, CSV and tiled (!); exports ORC, CSV, RDBMS, VisNow)
 
 ## Store: a mutable, typed data frame
