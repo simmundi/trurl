@@ -17,7 +17,7 @@ public class EntitiesSampler {
     private final EngineConfiguration engineConfiguration;
 
 
-    public EntitiesSampler(EngineConfiguration engineConfiguration, Selectors selectors) {
+    public EntitiesSampler(EngineConfiguration engineConfiguration) {
         this.engineConfiguration = engineConfiguration;
     }
 
