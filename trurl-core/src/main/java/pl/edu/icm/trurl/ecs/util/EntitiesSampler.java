@@ -12,11 +12,11 @@ import java.util.stream.Collectors;
 
 import static pl.edu.icm.trurl.ecs.util.EntityIterator.select;
 
-@WithFactory
+
 public class EntitiesSampler {
     private final EngineConfiguration engineConfiguration;
 
-
+    @WithFactory
     public EntitiesSampler(EngineConfiguration engineConfiguration) {
         this.engineConfiguration = engineConfiguration;
     }
@@ -24,17 +24,17 @@ public class EntitiesSampler {
     public void copySelected(Selector selector, Store newStore) {
         List<Integer> oldIds = createIdMapping(selector);
         Store oldStore = engineConfiguration.getEngine().getStore();
-        for (Attribute attribute : newStore.attributes().collect(Collectors.toList())) {
-            if (attribute.name().equals("old_id")) {
-                for (int i = 0; i < oldIds.size(); i++) {
-                    attribute.setString(i, oldIds.get(i).toString());
-                }
-            } else {
-                for (int i = 0; i < oldIds.size(); i++) {
-                    attribute.setString(i, oldStore.get(attribute.name()).getString(oldIds.get(i)));
-                }
-            }
 
+        for (Attribute attribute : newStore.attributes().collect(Collectors.toList())) {
+            for (int i = 0; i < oldIds.size(); i++) {
+                attribute.setString(i, oldStore.get(attribute.name()).getString(oldIds.get(i)));
+            }
+        }
+
+        newStore.addInt("old_id");
+        Attribute oldIdsAttribute = newStore.get("old_id");
+        for (int i = 0; i < oldIds.size(); i++) {
+            oldIdsAttribute.setString(i, oldIds.get(i).toString());
         }
     }
 
