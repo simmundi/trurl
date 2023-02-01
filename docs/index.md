@@ -9,7 +9,7 @@ It consists of:
 
 - Store a dataframe implementation optimized for simulations (i.e. mutable)
 - an Object-Dataframe-Mapper - mapping dataframe rows to objects and vice versa, so that the simulation logic can be expressed in terms of reading and mutating objects
-- framework for writing, chaining and parallelizing functions that modify the dataframe.
+- framework for writing, chaining and executing in parallel operations that modify the dataframe.
 - generic importer / exporter of the dataframe data (imports ORC, CSV and tiled (!); exports ORC, CSV, RDBMS, VisNow)
 
 ## Store: a mutable, typed data frame
@@ -61,8 +61,3 @@ Finally, an engine manages execution of logic that affects the data - the `Syste
 ### Systems
 
 ### Glue
-
-
-
-
-
