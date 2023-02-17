@@ -37,6 +37,7 @@ public class EntityIterator {
     private final Selector selector;
 
     private final Function<Chunk, Void> NULL_CONTEXT_FACTORY = (unused) -> null;
+    private Class[] persisting = new Class[]{};
 
     private EntityIterator(Selector selector) {
         this.selector = selector;
@@ -53,6 +54,16 @@ public class EntityIterator {
 
     public EntityIterator detachEntities() {
         mode = Session.Mode.DETACHED_ENTITIES;
+        return this;
+    }
+
+    public EntityIterator persistingAll() {
+        persisting = new Class[]{};
+        return this;
+    }
+
+    public EntityIterator persisting(Class... persistables) {
+        persisting = persistables;
         return this;
     }
 
@@ -101,6 +112,7 @@ public class EntityIterator {
     public <Context> EntitySystem forEach(Function<Chunk, Context> contextFactory, Systems.IdxProcessor<Context> idxProcessor) {
         return initialSessionFactory -> {
             SessionFactory sessionFactory = initialSessionFactory.withModeAndCount(mode, selector.estimatedChunkSize() * 8);
+            sessionFactory.setPersistables(persisting);
             if (parallel) {
                 initialSessionFactory.lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
             }

@@ -22,6 +22,9 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import pl.edu.icm.trurl.ecs.mapper.ComponentOwner;
 
+import java.util.Arrays;
+import java.util.stream.IntStream;
+
 public final class Session implements ComponentOwner {
     private final Engine engine;
     private final Int2ObjectMap<Entity> entities;
@@ -29,21 +32,30 @@ public final class Session implements ComponentOwner {
     private final boolean detachedEntities;
     private final boolean createStubEntities;
     private final boolean persist;
+    private final int[] persistables;
 
     private final int ownerId;
 
-    Session(Engine engine, int expectedEntityCount, Mode mode, int ownerId) {
+    Session(Engine engine, int expectedEntityCount, Mode mode, int ownerId, Class... persistables) {
         this.engine = engine;
         this.createStubEntities = mode == Mode.STUB_ENTITIES;
         this.detachedEntities = mode == Mode.DETACHED_ENTITIES;
         this.persist = (mode == Mode.NORMAL || mode == Mode.SHARED);
         this.entities = (detachedEntities || expectedEntityCount == 0) ? null : new Int2ObjectOpenHashMap<>(expectedEntityCount);
         this.ownerId = ownerId;
+
+        this.persistables = persistables.length > 0 ?
+            Arrays.stream(persistables).mapToInt(componentClass -> engine.getMapperSet().classToIndex(componentClass)).toArray()
+                : IntStream.range(0, engine.getMapperSet().componentCount()).toArray();
     }
 
     public void close() {
         if (persist) {
-            entities.values().stream().forEach(Entity::persist);
+            for (Entity value : entities.values()) {
+                for (int i = 0; i < persistables.length; i++) {
+                    value.persistSingle(persistables[i]);
+                }
+            }
         }
     }
 

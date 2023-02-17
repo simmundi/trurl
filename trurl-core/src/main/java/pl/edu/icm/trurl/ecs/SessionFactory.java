@@ -21,6 +21,9 @@ package pl.edu.icm.trurl.ecs;
 import com.google.common.base.Preconditions;
 import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public final class SessionFactory {
     public final static int EXPECTED_ENTITY_COUNT = 25_000;
     private final static Session.Mode DEFAULT_MODE = Session.Mode.NORMAL;
@@ -29,6 +32,11 @@ public final class SessionFactory {
     private final Session.Mode mode;
     private final int expectedEntityCount;
     private final Session shared;
+    private Class[] persistables = new Class[]{};
+
+    public void setPersistables(Class[] persistables) {
+        this.persistables = persistables;
+    }
 
     public SessionFactory(Engine engine) {
         this(engine, DEFAULT_MODE, EXPECTED_ENTITY_COUNT);
@@ -61,7 +69,7 @@ public final class SessionFactory {
         Preconditions.checkState(ownerId > 0, "OwnerId must be positive");
         Preconditions.checkState(shared == null || shared.getOwnerId() == ownerId, "Shared session factory cannot change ownerId");
         Preconditions.checkState(shared == null || this.expectedEntityCount >= expectedEntityCount, "Shared session factory cannot enlarge expected entity count (was %s is %s)", this.expectedEntityCount, expectedEntityCount);
-        return shared == null ? new Session(engine, expectedEntityCount, mode, ownerId) : shared;
+        return shared == null ? new Session(engine, expectedEntityCount, mode, ownerId, persistables) : shared;
     }
 
     public SessionFactory withModeAndCount(Session.Mode mode, int expectedEntityCount) {

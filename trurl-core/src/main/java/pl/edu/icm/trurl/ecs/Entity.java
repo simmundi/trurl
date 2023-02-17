@@ -64,12 +64,17 @@ public final class Entity {
 
     public void persist() {
         for (int idx = 0; idx < components.length; idx++) {
-            if (components[idx] != null) {
-                Mapper<Object> mapper = mapperSet.indexToMapper(idx);
-                mapper.save(session, components[idx], id);
-            }
+            persistSingle(idx);
         }
     }
+
+    void persistSingle(int idx) {
+        if (components[idx] != null) {
+            Mapper<Object> mapper = mapperSet.indexToMapper(idx);
+            mapper.save(session, components[idx], id);
+        }
+    }
+
 
     public int getId() {
         return id;

@@ -19,9 +19,12 @@
 package pl.edu.icm.trurl.util;
 
 import com.google.common.base.Preconditions;
+import com.google.common.util.concurrent.AtomicDouble;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Status {
     private final String text;
@@ -30,12 +33,21 @@ public class Status {
     private long startTime;
     public static StatusListener statusListener;
     public final ConcurrentHashMap<String, Integer> problems = new ConcurrentHashMap<>();
+    public final static ConcurrentHashMap<String, TotalCounter> totalCounters = new ConcurrentHashMap<String, TotalCounter>();
+
+    private final TotalCounter myCounter;
+
+    private static class TotalCounter {
+        private final AtomicDouble totalTime = new AtomicDouble();
+        private final AtomicInteger executions = new AtomicInteger();
+    }
 
     public Status(String text, int skip) {
         this.text = text;
         this.skip = skip;
         Preconditions.checkState(skip > 0, "skip must be 1 or more");
         startTime = System.currentTimeMillis();
+        this.myCounter = totalCounters.computeIfAbsent(text, (unused) -> new TotalCounter());
         System.out.print(text + ": ");
     }
 
@@ -58,7 +70,14 @@ public class Status {
     public void done(String comment, Object... args) {
         double now = System.currentTimeMillis();
         double duration = now - startTime;
-        System.out.print(String.format(" [OK] (in %f seconds)", duration / 1000.0));
+        int executions = myCounter.executions.incrementAndGet();  // theoretically a race condition
+        double totalTime = myCounter.totalTime.addAndGet(duration); // but doesn't matter in this case
+
+        String totalComment = "";
+        if (myCounter.executions.get() > 1) {
+            totalComment = String.format(" (executed %d times, %f seconds on avg)", executions, totalTime / executions / 1000.0);
+        }
+        System.out.print(String.format(" [OK] (in %f seconds)%s", duration / 1000.0, totalComment));
         if (comment != null) {
             System.out.print(" -> " + String.format(comment, args));
         }
