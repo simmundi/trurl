@@ -36,6 +36,8 @@ public class EntitiesSampler {
         for (int i = 0; i < oldIds.size(); i++) {
             oldIdsAttribute.setString(i, oldIds.get(i).toString());
         }
+        
+        newStore.fireUnderlyingDataChanged(0, oldIds.size());
     }
 
     private List<Integer> createIdMapping(Selector selector) {
