@@ -72,6 +72,9 @@ public class ConfigureStoreFeature implements Feature {
                 case DOUBLE_PROP:
                     methodSpec.addStatement("meta.addDouble($S)", name);
                     break;
+                case SOFT_ENUM_PROP:
+                    methodSpec.addStatement("meta.addSoftEnum($S, $L)", name, property.name + "Manager");
+                    break;
                 case ENUM_PROP:
                     methodSpec.addStatement("meta.addEnum($S, $T.class)", name, property.businessType);
                     break;

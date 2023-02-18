@@ -22,15 +22,15 @@ import com.google.common.base.Strings;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import net.snowyhollows.bento.soft.SoftEnum;
 import pl.edu.icm.trurl.ecs.annotation.NotMapped;
 import pl.edu.icm.trurl.generator.CommonTypes;
 
+import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
+import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
+import javax.tools.Diagnostic;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -102,10 +102,10 @@ public class ComponentProperty {
     }
 
     /**
-     * In some cases, the direct type (List, Enum) is different than the business type.
+     * In some cases, the direct type (List, Enum) is different from the business type.
      * e.g. a getMedicalRecords() method returns a list of MedicalRecord; the actual type is List, but
      * we need to create a mapper for MedicalRecord.
-     *
+     * <p>
      * This method uses case-by-case rules to establish the relevant business type.
      */
     private static ClassName findIndirectBusinessType(ProcessingEnvironment processingEnvironment, TypeMirror typeMirror) {
@@ -113,7 +113,7 @@ public class ComponentProperty {
         if (isEnum(processingEnvironment, typeMirror, typeName)) {
             return (ClassName) ClassName.get(typeMirror);
         } else if (isList(typeName)) {
-            return (ClassName) ((ParameterizedTypeName)typeName).typeArguments.get(0);
+            return (ClassName) ((ParameterizedTypeName) typeName).typeArguments.get(0);
         } else {
             return null;
         }
@@ -144,6 +144,8 @@ public class ComponentProperty {
             return PropertyType.BOOLEAN_PROP;
         } else if (typeName.equals(CommonTypes.LANG_STRING)) {
             return PropertyType.STRING_PROP;
+        } else if (isSoftEnum(processingEnvironment, typeMirror)) {
+            return PropertyType.SOFT_ENUM_PROP;
         } else if (isEnum(processingEnvironment, typeMirror, typeName)) {
             return PropertyType.ENUM_PROP;
         } else if (typeName.equals(CommonTypes.ENTITY_LIST)) {
@@ -151,11 +153,16 @@ public class ComponentProperty {
         } else if (typeName.equals(CommonTypes.ENTITY)) {
             return PropertyType.ENTITY_PROP;
         } else if (typeName instanceof ParameterizedTypeName
-                && ((ParameterizedTypeName)typeName).rawType.equals(CommonTypes.LIST)) {
+                && ((ParameterizedTypeName) typeName).rawType.equals(CommonTypes.LIST)) {
             return PropertyType.EMBEDDED_LIST;
         } else {
             return PropertyType.EMBEDDED_PROP;
         }
+    }
+
+    private static boolean isSoftEnum(ProcessingEnvironment processingEnvironment, TypeMirror typeMirror) {
+        TypeElement typeElement = processingEnvironment.getElementUtils().getTypeElement(SoftEnum.class.getCanonicalName());
+        return processingEnvironment.getTypeUtils().isAssignable(typeMirror, typeElement.asType());
     }
 
     public boolean isAttachedToAttribute() {

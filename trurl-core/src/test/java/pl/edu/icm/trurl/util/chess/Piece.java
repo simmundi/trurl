@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,20 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.selector;
+package pl.edu.icm.trurl.util.chess;
 
-public interface RandomAccessSelector extends Selector {
-    int getInt(float index);
-    int getCount();
+import net.snowyhollows.bento.annotation.WithFactory;
+import pl.edu.icm.trurl.util.AbstractSoftEnum;
+
+public class Piece extends AbstractSoftEnum {
+    private final String abbrv;
+    @WithFactory
+    public Piece(String name, int ordinal, String abbrv) {
+        super(name, ordinal);
+        this.abbrv = abbrv;
+    }
+
+    public String getAbbrv() {
+        return abbrv;
+    }
 }

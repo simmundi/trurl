@@ -18,6 +18,8 @@
 
 package pl.edu.icm.trurl.store.array;
 
+import net.snowyhollows.bento.soft.SoftEnum;
+import net.snowyhollows.bento.soft.SoftEnumManager;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreListener;
 import pl.edu.icm.trurl.store.attribute.Attribute;
@@ -112,6 +114,11 @@ public final class ArrayStore implements Store {
     @Override
     public <E extends Enum<E>> void addEnum(String name, Class<E> enumType) {
         attributes.putIfAbsent(name, new EnumArrayAttribute<>(enumType, name, defaultCapacity));
+    }
+
+    @Override
+    public <E extends SoftEnum> void addSoftEnum(String name, SoftEnumManager<E> enumType) {
+        attributes.putIfAbsent(name, new SoftEnumArrayAttribute<>(enumType, name, defaultCapacity));
     }
 
     @Override

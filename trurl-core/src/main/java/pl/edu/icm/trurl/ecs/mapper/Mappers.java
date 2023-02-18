@@ -18,6 +18,8 @@
 
 package pl.edu.icm.trurl.ecs.mapper;
 
+import net.snowyhollows.bento.Bento;
+import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
@@ -29,6 +31,29 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Mappers {
+
+    private final Bento bento;
+
+    @WithFactory
+    public Mappers(Bento bento) {
+        this.bento = bento;
+    }
+
+    public Mappers() {
+        this.bento = Bento.createRoot();
+    }
+
+    public <T> Mapper<T> createMapper(Class<T> clazz) {
+        try {
+            return bento.get(
+                    Class.forName(clazz.getCanonicalName() + "MapperFactory")
+                            .getField("IT")
+                            .get(null));
+        } catch (ReflectiveOperationException cause) {
+            throw new IllegalArgumentException("Class " + clazz + " does not have a valid mapper (did you forget the @WithMapper annotation? is trurl-generator configured as an annotation processor?)", cause);
+        }
+    }
+
 
     static public <T> Mapper<T> create(Class<T> clazz) {
         try {

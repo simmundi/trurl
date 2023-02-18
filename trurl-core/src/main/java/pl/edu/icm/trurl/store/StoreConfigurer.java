@@ -18,6 +18,9 @@
 
 package pl.edu.icm.trurl.store;
 
+import net.snowyhollows.bento.soft.SoftEnum;
+import net.snowyhollows.bento.soft.SoftEnumManager;
+
 /**
  * This is usually used as superinterface of Store.
  * <p>
@@ -38,6 +41,8 @@ public interface StoreConfigurer {
     void addValueObjectList(String name);
 
     <E extends Enum<E>> void addEnum(String name, Class<E> enumType);
+
+    <E extends SoftEnum> void addSoftEnum(String name, SoftEnumManager<E> enumType);
 
     void addFloat(String name);
 

@@ -16,9 +16,17 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.selector;
+package pl.edu.icm.trurl.ecs.annotation;
 
-public interface RandomAccessSelector extends Selector {
-    int getInt(float index);
-    int getCount();
+import net.snowyhollows.bento.soft.SoftEnumManager;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.SOURCE)
+@Target(ElementType.FIELD)
+public @interface EnumManagedBy {
+    Class<?> value();
 }

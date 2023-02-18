@@ -1,5 +1,6 @@
 dependencies {
     implementation project(":trurl-core")
+    implementation "net.snowyhollows.bento:bento-core:${bentoVersion}"
 
     implementation "org.roaringbitmap:RoaringBitmap:${roaringBitmapVersion}"
 

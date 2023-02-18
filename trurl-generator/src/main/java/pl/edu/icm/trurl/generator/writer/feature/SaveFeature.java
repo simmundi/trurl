@@ -133,6 +133,9 @@ public class SaveFeature implements Feature {
                 case ENUM_PROP:
                     methodSpec.addStatement("$L.setEnum(row, component.$L())", property.name, property.getterName);
                     break;
+                case SOFT_ENUM_PROP:
+                    methodSpec.addStatement("$L.setEnum(row, component.$L())", property.name, property.getterName);
+                    break;
                 case FLOAT_PROP:
                     methodSpec.addStatement("$L.setFloat(row, component.$L())", property.name, property.getterName);
                     break;

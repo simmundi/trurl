@@ -62,7 +62,9 @@ import static org.mockito.Mockito.verify;
 public class MapperIT {
 
     @Spy
-    MapperSet mapperSet = new MapperSet(new DynamicComponentAccessor());
+    Mappers mappers = new Mappers();
+    @Spy
+    MapperSet mapperSet = new MapperSet(new DynamicComponentAccessor(), mappers);
 
     @Mock
     Session session;

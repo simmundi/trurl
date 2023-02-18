@@ -21,29 +21,31 @@ package pl.edu.icm.trurl.util;
 
 import java.util.Objects;
 
-public class Pair<FIRST, SECOND> {
+public class Triple<FIRST, SECOND, THIRD> {
     public final FIRST first;
     public final SECOND second;
+    public final THIRD third;
 
-    private Pair(FIRST first, SECOND second) {
+    private Triple(FIRST first, SECOND second, THIRD third) {
         this.first = first;
         this.second = second;
+        this.third = third;
     }
 
-    public static<FIRST, SECOND> Pair<FIRST, SECOND> of(FIRST first, SECOND second) {
-        return new Pair<>(first, second);
+    public static<FIRST, SECOND, THIRD> Triple<FIRST, SECOND, THIRD> of(FIRST first, SECOND second, THIRD third) {
+        return new Triple<>(first, second, third);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Pair<?, ?> pair = (Pair<?, ?>) o;
-        return Objects.equals(first, pair.first) && Objects.equals(second, pair.second);
+        Triple<?, ?, ?> triple = (Triple<?, ?, ?>) o;
+        return Objects.equals(first, triple.first) && Objects.equals(second, triple.second) && Objects.equals(third, triple.third);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(first, second);
+        return Objects.hash(first, second, third);
     }
 }

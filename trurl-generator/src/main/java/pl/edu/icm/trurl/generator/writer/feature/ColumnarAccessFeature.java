@@ -98,6 +98,9 @@ public class ColumnarAccessFeature implements Feature {
             case ENUM_PROP:
                 methodSpec.addStatement("return ($T)$L.getEnum(row)", property.businessType, property.name);
                 break;
+            case SOFT_ENUM_PROP:
+                methodSpec.addStatement("return ($T)$L.getEnum(row)", property.businessType, property.name);
+                break;
             case FLOAT_PROP:
                 methodSpec.addStatement("return $L.getFloat(row)", property.name);
                 break;

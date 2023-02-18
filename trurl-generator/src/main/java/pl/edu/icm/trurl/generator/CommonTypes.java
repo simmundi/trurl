@@ -20,6 +20,8 @@ package pl.edu.icm.trurl.generator;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
+import net.snowyhollows.bento.soft.SoftEnum;
+import net.snowyhollows.bento.soft.SoftEnumManager;
 import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
@@ -65,7 +67,11 @@ public class CommonTypes {
     public static final ClassName BOOLEAN_COLUMN = ClassName.get(BooleanAttribute.class);
     public static final ClassName ENTITY_LIST_COLUMN = ClassName.get(EntityListAttribute.class);
     public static final ClassName VALUE_OBJECT_LIST_COLUMN = ClassName.get(ValueObjectListAttribute.class);
+    public static final ClassName SOFT_ENUM_COLUMN = ClassName.get(SoftEnumAttribute.class);
     public static final ClassName ENTITY_COLUMN = ClassName.get(EntityAttribute.class);
+    public static final ClassName SOFT_ENUM = ClassName.get(SoftEnum.class);
+    public static final ClassName SOFT_ENUM_MANAGER = ClassName.get(SoftEnumManager.class);
+
 
     private CommonTypes() {
     }

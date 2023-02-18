@@ -85,6 +85,7 @@ public class IsModifiedFeature implements Feature {
                 case DOUBLE_PROP:
                     methodSpec.addStatement("if ($L.getDouble(row) != component.$L()) return true", property.name, property.getterName);
                     break;
+                case SOFT_ENUM_PROP:
                 case ENUM_PROP:
                     methodSpec.addStatement("if ($L.getEnum(row) != component.$L()) return true", property.name, property.getterName);
                     break;

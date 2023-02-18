@@ -16,9 +16,15 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.selector;
+package pl.edu.icm.trurl.store.attribute;
 
-public interface RandomAccessSelector extends Selector {
-    int getInt(float index);
-    int getCount();
+import net.snowyhollows.bento.soft.SoftEnum;
+
+public interface SoftEnumAttribute<E extends SoftEnum> extends Attribute {
+    E getEnum(int row);
+    void setEnum(int row, E value);
+    byte getOrdinal(int row);
+    void setOrdinal(int row, byte value);
+
+    E[] values();
 }

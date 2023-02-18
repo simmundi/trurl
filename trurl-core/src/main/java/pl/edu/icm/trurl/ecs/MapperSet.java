@@ -28,11 +28,11 @@ public final class MapperSet {
     private final ComponentAccessor componentAccessor;
     private final Mapper[] mappers;
 
-    public MapperSet(ComponentAccessor componentAccessor) {
+    public MapperSet(ComponentAccessor componentAccessor, Mappers mapperCreator) {
         this.componentAccessor = componentAccessor;
         mappers = new Mapper[componentAccessor.componentCount()];
         for (int idx = 0; idx < componentCount(); idx++) {
-            mappers[idx] = Mappers.create(componentAccessor.indexToClass(idx));
+            mappers[idx] = mapperCreator.createMapper(componentAccessor.indexToClass(idx));
         }
     }
 

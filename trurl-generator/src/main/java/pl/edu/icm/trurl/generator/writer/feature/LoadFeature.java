@@ -142,6 +142,9 @@ public class LoadFeature implements Feature {
                 case ENUM_PROP:
                     methodSpec.addStatement("component.$L(($T)$L.getEnum(row))", property.setterName, property.businessType, property.name);
                     break;
+                case SOFT_ENUM_PROP:
+                    methodSpec.addStatement("component.$L(($T)$L.getEnum(row))", property.setterName, property.businessType, property.name);
+                    break;
                 case FLOAT_PROP:
                     methodSpec.addStatement("component.$L($L.getFloat(row))", property.setterName, property.name);
                     break;

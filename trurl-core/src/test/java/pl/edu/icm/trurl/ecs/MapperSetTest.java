@@ -24,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
+import pl.edu.icm.trurl.ecs.mapper.Mappers;
 import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
 import pl.edu.icm.trurl.exampledata.Looks;
 import pl.edu.icm.trurl.exampledata.Stats;
@@ -37,6 +38,8 @@ class MapperSetTest {
 
     @Spy
     ComponentAccessor componentAccessor = new DynamicComponentAccessor(Looks.class, Stats.class);
+    @Spy
+    Mappers mappers = new Mappers();
 
     @InjectMocks
     MapperSet mapperSet;

@@ -19,7 +19,10 @@
 package pl.edu.icm.trurl.ecs;
 
 import com.google.common.base.Preconditions;
+import net.snowyhollows.bento.Bento;
 import net.snowyhollows.bento.annotation.WithFactory;
+import pl.edu.icm.trurl.ecs.mapper.Mappers;
+import pl.edu.icm.trurl.ecs.mapper.MappersFactory;
 import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
 import pl.edu.icm.trurl.store.StoreFactory;
 import pl.edu.icm.trurl.store.array.ArrayStoreFactory;
@@ -36,10 +39,11 @@ public class EngineConfiguration {
     private boolean sharedSession;
     private List<EngineCreationListener> engineCreationListeners = new CopyOnWriteArrayList<>();
     private List<Class<?>> componentClasses = new CopyOnWriteArrayList<>();
+    private final Bento bento;
 
     @WithFactory
-    public EngineConfiguration() {
-
+    public EngineConfiguration(Bento bento) {
+        this.bento = bento;
     }
 
     public void setStoreFactory(StoreFactory storeFactory) {
@@ -114,7 +118,7 @@ public class EngineConfiguration {
     private MapperSet getMapperSet() {
         preconditionEngineNotCreated();
         ComponentAccessor componentAccessor = getComponentIndexer();
-        return new MapperSet(componentAccessor);
+        return new MapperSet(componentAccessor, bento.get(MappersFactory.IT));
     }
 
     private ComponentAccessor getComponentIndexer() {

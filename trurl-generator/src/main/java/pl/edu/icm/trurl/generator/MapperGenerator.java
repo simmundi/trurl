@@ -56,15 +56,24 @@ public class MapperGenerator extends AbstractProcessor {
 
     private boolean doProcess(RoundEnvironment roundEnv) {
 
-        BeanFinder beanFinder = new BeanFinder();
-        MapperWriter mapperWriter = new MapperWriter();
-        SyntheticPropertiesSynthesizer syntheticPropertiesSynthesizer = new SyntheticPropertiesSynthesizer();
+        try {
+            BeanFinder beanFinder = new BeanFinder();
+            MapperWriter mapperWriter = new MapperWriter();
+            SyntheticPropertiesSynthesizer syntheticPropertiesSynthesizer = new SyntheticPropertiesSynthesizer();
 
-        beanFinder
-                .findBeans(processingEnvironment, roundEnv, syntheticPropertiesSynthesizer)
-                .forEach(beanMetadata -> mapperWriter.writeMapper(processingEnvironment, beanMetadata));
+            beanFinder
+                    .findBeans(processingEnvironment, roundEnv, syntheticPropertiesSynthesizer)
+                    .forEach(beanMetadata -> mapperWriter.writeMapper(processingEnvironment, beanMetadata));
 
+
+        } catch (Exception e) {
+            processingEnvironment.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
+            for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+                processingEnvironment.getMessager().printMessage(Diagnostic.Kind.ERROR, stackTraceElement.toString());
+            }
+        }
         return true;
+
     }
 
     @Override

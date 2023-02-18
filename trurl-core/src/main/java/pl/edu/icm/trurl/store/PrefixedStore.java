@@ -18,6 +18,8 @@
 
 package pl.edu.icm.trurl.store;
 
+import net.snowyhollows.bento.soft.SoftEnum;
+import net.snowyhollows.bento.soft.SoftEnumManager;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
 import java.util.stream.Stream;
@@ -105,6 +107,11 @@ public class PrefixedStore implements Store {
     @Override
     public <E extends Enum<E>> void addEnum(String name, Class<E> enumType) {
         wrappedMeta.addEnum(wrap(name), enumType);
+    }
+
+    @Override
+    public <E extends SoftEnum> void addSoftEnum(String name, SoftEnumManager<E> enumType) {
+        wrappedMeta.addSoftEnum(wrap(name), enumType);
     }
 
     @Override

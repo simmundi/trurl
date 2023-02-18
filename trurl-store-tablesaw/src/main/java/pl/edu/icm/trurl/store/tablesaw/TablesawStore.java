@@ -18,22 +18,15 @@
 
 package pl.edu.icm.trurl.store.tablesaw;
 
+import net.snowyhollows.bento.soft.SoftEnum;
+import net.snowyhollows.bento.soft.SoftEnumManager;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreConfigurer;
 import pl.edu.icm.trurl.store.StoreListener;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.generic.GenericEntityListOverStringAttribute;
 import pl.edu.icm.trurl.store.attribute.generic.GenericValueObjectListOverStringAttribute;
-import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawAttribute;
-import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawBooleanAttribute;
-import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawByteAttribute;
-import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawDoubleAttribute;
-import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawEntityAttribute;
-import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawEnumAttribute;
-import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawFloatAttribute;
-import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawIntAttribute;
-import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawShortAttribute;
-import pl.edu.icm.trurl.store.tablesaw.attribute.TablesawStringAttribute;
+import pl.edu.icm.trurl.store.tablesaw.attribute.*;
 import tech.tablesaw.api.Table;
 
 import java.util.Arrays;
@@ -103,6 +96,11 @@ public class TablesawStore implements StoreConfigurer, Store {
     @Override
     public <E extends Enum<E>> void addEnum(String name, Class<E> enumType) {
         attributes.putIfAbsent(name, new TablesawEnumAttribute<E>(enumType, name));
+    }
+
+    @Override
+    public <E extends SoftEnum> void addSoftEnum(String name, SoftEnumManager<E> enumType) {
+        attributes.putIfAbsent(name, new TablesawSoftEnumAttribute<>(enumType, name));
     }
 
     @Override
