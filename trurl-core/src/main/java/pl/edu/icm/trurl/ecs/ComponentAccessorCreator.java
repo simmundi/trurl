@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,14 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.ecs;
 
-import pl.edu.icm.trurl.store.AbstractStoreTest;
+import net.snowyhollows.bento.annotation.BentoWrapper;
+import net.snowyhollows.bento.annotation.ByName;
 
-class ArrayStoreTest extends AbstractStoreTest<ArrayStore> {
-    @Override
-    protected ArrayStore createStore() {
-        return new ArrayStore(1024);
-    }
+import java.util.Collection;
+
+@BentoWrapper
+public interface ComponentAccessorCreator {
+    ComponentAccessor create(@ByName Collection<Class<?>> componentClasses);
 }

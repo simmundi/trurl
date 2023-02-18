@@ -20,56 +20,53 @@ package pl.edu.icm.trurl.ecs;
 
 import com.google.common.base.Preconditions;
 import net.snowyhollows.bento.Bento;
+import net.snowyhollows.bento.Bento;
+import net.snowyhollows.bento.annotation.ByFactory;
+import net.snowyhollows.bento.annotation.ByName;
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
 import pl.edu.icm.trurl.ecs.mapper.MappersFactory;
 import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
 import pl.edu.icm.trurl.store.StoreFactory;
-import pl.edu.icm.trurl.store.array.ArrayStoreFactory;
 
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EngineConfiguration {
     private volatile Engine engine;
-    private StoreFactory storeFactory;
-    private ComponentAccessor componentAccessor;
-    private int initialCapacity = Integer.MIN_VALUE;
-    private int capacityHeadroom = Integer.MIN_VALUE;
-    private boolean sharedSession;
+    private ComponentAccessorCreator componentAccessorCreator;
     private List<EngineCreationListener> engineCreationListeners = new CopyOnWriteArrayList<>();
     private List<Class<?>> componentClasses = new CopyOnWriteArrayList<>();
     private final Bento bento;
+    private final StoreFactory storeFactory;
+    private final int initialCapacity;
+    private final int capacityHeadroom;
+    private final boolean sharedSession;
 
     @WithFactory
-    public EngineConfiguration(Bento bento) {
+    public EngineConfiguration(ComponentAccessorCreator componentAccessorCreator,
+                               StoreFactory storeFactory,
+                               @ByName(value = "trurl.engine.initialCapacity", fallbackValue = "1024") int initialCapacity,
+                               @ByName(value = "trurl.engine.capacityHeadroom", fallbackValue = "128") int capacityHeadroom,
+                               @ByName(value = "trurl.engine.sharedSession", fallbackValue = "false") boolean sharedSession,
+                               Bento bento) {
+        this.componentAccessorCreator = componentAccessorCreator;
+        this.storeFactory = storeFactory;
+        this.initialCapacity = initialCapacity;
+        this.capacityHeadroom = capacityHeadroom;
+        this.sharedSession = sharedSession;
         this.bento = bento;
     }
 
-    public void setStoreFactory(StoreFactory storeFactory) {
-        preconditionEngineNotCreated();
-        this.storeFactory = storeFactory;
-    }
 
-    public void setComponentIndexer(ComponentAccessor componentAccessor) {
-        preconditionEngineNotCreated();
-        Preconditions.checkState(this.componentAccessor == null, "ComponentIndexer already set");
-        this.componentAccessor = componentAccessor;
-    }
-
-    public void setSharedSession(boolean shared) {
-        preconditionEngineNotCreated();
-        this.sharedSession = shared;
-    }
-
-    public void addEngineCreationListeners(EngineCreationListener engineCreationListeners) {
+    public void addEngineCreationListener(EngineCreationListener engineCreationListeners) {
         preconditionEngineNotCreated();
         this.engineCreationListeners.add(engineCreationListeners);
     }
 
     public Engine getEngine() {
         if (engine == null) {
-            engine = new Engine(getStoreFactory(), getInitialCapacity(), getCapacityHeadroom(), getMapperSet(), sharedSession);
+            engine = new Engine(storeFactory, initialCapacity, capacityHeadroom, getMapperSet(), sharedSession);
             for (EngineCreationListener engineCreationListener : engineCreationListeners) {
                 engineCreationListener.onEngineCreated(engine);
             }
@@ -79,41 +76,9 @@ public class EngineConfiguration {
 
     public void addComponentClasses(Class<?>... componentClass) {
         preconditionEngineNotCreated();
-        for (Class<?> aClass : componentClass) {
-            componentClasses.add(aClass);
-        }
+        componentClasses.addAll(Arrays.asList(componentClass));
     }
 
-    public void setInitialCapacity(int initialCapacity) {
-        preconditionEngineNotCreated();
-        this.initialCapacity = initialCapacity;
-    }
-
-    public void setCapacityHeadroom(int capacityHeadroom) {
-        preconditionEngineNotCreated();
-        this.capacityHeadroom = capacityHeadroom;
-    }
-
-    private int getCapacityHeadroom() {
-        if (capacityHeadroom == Integer.MIN_VALUE) {
-            capacityHeadroom = (int) Math.ceil(initialCapacity / 10f);
-        }
-        return capacityHeadroom;
-    }
-
-    private int getInitialCapacity() {
-        if (initialCapacity == Integer.MIN_VALUE) {
-            initialCapacity = getStoreFactory().defaultInitialCapacity();
-        }
-        return initialCapacity;
-    }
-
-    private StoreFactory getStoreFactory() {
-        if (storeFactory == null) {
-            storeFactory = new ArrayStoreFactory();
-        }
-        return storeFactory;
-    }
 
     private MapperSet getMapperSet() {
         preconditionEngineNotCreated();
@@ -122,13 +87,8 @@ public class EngineConfiguration {
     }
 
     private ComponentAccessor getComponentIndexer() {
-        if (componentAccessor == null) {
-            componentAccessor = new DynamicComponentAccessor(componentClasses.toArray(new Class[0]));
-        }
-        // loop for fast failing if the indexer doesn't support any of the components
-        for (Class<?> componentClass : componentClasses) {
-            componentAccessor.classToIndex(componentClass);
-        }
+        ComponentAccessor componentAccessor = componentAccessorCreator.create(componentClasses);
+        verifyComponentAccessor(componentAccessor);
         return componentAccessor;
     }
 
@@ -136,4 +96,19 @@ public class EngineConfiguration {
         Preconditions.checkState(this.engine == null, "Engine already created set");
     }
 
+    private void verifyComponentAccessor(ComponentAccessor componentAccessor) {
+        // loop for fast failing if the indexer doesn't support any of the components
+        Map<Integer, Class<?>> map = new HashMap<>(componentClasses.size());
+        for (Class<?> componentClass : componentClasses) {
+            map.put(componentAccessor.classToIndex(componentClass), componentClass);
+        }
+        if (!new HashSet<>(map.values()).equals(new HashSet<>(componentClasses))) {
+            throw new IllegalStateException("Some components were not mapped by " + componentAccessor);
+        }
+        for (Integer index : map.keySet()) {
+            if (map.get(index) != componentAccessor.indexToClass(index)) {
+                throw new IllegalStateException("Component " + map.get(index) + " was not mapped correctly by " + componentAccessor);
+            }
+        }
+    }
 }

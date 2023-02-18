@@ -18,18 +18,18 @@
 
 package pl.edu.icm.trurl.store.array;
 
+import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreFactory;
 
 public class ArrayStoreFactory implements StoreFactory {
 
-    @Override
-    public Store create(int initialCapacity) {
-        return new ArrayStore(initialCapacity);
+    @WithFactory
+    public ArrayStoreFactory() {
     }
 
     @Override
-    public int defaultInitialCapacity() {
-        return ArrayStore.DEFAULT_INITIAL_CAPACITY;
+    public Store create(int initialCapacity) {
+        return new ArrayStore(initialCapacity);
     }
 }

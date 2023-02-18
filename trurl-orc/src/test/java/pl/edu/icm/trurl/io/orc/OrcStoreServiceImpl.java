@@ -41,9 +41,9 @@ class OrcStoreServiceImpl {
     public void writeThenRead() throws IOException {
         // given
         String filename = new File(tempDir, "dump.orc").getAbsolutePath();
-        ArrayStore storeToWrite = new ArrayStore();
+        ArrayStore storeToWrite = new ArrayStore(1024);
         configureStore(storeToWrite);
-        ArrayStore storeToRead = new ArrayStore();
+        ArrayStore storeToRead = new ArrayStore(1024);
         configureStore(storeToRead);
         loadFromCsvResource(storeToWrite, "/store.csv");
         OrcStoreService orcStoreService = new OrcStoreService(new OrcImplementationsService());

@@ -22,6 +22,8 @@ import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.exampledata.Looks;
 import pl.edu.icm.trurl.exampledata.Stats;
 
+import java.util.Arrays;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -30,7 +32,7 @@ class DynamicComponentAccessorTest {
     @Test
     void classToIndex() {
         // given
-        DynamicComponentAccessor ci = new DynamicComponentAccessor(Looks.class, Stats.class);
+        DynamicComponentAccessor ci = new DynamicComponentAccessor(Arrays.asList(Looks.class, Stats.class));
 
         // execute
         int looksIdx = ci.classToIndex(Looks.class);
@@ -44,7 +46,7 @@ class DynamicComponentAccessorTest {
     @Test
     void indexToClass() {
         // given
-        DynamicComponentAccessor ci = new DynamicComponentAccessor(Looks.class, Stats.class);
+        DynamicComponentAccessor ci = new DynamicComponentAccessor(Arrays.asList(Looks.class, Stats.class));
 
         // execute
         Class<?> statsClass = ci.indexToClass(1);
@@ -58,7 +60,7 @@ class DynamicComponentAccessorTest {
     @Test
     void componentCount() {
         // given
-        DynamicComponentAccessor ci = new DynamicComponentAccessor(Looks.class, Stats.class);
+        DynamicComponentAccessor ci = new DynamicComponentAccessor(Arrays.asList(Looks.class, Stats.class));
 
         // execute
         int count = ci.componentCount();

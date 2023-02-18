@@ -7,7 +7,13 @@ fireUnderlyingDataChanged
 : broadcastStoreChange?
 
 SampleSpace
-: ???
+: DiscretePDF
+: PDF
+: Histogram
+: WeightedDraw
+: Weights
+: WeightedSampler
+: Sampler
 
 GridUtil
 : ???

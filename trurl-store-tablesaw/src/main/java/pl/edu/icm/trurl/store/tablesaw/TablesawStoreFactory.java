@@ -18,10 +18,17 @@
 
 package pl.edu.icm.trurl.store.tablesaw;
 
+import net.snowyhollows.bento.annotation.WithFactory;
+import pl.edu.icm.trurl.ecs.annotation.WithMapper;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreFactory;
 
 public class TablesawStoreFactory implements StoreFactory {
+
+    @WithFactory
+    public TablesawStoreFactory() {
+    }
+
     @Override
     public Store create(int ignoredInitialCapacity) {
         return new TablesawStore();

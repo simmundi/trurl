@@ -48,6 +48,7 @@ import pl.edu.icm.trurl.store.attribute.StringAttribute;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -64,7 +65,7 @@ public class MapperIT {
     @Spy
     Mappers mappers = new Mappers();
     @Spy
-    MapperSet mapperSet = new MapperSet(new DynamicComponentAccessor(), mappers);
+    MapperSet mapperSet = new MapperSet(new DynamicComponentAccessor(Collections.emptyList()), mappers);
 
     @Mock
     Session session;

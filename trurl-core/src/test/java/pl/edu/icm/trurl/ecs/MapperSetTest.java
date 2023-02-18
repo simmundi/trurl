@@ -29,6 +29,7 @@ import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
 import pl.edu.icm.trurl.exampledata.Looks;
 import pl.edu.icm.trurl.exampledata.Stats;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MapperSetTest {
 
     @Spy
-    ComponentAccessor componentAccessor = new DynamicComponentAccessor(Looks.class, Stats.class);
+    ComponentAccessor componentAccessor = new DynamicComponentAccessor(Arrays.asList(Looks.class, Stats.class));
     @Spy
     Mappers mappers = new Mappers();
 

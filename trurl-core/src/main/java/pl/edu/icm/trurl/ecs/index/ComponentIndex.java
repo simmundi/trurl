@@ -31,7 +31,7 @@ public abstract class ComponentIndex<T> implements MapperListener<T>, EngineCrea
 
     public ComponentIndex(EngineConfiguration engineConfiguration, Class<T> clazz) {
         this.classToken = clazz;
-        engineConfiguration.addEngineCreationListeners(this);
+        engineConfiguration.addEngineCreationListener(this);
     }
 
     @Override

@@ -35,7 +35,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public final class ArrayStore implements Store {
-    public final static int DEFAULT_INITIAL_CAPACITY = 1000;
     private final CopyOnWriteArrayList<StoreListener> listeners = new CopyOnWriteArrayList();
     private final Map<String, Attribute> attributes = new LinkedHashMap<>(40);
     private final int defaultCapacity;
@@ -45,9 +44,6 @@ public final class ArrayStore implements Store {
         this.defaultCapacity = defaultCapacity;
     }
 
-    public ArrayStore() {
-        this(DEFAULT_INITIAL_CAPACITY);
-    }
 
     @Override
     public <T extends Attribute> T get(String name) {

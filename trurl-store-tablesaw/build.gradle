@@ -1,9 +1,11 @@
 dependencies {
+    annotationProcessor "net.snowyhollows.bento:bento-generator:${bentoVersion}"
+
     implementation project(":trurl-core")
     implementation "net.snowyhollows.bento:bento-core:${bentoVersion}"
 
     implementation "org.roaringbitmap:RoaringBitmap:${roaringBitmapVersion}"
-
+    implementation "net.snowyhollows.bento:bento-core:${bentoVersion}"
     implementation "com.google.guava:guava:${guavaVersion}"
     api ("tech.tablesaw:tablesaw-core:${tablesawVersion}") {
         exclude group: "org.roaringbitmap", module: "RoaringBitmap"

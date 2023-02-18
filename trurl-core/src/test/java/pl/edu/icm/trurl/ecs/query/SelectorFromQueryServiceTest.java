@@ -21,9 +21,7 @@ package pl.edu.icm.trurl.ecs.query;
 import net.snowyhollows.bento.Bento;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.ecs.Engine;
-import pl.edu.icm.trurl.ecs.EngineConfiguration;
-import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.*;
 import pl.edu.icm.trurl.ecs.selector.Selector;
 import pl.edu.icm.trurl.ecs.util.Selectors;
 import pl.edu.icm.trurl.exampledata.Person;
@@ -49,7 +47,7 @@ class SelectorFromQueryServiceTest {
 
     @BeforeEach
     void prepare() {
-        engineConfiguration = new EngineConfiguration(Bento.createRoot());
+        engineConfiguration = Bento.createRoot().get(EngineConfigurationFactory.IT);
         engineConfiguration.addComponentClasses(Person.class, Stats.class);
         engine = engineConfiguration.getEngine();
         selectors = new Selectors(engineConfiguration);

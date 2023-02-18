@@ -40,7 +40,7 @@ public class MapperSoftEnumsIT {
     @DisplayName("Should correctly map a component with a SoftEnum")
     void test() throws IOException {
         // given
-        Store store = new ArrayStore();
+        Store store = new ArrayStore(1024);
         Bento config = new Configurer().loadConfigResource("/contamination.properties").getConfig();
         HealthMapper healthMapper = config.get(HealthMapperFactory.IT);
         ContaminationTypes contaminationTypes = config.get(ContaminationTypesFactory.IT);
