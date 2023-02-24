@@ -20,6 +20,7 @@ package pl.edu.icm.trurl.store.array;
 
 import com.google.common.base.Strings;
 import pl.edu.icm.trurl.store.IntSink;
+import pl.edu.icm.trurl.store.IntSource;
 import pl.edu.icm.trurl.store.attribute.ValueObjectListAttribute;
 
 import java.util.Arrays;
@@ -115,6 +116,17 @@ public class ValueObjectListArrayAttribute implements ValueObjectListAttribute {
         }
     }
 
+    @Override
+    public void saveIds(int row, int size, IntSource ids) {
+        int[] result = values[row];
+        if (result == null || result.length != size) {
+            result = new int[size];
+            values[row] = result;
+        }
+        for (int i = 0; i < result.length; i++) {
+            result[i] = ids.getInt(i);
+        }
+    }
     @Override
     public int saveIds(int row, int size, int firstNewIndex) {
         checkArgument(firstNewIndex > 0, "Index should be greater than 0. 0 >= " + firstNewIndex);

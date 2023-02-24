@@ -19,6 +19,7 @@
 package pl.edu.icm.trurl.store.attribute.generic;
 
 import pl.edu.icm.trurl.store.IntSink;
+import pl.edu.icm.trurl.store.IntSource;
 import pl.edu.icm.trurl.store.attribute.StringAttribute;
 import pl.edu.icm.trurl.store.attribute.ValueObjectListAttribute;
 
@@ -112,6 +113,11 @@ public class GenericValueObjectListOverStringAttribute implements ValueObjectLis
     }
 
     @Override
+    public void saveIds(int row, int size, IntSource ids) {
+        wrappedAttribute.setString(row, stringFromIds(size, ids));
+    }
+
+    @Override
     public int saveIds(int row, int size, int firstNewIndex) {
         checkArgument(firstNewIndex > 0, "Index should be greater than 0. 0 >= " + firstNewIndex);
         checkArgument(size >= 0, "Size should be greater or equal 0. 0 > " + size);
@@ -146,6 +152,19 @@ public class GenericValueObjectListOverStringAttribute implements ValueObjectLis
                             .mapToObj(EntityEncoder::encodeId)
                             .collect(joining(splitter.pattern())));
             return Math.abs(ints[ints.length - 1]) + 1;
+        }
+    }
+    private String stringFromIds(int count, IntSource ids) {
+        if (count == 0) {
+            return "";
+        } else if (count == 1) {
+            return EntityEncoder.encodeId(ids.getInt(0));
+        } else {
+            StringJoiner stringJoiner = new StringJoiner(",");
+            for (int i = 0; i < count; i++) {
+                stringJoiner.add(EntityEncoder.encodeId(ids.getInt(i)));
+            }
+            return stringJoiner.toString();
         }
     }
 }

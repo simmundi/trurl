@@ -21,15 +21,11 @@ package pl.edu.icm.trurl.store.array;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.edu.icm.trurl.store.attribute.ValueObjectListAttribute;
-
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static java.util.stream.IntStream.concat;
 import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class ValueObjectListArrayAttributeTest {
@@ -143,6 +139,20 @@ class ValueObjectListArrayAttributeTest {
         assertThat(values1).containsExactlyInAnyOrder(range(1, 11).toArray());
         assertThat(values2).containsExactlyInAnyOrder(range(1, 3).toArray());
         assertThat(values3).containsExactlyInAnyOrder(concat(range(1, 11), range(15, 18)).toArray());
+    }
+
+    @Test
+    void saveIdsFromIntSource() {
+        //given
+        int capacity = 10;
+        int size = 10;
+        ValueObjectListArrayAttribute valueObjectListArrayAttribute = new ValueObjectListArrayAttribute("test", capacity);
+        //execute
+        valueObjectListArrayAttribute.saveIds(1, size, (i) -> 13 * i + 2);
+        int[] values = new int[size];
+        valueObjectListArrayAttribute.loadIds(1, (index, value) -> values[index] = value);
+        //assert
+        assertThat(values).containsExactlyInAnyOrder(2, 15, 28, 41, 54, 67, 80, 93, 106, 119);
     }
 
     @Test

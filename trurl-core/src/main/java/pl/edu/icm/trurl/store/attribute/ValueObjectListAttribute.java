@@ -19,11 +19,14 @@
 package pl.edu.icm.trurl.store.attribute;
 
 import pl.edu.icm.trurl.store.IntSink;
+import pl.edu.icm.trurl.store.IntSource;
 
 public interface ValueObjectListAttribute extends Attribute {
     int getSize(int row);
 
     void loadIds(int row, IntSink intSink);
+
+    void saveIds(int row, int size, IntSource ints);
 
     /**
      * @param size number of ids to save
