@@ -23,7 +23,6 @@ import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,10 +42,10 @@ public class Mappers {
         this.bento = Bento.createRoot();
     }
 
-    public <T> Mapper<T> createMapper(Class<T> clazz) {
+    public <T> Mapper<T> create(Class<T> clazz) {
         try {
             return bento.get(
-                    Class.forName(clazz.getCanonicalName() + "MapperFactory")
+                    Class.forName(clazz.getPackage().getName() + ".MapperOf" + clazz.getSimpleName() + "Factory")
                             .getField("IT")
                             .get(null));
         } catch (ReflectiveOperationException cause) {
@@ -55,17 +54,6 @@ public class Mappers {
     }
 
 
-    static public <T> Mapper<T> create(Class<T> clazz) {
-        try {
-            return (Mapper<T>)
-                    Class.forName(clazz.getCanonicalName() + "Mapper")
-                            .getDeclaredConstructor()
-                            .newInstance();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException cause) {
-            throw new IllegalArgumentException("Class " + clazz + " does not have a valid mapper (did you forget the @WithMapper annotation? is trurl-generator configured as an annotation processor?)", cause);
-        }
-    }
-
     static public List<Attribute> gatherAttributes(Collection<Mapper<?>> mappers) {
         return mappers.stream()
                 .flatMap(mapper -> Stream.concat(Stream.of(mapper), mapper.getChildMappers().stream()))
@@ -73,7 +61,7 @@ public class Mappers {
                 .collect(Collectors.toList());
     }
 
-    static public <T> Mapper<T> createAndAttach(Class<T> clazz, Store store) {
+    public <T> Mapper<T> createAndAttach(Class<T> clazz, Store store) {
         Mapper<T> tMapper = create(clazz);
         tMapper.configureStore(store);
         tMapper.attachStore(store);

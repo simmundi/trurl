@@ -45,7 +45,7 @@ yes, strings and - generally - variable size fields are another story, described
 ## Basic operations: iteration, chunks and selectors
 
 Selector (an interface)
-: Selector is a full description of a set of entities to process, grouped into `Chunk`s. The grouping suggests affinity
+: Selector describes a set of entities, grouped into `Chunk`s. The grouping suggests affinity
 between entities sharing one chunk, clients of the `Selector`s should use chunks as units for scatter/gather-type
 scenarios. Selector does not contain (or even need to know about) actual entities, only their identifiers.
 

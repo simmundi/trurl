@@ -12,7 +12,7 @@ dependencies {
     implementation "it.unimi.dsi:fastutil:${fastutilVersion}"
     implementation "com.univocity:univocity-parsers:${univocityVersion}"
     implementation "org.slf4j:slf4j-api:${slf4jVersion}"
-    implementation "net.snowyhollows.bento:bento-core:${bentoVersion}"
+    api "net.snowyhollows.bento:bento-core:${bentoVersion}"
     implementation "net.snowyhollows.bento:bento-config:${bentoVersion}"
 
     runtimeOnly "org.slf4j:slf4j-simple:${slf4jVersion}"

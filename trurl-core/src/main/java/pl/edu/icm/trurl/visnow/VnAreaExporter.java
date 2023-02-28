@@ -56,11 +56,11 @@ public class VnAreaExporter<T> {
     }
 
     public static <T> VnAreaExporter<T> create(WorkDir workDir, Class<T> areaDescription, String baseFilePath, int fromX, int width, int fromY, int height) throws FileNotFoundException {
-        return new VnAreaExporter<T>(workDir, Mappers.create(areaDescription), baseFilePath, fromX, width, fromY, height);
+        return new VnAreaExporter<T>(workDir, new Mappers().create(areaDescription), baseFilePath, fromX, width, fromY, height);
     }
 
     public static <T> VnAreaExporter<T> create(Class<T> areaDescription, String baseFilePath, int fromX, int width, int fromY, int height) throws FileNotFoundException {
-        return new VnAreaExporter<T>(new DefaultWorkDir(), Mappers.create(areaDescription), baseFilePath, fromX, width, fromY, height);
+        return new VnAreaExporter<T>(new DefaultWorkDir(), new Mappers().create(areaDescription), baseFilePath, fromX, width, fromY, height);
     }
 
     private VnAreaExporter(WorkDir workDir, Mapper<T> mapper, String baseFilePath, int fromX, int width, int fromY, int height) throws FileNotFoundException {

@@ -32,7 +32,7 @@ public final class MapperSet {
         this.componentAccessor = componentAccessor;
         mappers = new Mapper[componentAccessor.componentCount()];
         for (int idx = 0; idx < componentCount(); idx++) {
-            mappers[idx] = mapperCreator.createMapper(componentAccessor.indexToClass(idx));
+            mappers[idx] = mapperCreator.create(componentAccessor.indexToClass(idx));
         }
     }
 

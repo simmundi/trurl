@@ -40,7 +40,7 @@ public class MapperCollectionsIT {
 
     @BeforeEach
     void before() {
-        mapper = Mappers.create(Pizza.class);
+        mapper = new Mappers().create(Pizza.class);
         mapper.configureAndAttach(store);
     }
 

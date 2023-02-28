@@ -144,8 +144,6 @@ public class ComponentProperty {
             return PropertyType.BOOLEAN_PROP;
         } else if (typeName.equals(CommonTypes.LANG_STRING)) {
             return PropertyType.STRING_PROP;
-        } else if (isSoftEnum(processingEnvironment, typeMirror)) {
-            return PropertyType.SOFT_ENUM_PROP;
         } else if (isEnum(processingEnvironment, typeMirror, typeName)) {
             return PropertyType.ENUM_PROP;
         } else if (typeName.equals(CommonTypes.ENTITY_LIST)) {
@@ -155,6 +153,8 @@ public class ComponentProperty {
         } else if (typeName instanceof ParameterizedTypeName
                 && ((ParameterizedTypeName) typeName).rawType.equals(CommonTypes.LIST)) {
             return PropertyType.EMBEDDED_LIST;
+        } else if (isSoftEnum(processingEnvironment, typeMirror)) {
+            return PropertyType.SOFT_ENUM_PROP;
         } else {
             return PropertyType.EMBEDDED_PROP;
         }

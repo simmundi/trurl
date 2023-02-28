@@ -69,7 +69,7 @@ public class VnPointsExporter<T extends VnCoords> {
 
     public static <T extends VnCoords> VnPointsExporter<T> create(Class<T> componentClass, String baseFileName) {
         try {
-            return new VnPointsExporter<>(Mappers.create(componentClass), new DefaultWorkDir(), baseFileName);
+            return new VnPointsExporter<>(new Mappers().create(componentClass), new DefaultWorkDir(), baseFileName);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -77,7 +77,7 @@ public class VnPointsExporter<T extends VnCoords> {
 
     public static <T extends VnCoords> VnPointsExporter<T> create(Class<T> componentClass, WorkDir workDir, String baseFileName) {
         try {
-            return new VnPointsExporter<>(Mappers.create(componentClass), workDir, baseFileName);
+            return new VnPointsExporter<>(new Mappers().create(componentClass), workDir, baseFileName);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }

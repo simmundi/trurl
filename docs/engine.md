@@ -1,12 +1,14 @@
 # Engine
 
-`Engine` is the object coordinating and managing:
+`Engine` is the object coordinating storing and managing:
 - components (in turn, managed by `Mapper` instances)
 - sessions (it uses a stored `SessionFactory`)
-- systems - although it does not store systems, merely executes them
 - listeners
 
-The list of components available and session configuration are immutable and
+It allows for running pieces of logic, called *systems*, but engine does not store or manage
+`System` instances.
+
+The list of components available and session configuration are **immutable** and
 initialized at construction time. On the other hand, different objects can
 require existence of certain components.
 

@@ -18,6 +18,9 @@
 
 package pl.edu.icm.trurl.sampleSpace;
 
+import net.snowyhollows.bento.soft.SoftEnum;
+import net.snowyhollows.bento.soft.SoftEnumManager;
+
 import java.util.Arrays;
 
 /**
@@ -25,23 +28,22 @@ import java.util.Arrays;
  *
  * @param <Label>
  */
-public class SoftEnumSampleSpace<Label extends Enum<Label>> {
+public class SoftEnumSampleSpace<Label extends SoftEnum> {
     private final float[] outcomes;
     private boolean normalized;
     private Label defaultOutcome;
-    private final Class<Label> keyType;
+    private final SoftEnumManager<Label> manager;
 
-    public SoftEnumSampleSpace(Class<Label> keyType) {
-        outcomes = new float[keyType.getEnumConstants().length];
+    public SoftEnumSampleSpace(SoftEnumManager<Label> manager) {
+        this.manager = manager;
+        outcomes = new float[manager.values().size()];
         normalized = false;
-        this.keyType = keyType;
     }
 
-    public SoftEnumSampleSpace(Class<Label> keyType, Label defaultOutcome) {
-        outcomes = new float[keyType.getEnumConstants().length];
-        normalized = false;
+    public SoftEnumSampleSpace(Label defaultOutcome, SoftEnumManager<Label> manager) {
+        this(manager);
         this.defaultOutcome = defaultOutcome;
-        this.keyType = keyType;
+
     }
 
     /**
@@ -157,7 +159,7 @@ public class SoftEnumSampleSpace<Label extends Enum<Label>> {
         Label outcome = null;
         for (int i = 0; i < outcomes.length; i++) {
             if (outcomes[i] != 0.0f) {
-                outcome = keyType.getEnumConstants()[i];
+                outcome = manager.getByOrdinal(i);
                 cumulativeProbability += outcomes[i];
                 if (random < cumulativeProbability) break;
             }
@@ -178,7 +180,7 @@ public class SoftEnumSampleSpace<Label extends Enum<Label>> {
         for (int i = 0; i < outcomes.length; i++) {
             if (outcomes[i] != 0.0f) {
                 cumulativeProbability += outcomes[i];
-                if (random < cumulativeProbability && random > 0) return keyType.getEnumConstants()[i];
+                if (random < cumulativeProbability && random > 0) return manager.getByOrdinal(i);
             }
         }
         return defaultOutcome;

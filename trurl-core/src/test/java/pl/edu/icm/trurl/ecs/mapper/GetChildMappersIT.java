@@ -28,7 +28,7 @@ import pl.edu.icm.trurl.exampledata.pizza.PizzaMapper;
 
 @ExtendWith(MockitoExtension.class)
 public class GetChildMappersIT {
-    PizzaMapper pizzaMapper = new PizzaMapper();
+    PizzaMapper pizzaMapper = new PizzaMapper(new Mappers());
     PersonMapper personMapper = new PersonMapper();
 
     @Test

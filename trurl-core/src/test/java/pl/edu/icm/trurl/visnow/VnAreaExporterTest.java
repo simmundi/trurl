@@ -51,7 +51,7 @@ class VnAreaExporterTest {
     WorkDir workDir;
 
     @Spy
-    Mapper<AreaInfo> areaInfoMapper = Mappers.create(AreaInfo.class);
+    Mapper<AreaInfo> areaInfoMapper = new Mappers().create(AreaInfo.class);
 
     VnAreaExporter<AreaInfo> vnAreaExporter;
 

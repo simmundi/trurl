@@ -42,9 +42,6 @@ abstract public class AbstractSoftEnum implements SoftEnum {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{" +
-                name + '\'' +
-                ", " + ordinal +
-                '}';
+        return name;
     }
 }

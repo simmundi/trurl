@@ -60,7 +60,7 @@ class MapperTest {
 
     @BeforeEach
     void before() {
-        mapper = Mappers.create(Looks.class);
+        mapper = new Mappers().create(Looks.class);
         when(store.get("color")).thenReturn(colorAttribute);
         when(store.get("texture")).thenReturn(textureAttribute);
         mapper.configureStore(store);

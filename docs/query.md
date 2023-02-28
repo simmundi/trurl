@@ -83,3 +83,9 @@ Some examples:
         };
 
 ```
+
+## Direct uses
+
+### Creating Selectors
+
+A `Query` can be used to create a selector.

@@ -28,6 +28,7 @@ import pl.edu.icm.trurl.generator.writer.feature.*;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Modifier;
+import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +36,7 @@ import java.util.List;
 public class MapperWriter {
 
     public void writeMapper(ProcessingEnvironment processingEnvironment, BeanMetadata beanMetadata) {
+        processingEnvironment.getMessager().printMessage(Diagnostic.Kind.OTHER, "starting: " + beanMetadata.componentName);
         ParameterizedTypeName superInterface = ParameterizedTypeName.get(CommonTypes.MAPPER, beanMetadata.componentName);
         ClassName mapperName = mapperNameFor(beanMetadata.componentName);
 

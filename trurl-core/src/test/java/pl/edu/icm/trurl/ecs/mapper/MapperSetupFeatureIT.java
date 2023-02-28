@@ -42,7 +42,7 @@ public class MapperSetupFeatureIT {
     }
 
     @Test
-    @DisplayName("Should save Counter and load it with ")
+    @DisplayName("Should save Counter and load it")
     public void normalize() {
         // given
         CounterWithSetup counter = counterMapper.create();

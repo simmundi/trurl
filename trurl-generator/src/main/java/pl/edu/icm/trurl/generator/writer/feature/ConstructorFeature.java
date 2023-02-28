@@ -35,20 +35,24 @@ import java.util.stream.Stream;
 
 public class ConstructorFeature implements Feature {
     private final BeanMetadata beanMetadata;
-    private final Types typeUtilities;
+    private final List<ComponentProperty> componentProperties;
 
     public ConstructorFeature(BeanMetadata beanMetadata, Types typeUtilities) {
         this.beanMetadata = beanMetadata;
-        this.typeUtilities = typeUtilities;
+        this.componentProperties = beanMetadata.getComponentProperties();
     }
 
     @Override
     public Stream<FieldSpec> fields() {
-        return getSoftEnumProperties()
-                .map(property -> FieldSpec.builder(
-                                ParameterizedTypeName.get(CommonTypes.SOFT_ENUM_MANAGER, property.businessType), property.name + "Manager")
-                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                        .build());
+        return Stream.concat(
+                getSoftEnumProperties()
+                        .map(property -> FieldSpec.builder(
+                                        ParameterizedTypeName.get(CommonTypes.SOFT_ENUM_MANAGER, property.businessType), property.name + "Manager")
+                                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                                .build()),
+                usesMappers()
+                    ? Stream.of(FieldSpec.builder(CommonTypes.MAPPERS, "mappers", Modifier.FINAL).build())
+                    : Stream.empty());
     }
 
     private Stream<ComponentProperty> getSoftEnumProperties() {
@@ -63,9 +67,18 @@ public class ConstructorFeature implements Feature {
 
     private MethodSpec constructor(BeanMetadata beanMetadata) {
         List<ComponentProperty> properties = getSoftEnumProperties().collect(Collectors.toList());
+
+        AnnotationSpec withFactory = AnnotationSpec.builder(WithFactory.class)
+                .addMember("exactName", "$S", "MapperOf" + beanMetadata.componentName.simpleName() + "Factory").build();
+
         MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(WithFactory.class);
+                .addAnnotation(withFactory);
+
+        if (usesMappers()) {
+            constructorBuilder.addParameter(CommonTypes.MAPPERS, "mappers");
+            constructorBuilder.addStatement("this.mappers = mappers");
+        }
 
         for (ComponentProperty property : properties) {
             EnumManagedBy managedBy = property.attribute.getAnnotation(EnumManagedBy.class);
@@ -77,6 +90,10 @@ public class ConstructorFeature implements Feature {
             constructorBuilder.addStatement("this.$L = $L", name, name);
         }
         return constructorBuilder.build();
+    }
+
+    private boolean usesMappers() {
+        return componentProperties.stream().anyMatch(p -> p.type.columnType == CommonTypes.MAPPER);
     }
 
     private TypeName getTypeName(EnumManagedBy managedBy) {

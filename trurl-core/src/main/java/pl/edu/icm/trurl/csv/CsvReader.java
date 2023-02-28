@@ -47,7 +47,7 @@ public class CsvReader {
 
     public <T> Mapper<T> load(InputStream stream, StoreFactory storeFactory, Class<T> model, String... columns) {
         Store store = storeFactory.create(1024);
-        Mapper<T> mapper = Mappers.create(model);
+        Mapper<T> mapper = new Mappers().create(model);
         mapper.configureStore(store);
         int count = load(stream, store, columns);
         mapper.attachStore(store);

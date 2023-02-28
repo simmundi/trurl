@@ -91,7 +91,7 @@ public class MapperIT {
 
     @BeforeEach
     void before() {
-        mapper = Mappers.create(BunchOfData.class);
+        mapper = new Mappers().create(BunchOfData.class);
         mapper.configureStore(store);
         mapper.attachStore(store);
         booleanAttribute = store.get("booleanProp");

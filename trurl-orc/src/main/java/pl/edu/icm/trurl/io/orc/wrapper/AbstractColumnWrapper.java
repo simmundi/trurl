@@ -20,17 +20,7 @@ package pl.edu.icm.trurl.io.orc.wrapper;
 
 import org.apache.hadoop.hive.ql.exec.vector.ColumnVector;
 import org.apache.orc.TypeDescription;
-import pl.edu.icm.trurl.store.attribute.Attribute;
-import pl.edu.icm.trurl.store.attribute.BooleanAttribute;
-import pl.edu.icm.trurl.store.attribute.ByteAttribute;
-import pl.edu.icm.trurl.store.attribute.DoubleAttribute;
-import pl.edu.icm.trurl.store.attribute.EntityAttribute;
-import pl.edu.icm.trurl.store.attribute.EntityListAttribute;
-import pl.edu.icm.trurl.store.attribute.EnumAttribute;
-import pl.edu.icm.trurl.store.attribute.FloatAttribute;
-import pl.edu.icm.trurl.store.attribute.IntAttribute;
-import pl.edu.icm.trurl.store.attribute.ShortAttribute;
-import pl.edu.icm.trurl.store.attribute.StringAttribute;
+import pl.edu.icm.trurl.store.attribute.*;
 
 /**
  * Base class for classes representing type-specific operations between a single Attribute
@@ -123,6 +113,8 @@ public abstract class AbstractColumnWrapper<T extends ColumnVector, A extends At
             return new EntityWrapper((EntityAttribute) attribute);
         } else if (attribute instanceof EnumAttribute) {
             return new EnumWrapper((EnumAttribute<?>) attribute);
+        } else if (attribute instanceof SoftEnumAttribute) {
+            return new SoftEnumWrapper((SoftEnumAttribute<?>) attribute);
         } else {
             throw new IllegalArgumentException("Not supported attribute type: " + attribute);
         }

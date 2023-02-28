@@ -42,7 +42,7 @@ public class MapperSoftEnumsIT {
         // given
         Store store = new ArrayStore(1024);
         Bento config = new Configurer().loadConfigResource("/contamination.properties").getConfig();
-        HealthMapper healthMapper = config.get(HealthMapperFactory.IT);
+        HealthMapper healthMapper = config.get(MapperOfHealthFactory.IT);
         ContaminationTypes contaminationTypes = config.get(ContaminationTypesFactory.IT);
 
         ContaminationType WILD = contaminationTypes.getByOrdinal(0);

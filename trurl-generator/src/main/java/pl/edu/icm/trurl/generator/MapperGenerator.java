@@ -67,7 +67,7 @@ public class MapperGenerator extends AbstractProcessor {
 
 
         } catch (Exception e) {
-            processingEnvironment.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
+            processingEnvironment.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage() == null ? "(null)" : e.getMessage());
             for (StackTraceElement stackTraceElement : e.getStackTrace()) {
                 processingEnvironment.getMessager().printMessage(Diagnostic.Kind.ERROR, stackTraceElement.toString());
             }
