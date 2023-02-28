@@ -4,16 +4,8 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
-import pl.edu.icm.trurl.store.attribute.Attribute;
-import pl.edu.icm.trurl.store.attribute.BooleanAttribute;
-import pl.edu.icm.trurl.store.attribute.DoubleAttribute;
-import pl.edu.icm.trurl.store.attribute.EntityAttribute;
-import pl.edu.icm.trurl.store.attribute.EntityListAttribute;
-import pl.edu.icm.trurl.store.attribute.EnumAttribute;
-import pl.edu.icm.trurl.store.attribute.FloatAttribute;
-import pl.edu.icm.trurl.store.attribute.IntAttribute;
-import pl.edu.icm.trurl.store.attribute.ShortAttribute;
-import pl.edu.icm.trurl.store.attribute.StringAttribute;
+import pl.edu.icm.trurl.store.array.ByteArrayAttribute;
+import pl.edu.icm.trurl.store.attribute.*;
 import pl.edu.icm.trurl.util.Status;
 
 import java.sql.Connection;
@@ -56,7 +48,7 @@ public class SqlExporter {
 
             String dml = "insert into " + name + "(id, "
                     + attributes.stream()
-                    .filter(a -> !(a instanceof EntityListAttribute)).map(Attribute::name).collect(joining(", "))
+                    .filter(a -> !(a instanceof EntityListAttribute)).map(attr -> escape(attr.name())).collect(joining(", "))
                     + ") values (?, "
                     + attributes.stream()
                     .filter(a -> !(a instanceof EntityListAttribute)).map(attribute -> "?").collect(joining(", "))
@@ -101,17 +93,19 @@ public class SqlExporter {
         for (Attribute attribute : attributes.stream()
                 .filter(EntityListAttribute.class::isInstance).collect(toList())) {
 
-            String tableName = name + "_" + attribute.name();
+            String attributeName = escape(attribute.name());
+
+            String tableName = name + "_" + attributeName;
 
             String ddl = "create table if not exists " + tableName
-                    + "( " + name + "_id int, " + attribute.name() + "_id int primary key )";
+                    + "( " + name + "_id int, " + attributeName + "_id int, primary key(" + name + "_id, " + attributeName + "_id))";
 
             Statement statement = connection.createStatement();
             statement.execute(ddl);
             connection.commit();
 
             String dml = "insert into " + tableName
-                    + "( " + name + "_id, " + attribute.name() + "_id )" + "values (?,?)";
+                    + "( " + name + "_id, " + attributeName + "_id )" + "values (?,?)";
 
             PreparedStatement preparedStatement = connection.prepareStatement(dml);
 
@@ -153,6 +147,8 @@ public class SqlExporter {
             preparedStatement.setDouble(index, ((DoubleAttribute) attribute).getDouble(row));
         } else if (attribute instanceof ShortAttribute) {
             preparedStatement.setShort(index, ((ShortAttribute) attribute).getShort(row));
+        } else if (attribute instanceof ByteAttribute) {
+            preparedStatement.setByte(index, ((ByteAttribute) attribute).getByte(row));
         } else if (attribute instanceof BooleanAttribute) {
             preparedStatement.setBoolean(index, ((BooleanAttribute) attribute).getBoolean(row));
         } else if (attribute instanceof StringAttribute) {
@@ -173,23 +169,30 @@ public class SqlExporter {
 
 
     private String sqlType(Attribute attribute) {
+        String attributeName = escape(attribute.name());
         if (attribute instanceof IntAttribute) {
-            return attribute.name() + " int";
+            return attributeName + " int";
         } else if (attribute instanceof FloatAttribute) {
-            return attribute.name() + " float";
+            return attributeName + " float";
         } else if (attribute instanceof DoubleAttribute) {
-            return attribute.name() + " float";
+            return attributeName + " float";
         } else if (attribute instanceof ShortAttribute) {
-            return attribute.name() + " int";
+            return attributeName + " smallint";
         } else if (attribute instanceof BooleanAttribute) {
-            return attribute.name() + " boolean";
+            return attributeName + " boolean";
         } else if (attribute instanceof StringAttribute) {
-            return attribute.name() + " text";
+            return attributeName + " text";
         } else if (attribute instanceof EntityAttribute) {
-            return attribute.name() + " int";
+            return attributeName + " int";
+        } else if (attribute instanceof ByteAttribute) {
+            return attributeName + " smallint";
         } else if (attribute instanceof EnumAttribute) {
-            return attribute.name() + " text";
+            return attributeName + " text";
         }
         throw new IllegalArgumentException("Not supported column type: " + attribute);
+    }
+
+    private String escape(String name) {
+        return name.replaceAll("\\.", "_");
     }
 }
