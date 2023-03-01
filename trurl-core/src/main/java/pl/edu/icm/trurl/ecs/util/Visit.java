@@ -16,17 +16,24 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.query;
+package pl.edu.icm.trurl.ecs.util;
 
 import pl.edu.icm.trurl.ecs.Entity;
+import pl.edu.icm.trurl.ecs.Session;
 
-public interface Query {
-    void process(Entity entity, Query.Result result, String label);
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
-    interface Result {
-        default void add(Entity entity, String tag) {
-            add(entity, tag, null);
-        }
-        void add(Entity entity, String tag, String tagClassifier);
+public interface Visit<Context> {
+    void perform(Context context, Session session, int idx);
+
+    static<Context> Visit<Context> of(BiConsumer<Context, Entity> consumer) {
+        return (context, session, idx) -> consumer.accept(context, session.getEntity(idx));
+    }
+
+    static<Context> Visit<Context> of(Consumer<Entity> consumer) {
+        return (context, session, idx) -> consumer.accept(session.getEntity(idx));
     }
 }
+
+

@@ -23,7 +23,8 @@ import pl.edu.icm.trurl.ecs.EngineConfiguration;
 import pl.edu.icm.trurl.ecs.EntitySystem;
 import pl.edu.icm.trurl.ecs.selector.ChunkInfo;
 import pl.edu.icm.trurl.ecs.selector.Selector;
-import pl.edu.icm.trurl.ecs.util.EntityIterator;
+import pl.edu.icm.trurl.ecs.util.IteratingSystemBuilder;
+import pl.edu.icm.trurl.ecs.util.Visit;
 import pl.edu.icm.trurl.ecs.util.Selectors;
 
 public class SelectorFromQueryService {
@@ -40,10 +41,12 @@ public class SelectorFromQueryService {
 
     public Selector fixedSelectorFromQuery(Query query) {
         ManuallyChunkedSelectorBuilder selectorBuilder = new ManuallyChunkedSelectorBuilder();
-        EntitySystem entitySystem = EntityIterator.select(
-                selectors.allEntities())
-                .dontPersist()
-                .forEach(entity -> query.process(entity, selectorBuilder, ChunkInfo.DEFAULT_LABEL));
+        EntitySystem entitySystem = IteratingSystemBuilder.iteratingOver(selectors.allEntities())
+                .readOnlyEntities()
+                .withoutContext()
+                .perform(Visit.of(entity -> query.process(entity, selectorBuilder, ChunkInfo.DEFAULT_LABEL)))
+                .build();
+
         engineConfiguration.getEngine().execute(entitySystem);
         return selectorBuilder.build();
     }

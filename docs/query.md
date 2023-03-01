@@ -6,22 +6,30 @@ Query
 A `Query` could be written for cases like:
 
 - filtering out households,
-- filtering out households and grouping them (i.e. "labelled" or "chunked") into poviats
+- filtering out households and grouping them (i.e. "tagged" or "chunked") into poviats
 - filtering out primary school kids living in the same household with at least one person older than 70
 
-A more precise definition of a `Query` is: it is an operation, which describes how a **set of labeled Entities** can be derived from **one
-labeled Entity**. To use a query, typically a client must be created (implementing `Query.Result`) and the query itself needs to be 
+A more precise definition of a `Query` is: it is an visit, which describes how a **set of tagged Entities** can be derived from **one
+tagged Entity**. To use a query, typically a client must be created (implementing `Query.Result`) and the query itself needs to be 
 called per each entity in the `Engine`.
 
-The `label` in this context is any `String` (or a `null`), but the intention is to use them to group entities into
-chunks.
+The tag, in this context, is a plain string, which can be accompanied by an additional classifier (which is also a string).
+The intention of tags is to directly turn them into chunks (entities with the same tag are expected to be processed together).
+The tag classifier is an extension point - another level of entity classification. The intended scenario is to enable
+efficient creation of multiple selectors in one pass.
+
+Queries are free to use null tags, if that makes sense. Results are free to throw `NullPointerExceptions` upon
+receiving a null tag, if that makes sense. This only means that some query/results combination don't make sense.
 
 ```java
 public interface Query {
-    void process(Entity entity, Query.Result result, String label);
+    void process(Entity entity, Query.Result result, String tag);
 
     interface Result {
-        void add(Entity entity, String label);
+        default void add(Entity entity, String tag) {
+            add(entity, tag, null);
+        }
+        void add(Entity entity, String tag, String tagClassifier);
     }
 }
 ```
@@ -35,7 +43,7 @@ results in a single `Result` implementation, which could be:
 
 - an aggregator for some sort of statistics (e.g. counting an average of some property)
 - a set of entities
-- a `Selector` implenetation, allowing us to run a system on the selected entities.
+- a `Selector` implemetation, allowing us to run a system on the selected entities.
 
 ### Query examples
 

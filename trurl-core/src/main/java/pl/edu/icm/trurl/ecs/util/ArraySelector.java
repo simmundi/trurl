@@ -47,6 +47,11 @@ public class ArraySelector implements Selector {
        addAll(array);
     }
 
+    @Override
+    public int estimatedChunkSize() {
+        return chunkSize;
+    }
+
     public void shuffle(Random random) {
         IntArrays.shuffle(ids.elements(), 0, ids.getCurrentSize(), random);
     }

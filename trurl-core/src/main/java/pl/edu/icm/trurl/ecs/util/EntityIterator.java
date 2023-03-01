@@ -30,6 +30,7 @@ package pl.edu.icm.trurl.ecs.util;
  import java.util.function.Consumer;
  import java.util.function.Function;
 
+ @Deprecated
 public class EntityIterator {
     private Session.Mode mode = Session.Mode.NORMAL;
     private boolean parallel = false;

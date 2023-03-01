@@ -43,11 +43,11 @@ public class ManuallyChunkedSelectorBuilder implements Query.Result {
     /**
      * Adds an entity to a chunk identified by the label.
      * @param entity - must not be null
-     * @param label - must not be null
+     * @param tag - must not be null
      */
     @Override
-    public void add(Entity entity, String label) {
-        data.computeIfAbsent(label, unused -> new ConcurrentHashMap<>())
+    public void add(Entity entity, String tag, String tagClassifier) {
+        data.computeIfAbsent(tag, unused -> new ConcurrentHashMap<>())
                 .put(entity.getId(), Boolean.TRUE);
     }
 

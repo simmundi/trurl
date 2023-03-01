@@ -63,4 +63,9 @@ public class RangeSelector implements Selector {
             return new Chunk(ChunkInfo.of(chunkId, currentChunkSize), IntStream.range(start, start + currentChunkSize));
         });
     }
+
+    @Override
+    public int estimatedChunkSize() {
+        return chunkSize;
+    }
 }

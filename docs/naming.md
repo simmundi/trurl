@@ -26,3 +26,15 @@ Query::withSelection
 
 StaticSelector
 : ImmutableSelector?
+
+## Names to think about
+
+There should be an `IteratingSystem` and `IteratingSystemBuilder` instead of `EntityIterator`.
+
+There should be an `Action` (???), composable, akin to `System.IdxProcessor`
+
+There should be a `SessionWrapper` (unmanaged session?)
+
+
+
+
