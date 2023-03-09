@@ -13,6 +13,8 @@ import pl.edu.icm.trurl.exampledata.pizza.*;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayStore;
 
+import java.util.stream.Collectors;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(MockitoExtension.class)
@@ -98,6 +100,10 @@ class EntitiesSamplerTest {
         sampler.copySelected(selector, newStore);
 
         assertThat(newStore.getCount()).isEqualTo(7);
-        assertThat(newStore.attributes().count()).isEqualTo(11);
+        assertThat(newStore.get("old_id").getString(0)).isEqualTo("0");
+        assertThat(newStore.get("old_id").getString(1)).isEqualTo("1");
+        assertThat(newStore.get("old_id").getString(2)).isEqualTo("4");
+        assertThat(newStore.get("old_id").getString(3)).isEqualTo("5");
+        assertThat(newStore.get("old_id").getString(4)).isEqualTo("6");
     }
 }

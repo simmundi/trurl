@@ -39,9 +39,31 @@ public class EntitiesSampler {
 
         newStore.attributes().forEach(attribute -> {
             for (int newId = 0; newId < newToOldIdMapping.size(); newId++) {
-                if (attribute.getClass() == ValueObjectListArrayAttribute.class) {
+                if (Arrays.stream(attribute.getClass().getInterfaces())
+                        .anyMatch(i -> i == EntityAttribute.class)) {
 
-                    ValueObjectListArrayAttribute valueObjectListAttribute = oldStore.get(attribute.name());
+                    EntityAttribute entityAttribute = oldStore.get(attribute.name());
+                    int oldEntityId = entityAttribute.getId(newToOldIdMapping.get(newId));
+
+                    EntityAttribute newEntityAttribute = (EntityAttribute) attribute;
+                    newEntityAttribute.setId(newId, oldToNewIdMapping[oldEntityId]);
+
+                } else if (Arrays.stream(attribute.getClass().getInterfaces())
+                        .anyMatch(i -> i == EntityListAttribute.class)) {
+
+                    EntityListAttribute entityListAttribute = oldStore.get(attribute.name());
+
+                    List<Integer> oldEntityIds = new ArrayList<>();
+                    entityListAttribute.loadIds(newToOldIdMapping.get(newId), oldEntityIds::add);
+                    oldEntityIds.replaceAll(oldId -> oldToNewIdMapping[oldId]);
+
+                    EntityListAttribute newEntityListAttribute = (EntityListAttribute) attribute;
+                    newEntityListAttribute.saveIds(newId, oldEntityIds.size(), oldEntityIds::get);
+
+                } else if (Arrays.stream(attribute.getClass().getInterfaces())
+                        .anyMatch(i -> i == ValueObjectListAttribute.class)) {
+
+                    ValueObjectListAttribute valueObjectListAttribute = oldStore.get(attribute.name());
 
                     List<Integer> oldEntityIds = new ArrayList<>();
                     valueObjectListAttribute.loadIds(newToOldIdMapping.get(newId), oldEntityIds::add);
@@ -111,15 +133,40 @@ public class EntitiesSampler {
 
         do {
             changed.set(false);
-            newStore.attributes().filter(a -> a.getClass() == ValueObjectListArrayAttribute.class)
+            newStore.attributes().filter(a -> Arrays.stream(a.getClass().getInterfaces())
+                            .anyMatch(i -> i == EntityAttribute.class))
+                    .forEach(attribute -> {
+                        for (int newId = 0; newId < newToOldIdMapping.size(); newId++) {
+                            EntityAttribute entityAttribute = oldStore.get(attribute.name());
+
+                            int oldEntityId = entityAttribute.getId(newToOldIdMapping.get(newId));
+                            changed.set(addOldToNewIdMapping(oldEntityId));
+                        }
+                    });
+            newStore.attributes().filter(a -> Arrays.stream(a.getClass().getInterfaces())
+                            .anyMatch(i -> i == EntityListAttribute.class))
+                    .forEach(attribute -> {
+                        for (int newId = 0; newId < newToOldIdMapping.size(); newId++) {
+                            EntityListAttribute entityListAttribute = oldStore.get(attribute.name());
+
+                            List<Integer> oldEntityIds = new ArrayList<>();
+                            entityListAttribute.loadIds(newToOldIdMapping.get(newId), oldEntityIds::add);
+
+                            oldEntityIds.forEach(oldId -> {
+                                changed.set(addOldToNewIdMapping(oldId));
+                            });
+                        }
+                    });
+            newStore.attributes().filter(a -> Arrays.stream(a.getClass().getInterfaces())
+                            .anyMatch(i -> i == ValueObjectListAttribute.class))
                     .forEach(attribute -> {
                         for (int newId = 0; newId < newToOldIdMapping.size(); newId++) {
                             ValueObjectListArrayAttribute valueObjectListAttribute = oldStore.get(attribute.name());
 
-                            List<Integer> oldEntityIds = new ArrayList<>();
-                            valueObjectListAttribute.loadIds(newToOldIdMapping.get(newId), oldEntityIds::add);
+                            List<Integer> oldIds = new ArrayList<>();
+                            valueObjectListAttribute.loadIds(newToOldIdMapping.get(newId), oldIds::add);
 
-                            oldEntityIds.forEach(oldId -> {
+                            oldIds.forEach(oldId -> {
                                 changed.set(addOldToNewIdMapping(oldId));
                             });
                         }
