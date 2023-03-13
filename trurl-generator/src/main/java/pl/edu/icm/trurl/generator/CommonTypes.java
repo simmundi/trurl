@@ -28,6 +28,7 @@ import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.MapperListeners;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
+import pl.edu.icm.trurl.store.IntSink;
 import pl.edu.icm.trurl.store.PrefixedStore;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreConfigurer;
@@ -41,6 +42,7 @@ public class CommonTypes {
     public static final ClassName STORE = ClassName.get(Store.class);
     public static final ClassName PREFIXED_STORE = ClassName.get(PrefixedStore.class);
     public static final ClassName LIFECYCLE_EVENT = ClassName.get(LifecycleEvent.class);
+    public static final ClassName INT_SINK = ClassName.get(IntSink.class);
     public static final ClassName MAPPER = ClassName.get(Mapper.class);
     public static final ClassName MAPPERS = ClassName.get(Mappers.class);
     public static final ClassName MAPPER_LISTENERS = ClassName.get(MapperListeners.class);

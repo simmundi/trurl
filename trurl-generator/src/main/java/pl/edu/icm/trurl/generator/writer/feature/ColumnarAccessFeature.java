@@ -45,9 +45,10 @@ public class ColumnarAccessFeature implements Feature {
 
     @Override
     public Stream<MethodSpec> methods() {
-        return Stream.concat(
+        return Stream.of(
                 propertiesForAttributeAccess().map(this::createAttributeAccessor),
-                propertiesForMapperAccess().map(this::createMapperAccessor));
+                propertiesForEntityListAccess().map(this::createEntityListAccessor),
+                propertiesForMapperAccess().map(this::createMapperAccessor)).flatMap(Function.identity());
     }
 
     private Stream<ComponentProperty> propertiesForAttributeAccess() {
@@ -68,11 +69,27 @@ public class ColumnarAccessFeature implements Feature {
                         || property.type == PropertyType.EMBEDDED_PROP);
     }
 
+    private Stream<ComponentProperty> propertiesForEntityListAccess() {
+        return beanMetadata.getComponentProperties()
+                .stream()
+                .filter(property -> property.type == PropertyType.ENTITY_LIST_PROP);
+    }
+
     private MethodSpec createMapperAccessor(ComponentProperty property) {
         return  MethodSpec.methodBuilder(property.getterName + "Mapper")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(CommonTypes.MAPPER, property.businessType))
                 .addStatement("return $L", property.name)
+                .build();
+    }
+
+    private MethodSpec createEntityListAccessor(ComponentProperty property) {
+        return MethodSpec.methodBuilder(property.getterName)
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(ClassName.INT, "row")
+                .addParameter(CommonTypes.INT_SINK, "ids")
+                .returns(ClassName.VOID)
+                .addStatement("$L.loadIds(row, ids)", property.name)
                 .build();
     }
 

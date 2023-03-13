@@ -33,7 +33,7 @@ final class EntityListWrapper extends AbstractColumnWrapper<BytesColumnVector, E
     public EntityListWrapper(EntityListAttribute attribute) {
         super(attribute);
     }
-    public ByteBuffer bytes = ByteBuffer.wrap(new byte[1024 * 16 * 4]); // 16K entities should be enough for everybody
+    public ByteBuffer bytes = ByteBuffer.wrap(new byte[1024 * 512 * 4]); // 512K entities should be enough for everybody
     public IntBuffer ids = bytes.asIntBuffer();
 
     @Override
