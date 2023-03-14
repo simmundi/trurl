@@ -18,16 +18,14 @@
 
 package pl.edu.icm.trurl.ecs.query;
 
-import pl.edu.icm.trurl.ecs.Entity;
-
-public interface Query<T> {
-    void process(Entity entity, Query.Result<T> result, String label);
+public interface RawQuery<T> {
+    void process(int entityID, RawQuery.Result<T> result, String label);
 
     interface Result<T> {
-        default void add(Entity entity, String tag) {
-            add(entity, tag, null);
+        default void add(int entityID, String tag) {
+            add(entityID, tag, null);
         }
 
-        void add(Entity entity, String tag, T tagClassifier);
+        void add(int entityID, String tag, T tagClassifier);
     }
 }

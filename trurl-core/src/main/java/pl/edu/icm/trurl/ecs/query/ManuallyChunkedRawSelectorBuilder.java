@@ -18,9 +18,9 @@
 
 package pl.edu.icm.trurl.ecs.query;
 
-import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.selector.Selector;
+import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
 import pl.edu.icm.trurl.ecs.util.ManuallyChunkedArraySelector;
+import pl.edu.icm.trurl.util.SynchronizedResizableIntArray;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,34 +28,43 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Builder for building deterministic ManuallyChunkedSelectors with out-of-order data and in parallel.
  * <p>
- * The chunks will be ordered in natural order of the labels, the ids will be ordered in ascending order.
+ * The chunks will be ordered in natural order of the labels.
  * <p>
- * Adding the same (id, label) pair multiple times is not an error and the pair will only be added once.
+ * Adding the same (id, label) pair multiple times will cause adding the same id multiple times.
  * <p>
  * Adding the same id with different labels will cause the same id to appear in multiple different chunks.
  */
-public class ManuallyChunkedSelectorBuilder<T> implements Query.Result<T> {
+public class ManuallyChunkedRawSelectorBuilder<T> implements RawQuery.Result<T> {
+    public final static int DEFAULT_INITIAL_SIZE = 1024;
+    private final int initialSize;
+    private final ConcurrentHashMap<String, SynchronizedResizableIntArray> data = new ConcurrentHashMap<>();
 
-    private final ConcurrentHashMap<String, ConcurrentHashMap<Integer, Boolean>> data = new ConcurrentHashMap<>();
+    public ManuallyChunkedRawSelectorBuilder(int initialSize) {
+        this.initialSize = initialSize;
+    }
+
+    public ManuallyChunkedRawSelectorBuilder() {
+        this(DEFAULT_INITIAL_SIZE);
+    }
 
     /**
      * Adds an entity to a chunk identified by the label.
      *
-     * @param entity - must not be null
-     * @param tag    - must not be null
+     * @param entityId - entity id
+     * @param tag      - must not be null
      */
     @Override
-    public void add(Entity entity, String tag, T tagClassifier) {
-        data.computeIfAbsent(tag, unused -> new ConcurrentHashMap<>())
-                .put(entity.getId(), Boolean.TRUE);
+    public void add(int entityId, String tag, T tagClassifier) {
+        data.computeIfAbsent(tag, unused -> new SynchronizedResizableIntArray(this.initialSize))
+                .add(entityId);
     }
 
-    public Selector build() {
-        int size = data.values().stream().mapToInt(ConcurrentHashMap::size).sum();
+    public RandomAccessSelector build() {
+        int size = data.values().stream().mapToInt(SynchronizedResizableIntArray::getCurrentSize).sum();
 
         ManuallyChunkedArraySelector selector = new ManuallyChunkedArraySelector(size, data.entrySet().size());
         data.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(chunkData -> {
-            chunkData.getValue().keySet().stream().sorted().forEach(selector::add);
+            chunkData.getValue().stream().forEach(selector::add);
             selector.endChunk(chunkData.getKey());
         });
         return selector;

@@ -21,7 +21,10 @@ package pl.edu.icm.trurl.ecs.query;
 import net.snowyhollows.bento.Bento;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.ecs.*;
+import pl.edu.icm.trurl.ecs.Engine;
+import pl.edu.icm.trurl.ecs.EngineConfiguration;
+import pl.edu.icm.trurl.ecs.EngineConfigurationFactory;
+import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.ecs.selector.Selector;
 import pl.edu.icm.trurl.ecs.util.Selectors;
 import pl.edu.icm.trurl.exampledata.Person;
@@ -44,6 +47,7 @@ class SelectorFromQueryServiceTest {
     Selectors selectors;
     SelectorFromQueryService service;
     Random random = new Random(0);
+    String[] names = {"ANNA", "BARBARA", "CELINA", "DANUTA", "EWELINA", "FILIPINA", "GRAŻYNA", "HANNA", "IRENA", "JANINA", "KRZYSZTOFA"};
 
     @BeforeEach
     void prepare() {
@@ -69,7 +73,7 @@ class SelectorFromQueryServiceTest {
     @Test
     void fixedSelectorFromQuery() {
         // given
-        Query queryForWise = (entity, result, label) -> {
+        Query<?> queryForWise = (entity, result, label) -> {
             String name = entity.get(Person.class).getName();
             if (entity.get(Stats.class).getWis() == 5) {
                 result.add(entity, "wise_" + name);
@@ -120,8 +124,6 @@ class SelectorFromQueryServiceTest {
                 random.nextInt(6)
         );
     }
-
-    String[] names = {"ANNA", "BARBARA", "CELINA", "DANUTA", "EWELINA", "FILIPINA", "GRAŻYNA", "HANNA", "IRENA", "JANINA", "KRZYSZTOFA"};
 
     private Person randomPerson() {
         return new Person(names[random.nextInt(names.length)]);

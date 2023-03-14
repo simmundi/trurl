@@ -21,11 +21,16 @@ package pl.edu.icm.trurl.ecs.query;
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.EngineConfiguration;
 import pl.edu.icm.trurl.ecs.EntitySystem;
+import pl.edu.icm.trurl.ecs.selector.Chunk;
 import pl.edu.icm.trurl.ecs.selector.ChunkInfo;
+import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
 import pl.edu.icm.trurl.ecs.selector.Selector;
 import pl.edu.icm.trurl.ecs.util.IteratingSystemBuilder;
-import pl.edu.icm.trurl.ecs.util.Visit;
 import pl.edu.icm.trurl.ecs.util.Selectors;
+import pl.edu.icm.trurl.ecs.util.Visit;
+
+import java.util.Collection;
+import java.util.Map;
 
 public class SelectorFromQueryService {
 
@@ -39,8 +44,8 @@ public class SelectorFromQueryService {
         this.engineConfiguration = engineConfiguration;
     }
 
-    public Selector fixedSelectorFromQuery(Query query) {
-        ManuallyChunkedSelectorBuilder selectorBuilder = new ManuallyChunkedSelectorBuilder();
+    public <T> Selector fixedSelectorFromQuery(Query<T> query) {
+        ManuallyChunkedSelectorBuilder<T> selectorBuilder = new ManuallyChunkedSelectorBuilder<>();
         EntitySystem entitySystem = IteratingSystemBuilder.iteratingOver(selectors.allEntities())
                 .readOnlyEntities()
                 .withoutContext()
@@ -49,5 +54,22 @@ public class SelectorFromQueryService {
 
         engineConfiguration.getEngine().execute(entitySystem);
         return selectorBuilder.build();
+    }
+
+    public <T> Map<T, RandomAccessSelector> fixedMultipleSelectorsFromRawQueryInParallel(Map<T, Integer> tagClassifiersWithInitialSizes,
+                                                                                         RawQuery<T> query) {
+        MapOfManuallyChunkedSelectorsBuilder<T> selectorsBuilder = new MapOfManuallyChunkedSelectorsBuilder<>(tagClassifiersWithInitialSizes);
+
+        selectors.allEntities().chunks()
+                .flatMapToInt(Chunk::ids)
+                .parallel()
+                .forEach(id -> query.process(id, selectorsBuilder, ChunkInfo.DEFAULT_LABEL));
+        return selectorsBuilder.build();
+    }
+
+    public <T> Map<T, RandomAccessSelector> fixedMultipleSelectorsFromRawQueryInParallel(Collection<T> tagClassifiers,
+                                                                                         RawQuery<T> query) {
+        return fixedMultipleSelectorsFromRawQueryInParallel(MapOfManuallyChunkedSelectorsBuilder.getDefaultSizes(tagClassifiers),
+                query);
     }
 }
