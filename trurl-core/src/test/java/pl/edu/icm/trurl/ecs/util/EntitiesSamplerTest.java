@@ -1,16 +1,20 @@
 package pl.edu.icm.trurl.ecs.util;
 
+import net.snowyhollows.bento.Bento;
+import net.snowyhollows.bento.BentoFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.edu.icm.trurl.ecs.ComponentAccessorCreator;
 import pl.edu.icm.trurl.ecs.EngineConfiguration;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
 import pl.edu.icm.trurl.exampledata.*;
 import pl.edu.icm.trurl.exampledata.pizza.*;
 import pl.edu.icm.trurl.store.Store;
+import pl.edu.icm.trurl.store.StoreFactory;
 import pl.edu.icm.trurl.store.array.ArrayStore;
 
 import java.util.stream.Collectors;
@@ -37,8 +41,19 @@ class EntitiesSamplerTest {
     Mapper<SomePoi> somePoiMapper;
     Mapper<Pizza> pizzaMapper;
 
+
     @Spy
-    EngineConfiguration engineConfiguration;
+    ComponentAccessorCreator componentAccessorCreator;
+    @Spy
+    StoreFactory storeFactory;
+    @Spy
+    Bento bento;
+    EngineConfiguration engineConfiguration = new EngineConfiguration(componentAccessorCreator,
+            storeFactory,
+            20,
+            10,
+            false,
+            bento);
 
     @BeforeEach
     void setUp() {
@@ -59,12 +74,12 @@ class EntitiesSamplerTest {
         pizzaB.getOlives().add(Olive.of(OliveColor.GREEN, 1));
         pizzaB.getOlives().add(Olive.of(OliveColor.BLACK, 2));
 
-        personMapper = Mappers.create(Person.class);
-        looksMapper = Mappers.create(Looks.class);
-        somePoiMapper = Mappers.create(SomePoi.class);
-        pizzaMapper = Mappers.create(Pizza.class);
+        Mappers mappers = new Mappers();
+        personMapper = mappers.create(Person.class);
+        looksMapper = mappers.create(Looks.class);
+        somePoiMapper = mappers.create(SomePoi.class);
+        pizzaMapper = mappers.create(Pizza.class);
 
-        engineConfiguration.setInitialCapacity(20);
         Store store = engineConfiguration.getEngine().getStore();
         personMapper.configureAndAttach(store);
         looksMapper.configureAndAttach(store);
