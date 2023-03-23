@@ -10,7 +10,6 @@ import pl.edu.icm.trurl.store.attribute.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 
 import static pl.edu.icm.trurl.ecs.util.EntityIterator.select;
@@ -21,7 +20,8 @@ public class EntitiesSampler {
     private final AtomicInteger newIds = new AtomicInteger();
     private int[] oldToNewIdMapping;
     private List<Integer> newToOldIdMapping;
-    private Map<String, List<Integer>> fixedAttributes;
+    private Map<String, List<Integer>> fixedAttributes = new HashMap<>();
+    private int maxFixedAttributeRow;
 
     @WithFactory
     public EntitiesSampler(EngineConfiguration engineConfiguration) {
@@ -33,14 +33,14 @@ public class EntitiesSampler {
         oldToNewIdMapping = createOldToNewIdMapping(selector);
         newToOldIdMapping = createNewToOldIdMapping();
         addAllRelatedEntities(oldStore, newStore);
-
+        findAllFixedAttributes(oldStore, newStore);
         newStore.attributes().forEach(attribute -> {
             for (int newId = 0; newId < newToOldIdMapping.size(); newId++) {
-                AtomicReference<String> fixedAttributeName = new AtomicReference<>("");
+                String attributeName = attribute.name();
                 if (Arrays.stream(attribute.getClass().getInterfaces())
                         .anyMatch(i -> i == EntityAttribute.class)) {
 
-                    EntityAttribute entityAttribute = oldStore.get(attribute.name());
+                    EntityAttribute entityAttribute = oldStore.get(attributeName);
                     int oldEntityId = entityAttribute.getId(newToOldIdMapping.get(newId));
 
                     EntityAttribute newEntityAttribute = (EntityAttribute) attribute;
@@ -49,7 +49,7 @@ public class EntitiesSampler {
                 } else if (Arrays.stream(attribute.getClass().getInterfaces())
                         .anyMatch(i -> i == EntityListAttribute.class)) {
 
-                    EntityListAttribute entityListAttribute = oldStore.get(attribute.name());
+                    EntityListAttribute entityListAttribute = oldStore.get(attributeName);
 
                     List<Integer> oldEntityIds = new ArrayList<>();
                     entityListAttribute.loadIds(newToOldIdMapping.get(newId), oldEntityIds::add);
@@ -58,26 +58,38 @@ public class EntitiesSampler {
                     EntityListAttribute newEntityListAttribute = (EntityListAttribute) attribute;
                     newEntityListAttribute.saveIds(newId, oldEntityIds.size(), oldEntityIds::get);
 
-                } else if (fixedAttributes.keySet().stream()
-                        .anyMatch(a -> {
+                } else if (fixedAttributes.containsKey(attributeName)) {
 
-                            if (attribute.name().contains(a)) {
-                                fixedAttributeName.set(a);
-                                return true;
-                            }
-                            return false;
-                        })) {
+                    if (fixedAttributes.get(attributeName).contains(newId)) {
+                        attribute.setString(newId, oldStore.get(attributeName).getString(newId));
+                    }
 
-                    Attribute oldAttribute = oldStore.get(attribute.name());
-                    if (fixedAttributes.get(fixedAttributeName.get()).contains(newId)) {
-                        attribute.setString(newId, oldStore.get(attribute.name()).getString(newId));
+                } else if (Arrays.stream(attribute.getClass().getInterfaces())
+                        .anyMatch(i -> i == ValueObjectListAttribute.class)) {
+                    if (!oldStore.get(attributeName).isEmpty(newToOldIdMapping.get(newId))) {
+                        attribute.setString(newId, oldStore.get(attributeName)
+                                .getString(newToOldIdMapping.get(newId)));
                     }
 
                 } else {
-                    attribute.setString(newId, oldStore.get(attribute.name()).getString(newToOldIdMapping.get(newId)));
+                    attribute.setString(newId, oldStore.get(attributeName)
+                            .getString(newToOldIdMapping.get(newId)));
+
+                }
+            }
+
+            for (int newId = newToOldIdMapping.size(); newId < maxFixedAttributeRow; newId++) {
+                String attributeName = attribute.name();
+                if (fixedAttributes.containsKey(attributeName)) {
+
+                    if (fixedAttributes.get(attributeName).contains(newId)) {
+                        attribute.setString(newId, oldStore.get(attributeName).getString(newId));
+                    }
+
                 }
             }
         });
+
 
         newStore.addInt("old_id");
         IntAttribute oldIdsAttribute = newStore.get("old_id");
@@ -121,32 +133,36 @@ public class EntitiesSampler {
     }
 
     private void findAllFixedAttributes(Store oldStore, Store newStore) {
-        Set<String> rawAttributeNames = new HashSet<>();
+        Set<String> idsAndStartAttributeNames = new HashSet<>();
         newStore.attributes().filter(a -> a.name().endsWith("_ids") || a.name().endsWith("_start")).forEach(attribute -> {
-            rawAttributeNames.add(attribute.name());
+            idsAndStartAttributeNames.add(attribute.name());
         });
-        oldStore.attributes().filter(a -> rawAttributeNames.stream().anyMatch(ra -> a.name()
-                        .contains(ra.replace("_ids", "").replace("_start", ""))))
+        oldStore.attributes().filter(a -> idsAndStartAttributeNames.stream().anyMatch(is -> a.name()
+                .startsWith(is.replace("_ids", "").replace("_start", "")) &&
+                        !a.name().endsWith("_ids") && !a.name().endsWith("_start") && !a.name().endsWith("_length")))
                 .forEach(attribute -> {
-                    fixedAttributes.put(attribute.name(), new ArrayList<Integer>());
-                    String matched = rawAttributeNames.stream().filter(ra -> attribute.name()
-                            .contains(ra.replace("_ids", "").replace("_start", ""))).findAny().get();
-                    fixedAttributes.put(matched.replace("_ids", ""), new ArrayList<>());
+                    String attributeName = attribute.name();
+                    fixedAttributes.put(attribute.name(), new ArrayList<>());
+                    String matched = idsAndStartAttributeNames.stream().filter(is -> attribute.name()
+                            .contains(is.replace("_ids", "").replace("_start", ""))).findAny().get();
 
                     for (int i = 0; i < oldStore.getCount(); i++) {
                         if (matched.endsWith("_ids")) {
                             ValueObjectListAttribute oldAttribute = oldStore.get(matched);
-                            String rawMatched = matched.replace("_ids", "");
-                            oldAttribute.loadIds(i, (row, id) -> fixedAttributes.get(rawMatched).add(id));
+                            oldAttribute.loadIds(i, (row, id) -> {
+                                fixedAttributes.get(attributeName).add(id);
+                                maxFixedAttributeRow = Integer.max(maxFixedAttributeRow, id);
+                            });
                         } else if (matched.endsWith("_start")) {
                             IntAttribute startAttribute = oldStore.get(matched);
                             int start = startAttribute.getInt(i);
                             if (start >= 0) {
-                                String rawMatched = matched.replace("_ids", "");
-                                IntAttribute lengthAttribute = oldStore.get(rawMatched + "_length");
-                                int length = lengthAttribute.getInt(i);
+                                String rawMatched = matched.replace("_start", "");
+                                Attribute lengthAttribute = oldStore.get(rawMatched + "_length");
+                                int length = Integer.parseInt(lengthAttribute.getString(i));
                                 IntStream ids = IntStream.range(start, start + length);
-                                ids.forEach(id -> fixedAttributes.get(rawMatched).add(id));
+                                ids.forEach(id -> fixedAttributes.get(attributeName).add(id));
+                                maxFixedAttributeRow = Integer.max(maxFixedAttributeRow, start + length - 1);
                             }
 
                         }

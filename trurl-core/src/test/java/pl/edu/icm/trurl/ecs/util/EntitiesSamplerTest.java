@@ -5,9 +5,11 @@ import net.snowyhollows.bento.BentoFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.ComponentAccessorCreator;
+import pl.edu.icm.trurl.ecs.ComponentAccessorCreatorImpl;
 import pl.edu.icm.trurl.ecs.EngineConfiguration;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
@@ -16,6 +18,7 @@ import pl.edu.icm.trurl.exampledata.pizza.*;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreFactory;
 import pl.edu.icm.trurl.store.array.ArrayStore;
+import pl.edu.icm.trurl.store.array.ArrayStoreFactory;
 
 import java.util.stream.Collectors;
 
@@ -41,13 +44,12 @@ class EntitiesSamplerTest {
     Mapper<SomePoi> somePoiMapper;
     Mapper<Pizza> pizzaMapper;
 
-
     @Spy
-    ComponentAccessorCreator componentAccessorCreator;
+    Bento bento = Bento.createRoot();
     @Spy
-    StoreFactory storeFactory;
+    ComponentAccessorCreator componentAccessorCreator = new ComponentAccessorCreatorImpl(bento);
     @Spy
-    Bento bento;
+    StoreFactory storeFactory = new ArrayStoreFactory();
     EngineConfiguration engineConfiguration = new EngineConfiguration(componentAccessorCreator,
             storeFactory,
             20,
@@ -114,7 +116,7 @@ class EntitiesSamplerTest {
 
         sampler.copySelected(selector, newStore);
 
-        assertThat(newStore.getCount()).isEqualTo(7);
+        assertThat(newStore.getCount()).isEqualTo(5);
         assertThat(newStore.get("old_id").getString(0)).isEqualTo("0");
         assertThat(newStore.get("old_id").getString(1)).isEqualTo("1");
         assertThat(newStore.get("old_id").getString(2)).isEqualTo("4");
