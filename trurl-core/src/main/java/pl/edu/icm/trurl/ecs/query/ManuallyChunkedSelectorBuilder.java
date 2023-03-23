@@ -19,7 +19,7 @@
 package pl.edu.icm.trurl.ecs.query;
 
 import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.selector.Selector;
+import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
 import pl.edu.icm.trurl.ecs.util.ManuallyChunkedArraySelector;
 
 import java.util.Map;
@@ -50,7 +50,7 @@ public class ManuallyChunkedSelectorBuilder<T> implements Query.Result<T> {
                 .put(entity.getId(), Boolean.TRUE);
     }
 
-    public Selector build() {
+    public RandomAccessSelector build() {
         int size = data.values().stream().mapToInt(ConcurrentHashMap::size).sum();
 
         ManuallyChunkedArraySelector selector = new ManuallyChunkedArraySelector(size, data.entrySet().size());

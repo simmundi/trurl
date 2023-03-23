@@ -24,13 +24,14 @@ import pl.edu.icm.trurl.ecs.EntitySystem;
 import pl.edu.icm.trurl.ecs.selector.Chunk;
 import pl.edu.icm.trurl.ecs.selector.ChunkInfo;
 import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
-import pl.edu.icm.trurl.ecs.selector.Selector;
+import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
 import pl.edu.icm.trurl.ecs.util.IteratingSystemBuilder;
 import pl.edu.icm.trurl.ecs.util.Selectors;
 import pl.edu.icm.trurl.ecs.util.Visit;
 
 import java.util.Collection;
 import java.util.Map;
+import pl.edu.icm.trurl.ecs.util.Visit;
 
 public class SelectorFromQueryService {
 
@@ -44,7 +45,7 @@ public class SelectorFromQueryService {
         this.engineConfiguration = engineConfiguration;
     }
 
-    public <T> Selector fixedSelectorFromQuery(Query<T> query) {
+    public <T> RandomAccessSelector fixedSelectorFromQuery(Query<T> query) {
         ManuallyChunkedSelectorBuilder<T> selectorBuilder = new ManuallyChunkedSelectorBuilder<>();
         EntitySystem entitySystem = IteratingSystemBuilder.iteratingOver(selectors.allEntities())
                 .readOnlyEntities()
