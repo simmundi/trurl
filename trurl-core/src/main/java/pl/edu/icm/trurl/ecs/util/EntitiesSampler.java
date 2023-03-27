@@ -43,8 +43,10 @@ public class EntitiesSampler {
                     EntityAttribute entityAttribute = oldStore.get(attributeName);
                     int oldEntityId = entityAttribute.getId(newToOldIdMapping.get(newId));
 
-                    EntityAttribute newEntityAttribute = (EntityAttribute) attribute;
-                    newEntityAttribute.setId(newId, oldToNewIdMapping[oldEntityId]);
+                    if (oldEntityId >= 0) {
+                        EntityAttribute newEntityAttribute = (EntityAttribute) attribute;
+                        newEntityAttribute.setId(newId, oldToNewIdMapping[oldEntityId]);
+                    }
 
                 } else if (Arrays.stream(attribute.getClass().getInterfaces())
                         .anyMatch(i -> i == EntityListAttribute.class)) {
@@ -182,7 +184,9 @@ public class EntitiesSampler {
                             EntityAttribute entityAttribute = oldStore.get(attribute.name());
 
                             int oldEntityId = entityAttribute.getId(newToOldIdMapping.get(newId));
-                            changed.set(addOldToNewIdMapping(oldEntityId));
+                            if (oldEntityId >= 0) {
+                                changed.set(addOldToNewIdMapping(oldEntityId));
+                            }
                         }
                     });
             newStore.attributes().filter(a -> Arrays.stream(a.getClass().getInterfaces())
@@ -195,7 +199,9 @@ public class EntitiesSampler {
                             entityListAttribute.loadIds(newToOldIdMapping.get(newId), oldEntityIds::add);
 
                             oldEntityIds.forEach(oldId -> {
-                                changed.set(addOldToNewIdMapping(oldId));
+                                if (oldId >= 0) {
+                                    changed.set(addOldToNewIdMapping(oldId));
+                                }
                             });
                         }
                     });

@@ -8,9 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.edu.icm.trurl.ecs.ComponentAccessorCreator;
-import pl.edu.icm.trurl.ecs.ComponentAccessorCreatorImpl;
-import pl.edu.icm.trurl.ecs.EngineConfiguration;
+import pl.edu.icm.trurl.ecs.*;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
 import pl.edu.icm.trurl.exampledata.*;
@@ -20,6 +18,9 @@ import pl.edu.icm.trurl.store.StoreFactory;
 import pl.edu.icm.trurl.store.array.ArrayStore;
 import pl.edu.icm.trurl.store.array.ArrayStoreFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -38,11 +39,13 @@ class EntitiesSamplerTest {
     SomePoi poi = new SomePoi();
     Pizza pizzaA = new Pizza();
     Pizza pizzaB = new Pizza();
+    Flat flat = new Flat();
 
     Mapper<Person> personMapper;
     Mapper<Looks> looksMapper;
     Mapper<SomePoi> somePoiMapper;
     Mapper<Pizza> pizzaMapper;
+    Mapper<Flat> flatMapper;
 
     @Spy
     Bento bento = Bento.createRoot();
@@ -55,10 +58,22 @@ class EntitiesSamplerTest {
             20,
             10,
             false,
-            bento);
+            bento);;
+    @Mock
+    Session session;
 
     @BeforeEach
     void setUp() {
+
+        Mappers mappers = new Mappers();
+        personMapper = mappers.create(Person.class);
+        looksMapper = mappers.create(Looks.class);
+        somePoiMapper = mappers.create(SomePoi.class);
+        pizzaMapper = mappers.create(Pizza.class);
+        flatMapper = mappers.create(Flat.class);
+
+        engineConfiguration.addComponentClasses(Person.class, Looks.class, SomePoi.class, Pizza.class, Flat.class);
+
         person1.setName("A");
         person2.setName("B");
         person3.setName("C");
@@ -75,18 +90,15 @@ class EntitiesSamplerTest {
         pizzaA.getToppings().add(Topping.of(Ingredient.ANCHOVIS, 1));
         pizzaB.getOlives().add(Olive.of(OliveColor.GREEN, 1));
         pizzaB.getOlives().add(Olive.of(OliveColor.BLACK, 2));
-
-        Mappers mappers = new Mappers();
-        personMapper = mappers.create(Person.class);
-        looksMapper = mappers.create(Looks.class);
-        somePoiMapper = mappers.create(SomePoi.class);
-        pizzaMapper = mappers.create(Pizza.class);
+        pizzaB.getOlives().add(Olive.of(OliveColor.BLACK, 3));
+        pizzaB.getOlives().add(Olive.of(OliveColor.GREEN, 4));
 
         Store store = engineConfiguration.getEngine().getStore();
         personMapper.configureAndAttach(store);
         looksMapper.configureAndAttach(store);
         somePoiMapper.configureAndAttach(store);
         pizzaMapper.configureAndAttach(store);
+        flatMapper.configureAndAttach(store);
 
         personMapper.save(person1, 1);
         personMapper.save(person2, 2);
@@ -101,26 +113,55 @@ class EntitiesSamplerTest {
         pizzaMapper.save(pizzaA, 5);
         pizzaMapper.save(pizzaB, 6);
 
-        store.fireUnderlyingDataChanged(0, 7);
+        MapperSet mapperSet = engineConfiguration.getEngine().getMapperSet();
+        Entity person1Entity = new Entity(mapperSet, session, 1);
+        person1Entity.getOrCreate(Person.class);
+        person1Entity.add(person1);
+        Entity person3Entity = new Entity(mapperSet, session, 3);
+        person3Entity.getOrCreate(Person.class);
+        person3Entity.add(person3);
+        Entity person4Entity = new Entity(mapperSet, session, 4);
+        person4Entity.getOrCreate(Person.class);
+        person4Entity.add(person4);
+        flat.setOwner(person1Entity);
+        flat.getTenants().add(person3Entity);
+        flat.getTenants().add(person4Entity);
+
+        flatMapper.save(flat, 7);
+
+        store.fireUnderlyingDataChanged(0, 8);
     }
 
     @Test
     void copySelected() {
         EntitiesSampler sampler = new EntitiesSampler(engineConfiguration);
         ArraySelector selector = new ArraySelector();
-        selector.addAll(new int[]{0, 1, 4, 5, 6});
+        selector.addAll(new int[]{1, 4, 5, 6, 7});
 
         personMapper.configureAndAttach(newStore);
         looksMapper.configureAndAttach(newStore);
         pizzaMapper.configureAndAttach(newStore);
+        flatMapper.configureAndAttach(newStore);
 
         sampler.copySelected(selector, newStore);
 
-        assertThat(newStore.getCount()).isEqualTo(5);
-        assertThat(newStore.get("old_id").getString(0)).isEqualTo("0");
-        assertThat(newStore.get("old_id").getString(1)).isEqualTo("1");
-        assertThat(newStore.get("old_id").getString(2)).isEqualTo("4");
-        assertThat(newStore.get("old_id").getString(3)).isEqualTo("5");
-        assertThat(newStore.get("old_id").getString(4)).isEqualTo("6");
+        assertThat(newStore.getCount()).isEqualTo(6);
+        assertThat(newStore.get("old_id").getString(0)).isEqualTo("1");
+        assertThat(newStore.get("old_id").getString(1)).isEqualTo("4");
+        assertThat(newStore.get("old_id").getString(2)).isEqualTo("5");
+        assertThat(newStore.get("old_id").getString(3)).isEqualTo("6");
+        assertThat(newStore.get("old_id").getString(4)).isEqualTo("7");
+        assertThat(newStore.get("old_id").getString(5)).isEqualTo("3");
+        assertThat(newStore.get("olives_start").getString(2)).isEqualTo("0");
+        assertThat(newStore.get("olives_start").getString(3)).isEqualTo("3");
+        assertThat(newStore.get("olives_length").getString(2)).isEqualTo("3");
+        assertThat(newStore.get("olives_length").getString(3)).isEqualTo("6");
+        assertThat(newStore.get("olives.color").getString(3)).isEqualTo("GREEN");
+        assertThat(newStore.get("olives.color").getString(4)).isEqualTo("BLACK");
+        assertThat(newStore.get("olives.color").getString(5)).isEqualTo("BLACK");
+        assertThat(newStore.get("olives.color").getString(6)).isEqualTo("GREEN");
+        assertThat(newStore.get("toppings_ids").getString(2)).isEqualTo("1,2,3");
+        assertThat(newStore.get("tenants").getString(4)).isEqualTo("5,1");
+        assertThat(newStore.get("owner").getString(4)).isEqualTo("0");
     }
 }
