@@ -20,7 +20,7 @@ public class EntitiesSampler {
     private final AtomicInteger newIds = new AtomicInteger();
     private int[] oldToNewIdMapping;
     private List<Integer> newToOldIdMapping;
-    private Map<String, List<Integer>> fixedAttributes = new HashMap<>();
+    private final Map<String, List<Integer>> fixedAttributes = new HashMap<>();
     private int maxFixedAttributeRow;
 
     @WithFactory
@@ -140,7 +140,7 @@ public class EntitiesSampler {
             idsAndStartAttributeNames.add(attribute.name());
         });
         oldStore.attributes().filter(a -> idsAndStartAttributeNames.stream().anyMatch(is -> a.name()
-                .startsWith(is.replace("_ids", "").replace("_start", "")) &&
+                        .startsWith(is.replace("_ids", "").replace("_start", "")) &&
                         !a.name().endsWith("_ids") && !a.name().endsWith("_start") && !a.name().endsWith("_length")))
                 .forEach(attribute -> {
                     String attributeName = attribute.name();

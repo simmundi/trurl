@@ -1,7 +1,6 @@
 package pl.edu.icm.trurl.ecs.util;
 
 import net.snowyhollows.bento.Bento;
-import net.snowyhollows.bento.BentoFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,11 +16,6 @@ import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreFactory;
 import pl.edu.icm.trurl.store.array.ArrayStore;
 import pl.edu.icm.trurl.store.array.ArrayStoreFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -58,7 +52,7 @@ class EntitiesSamplerTest {
             20,
             10,
             false,
-            bento);;
+            bento);
     @Mock
     Session session;
 
