@@ -21,23 +21,19 @@ package pl.edu.icm.trurl.ecs.query;
 import net.snowyhollows.bento.Bento;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.ecs.Engine;
-import pl.edu.icm.trurl.ecs.EngineConfiguration;
-import pl.edu.icm.trurl.ecs.EngineConfigurationFactory;
-import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.*;
+import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
 import pl.edu.icm.trurl.ecs.selector.Selector;
 import pl.edu.icm.trurl.ecs.util.Selectors;
-import pl.edu.icm.trurl.exampledata.Person;
-import pl.edu.icm.trurl.exampledata.PersonMapper;
-import pl.edu.icm.trurl.exampledata.Stats;
-import pl.edu.icm.trurl.exampledata.StatsMapper;
+import pl.edu.icm.trurl.exampledata.*;
 
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SelectorFromQueryServiceTest {
@@ -52,17 +48,18 @@ class SelectorFromQueryServiceTest {
     @BeforeEach
     void prepare() {
         engineConfiguration = Bento.createRoot().get(EngineConfigurationFactory.IT);
-        engineConfiguration.addComponentClasses(Person.class, Stats.class);
+        engineConfiguration.addComponentClasses(Person.class, Stats.class, House.class);
         engine = engineConfiguration.getEngine();
         selectors = new Selectors(engineConfiguration);
 
         engine.execute(sf -> {
             Session session = sf.create(10000);
             for (int i = 0; i < 1000; i++) {
-                session.createEntity(
+                Entity entity = session.createEntity(
                         randomPerson(),
                         randomStats()
                 );
+                session.createEntity(new House(entity));
             }
             session.close();
         });
@@ -74,7 +71,11 @@ class SelectorFromQueryServiceTest {
     void fixedSelectorFromQuery() {
         // given
         Query<?> queryForWise = (entity, result, label) -> {
-            String name = entity.get(Person.class).getName();
+            Person person = entity.get(Person.class);
+            if (person == null) {
+                return;
+            }
+            String name = person.getName();
             if (entity.get(Stats.class).getWis() == 5) {
                 result.add(entity, "wise_" + name);
             } else {
@@ -112,9 +113,74 @@ class SelectorFromQueryServiceTest {
                 }
             });
         });
+        assertThat(counter.get()).isEqualTo(engine.getCount() / 2);
+        assertThat(foundNames).containsAll(asList(names));
+        assertThat(foundWiseNames).containsAll(asList(names));
+    }
+
+    private enum SelectorType {
+        PERSON, HOUSE
+    }
+
+    @Test
+    void fixedMultipleSelectorsFromRawQueryInParallel() {
+        // given
+        PersonMapper personMapper = (PersonMapper) engine.getMapperSet().classToMapper(Person.class);
+        StatsMapper statsMapper = (StatsMapper) engine.getMapperSet().classToMapper(Stats.class);
+        HouseMapper houseMapper = (HouseMapper) engine.getMapperSet().classToMapper(House.class);
+
+        RawQuery<SelectorType> rawQuery = (entityId, result, label) -> {
+            if (personMapper.isPresent(entityId) && statsMapper.isPresent(entityId)) {
+                String name = personMapper.getName(entityId);
+                if (statsMapper.getWis(entityId) == 5)
+                    result.add(entityId, "wise_" + name, SelectorType.PERSON);
+                else
+                    result.add(entityId, "unwise_" + name, SelectorType.PERSON);
+            }
+            if (houseMapper.isPresent(entityId)) {
+                result.add(entityId, label, SelectorType.HOUSE);
+            }
+        };
+
+
+        // execute
+        Map<SelectorType, RandomAccessSelector> selectors = service.
+                fixedMultipleSelectorsFromRawQueryInParallel(asList(SelectorType.values()), rawQuery);
+
+        // assert
+        AtomicInteger counter = new AtomicInteger();
+        Set<String> foundNames = new HashSet<>();
+        Set<String> foundWiseNames = new HashSet<>();
+
+        selectors.get(SelectorType.PERSON).chunks().forEach(chunk -> {
+            String label = chunk.getChunkInfo().getLabel();
+            String name = label.split("_")[1];
+            boolean wise = label.startsWith("wise_");
+            if (wise) {
+                foundWiseNames.add(name);
+            } else {
+                foundNames.add(name);
+            }
+
+            chunk.ids().forEach(id -> {
+                counter.incrementAndGet();
+                assertThat(personMapper.getName(id)).isEqualTo(name);
+                if (wise) {
+                    assertThat(statsMapper.getWis(id)).isEqualTo(5);
+                } else {
+                    assertThat(statsMapper.getWis(id)).isLessThan(5);
+                }
+            });
+        });
+
+        selectors.get(SelectorType.HOUSE).chunks().forEach(chunk ->
+                chunk.ids().forEach(id -> {
+                    counter.incrementAndGet();
+                    assertThat(houseMapper.isPresent(id)).isTrue();
+                }));
         assertThat(counter.get()).isEqualTo(engine.getCount());
-        assertThat(foundNames).containsAll(Arrays.asList(names));
-        assertThat(foundWiseNames).containsAll(Arrays.asList(names));
+        assertThat(foundNames).containsAll(asList(names));
+        assertThat(foundWiseNames).containsAll(asList(names));
     }
 
     private Stats randomStats() {

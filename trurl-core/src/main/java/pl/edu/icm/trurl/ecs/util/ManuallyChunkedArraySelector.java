@@ -48,8 +48,8 @@ public class ManuallyChunkedArraySelector implements RandomAccessSelector {
     }
 
     @Override
-    public synchronized int getInt(float index) {
-        return ids.getInt((int) (ids.size() * index));
+    public synchronized int getInt(float random) {
+        return ids.getInt((int) (ids.size() * random));
     }
 
     public synchronized void add(int id) {

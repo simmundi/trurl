@@ -33,7 +33,6 @@ class ManuallyChunkedArraySelectorTest {
     @Test
     @DisplayName("Should create a selector with ten chunks of different size")
     void create() {
-
         // given
         int total = 0;
 
@@ -41,7 +40,7 @@ class ManuallyChunkedArraySelectorTest {
         for (int chunk = 0; chunk < 10; chunk++) {
             int count = chunk * 10;
             for (int i = 0; i < count; i++) {
-                assertThat(selector.getRunningSize() == i);
+                assertThat(selector.getRunningSize()).isEqualTo(i);
                 selector.add(i);
                 total++;
             }
