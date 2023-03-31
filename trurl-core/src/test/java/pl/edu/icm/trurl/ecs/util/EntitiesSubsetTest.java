@@ -38,7 +38,7 @@ import pl.edu.icm.trurl.store.array.ArrayStoreFactory;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-class EntitiesSamplerTest {
+class EntitiesSubsetTest {
 
     Store newStore = new ArrayStore(20);
 
@@ -146,7 +146,7 @@ class EntitiesSamplerTest {
 
     @Test
     void copySelected() {
-        EntitiesSampler sampler = new EntitiesSampler(engineConfiguration);
+        EntitiesSubset subset = new EntitiesSubset(engineConfiguration);
         ArraySelector selector = new ArraySelector();
         selector.addAll(new int[]{1, 4, 5, 6, 7});
 
@@ -155,7 +155,7 @@ class EntitiesSamplerTest {
         pizzaMapper.configureAndAttach(newStore);
         flatMapper.configureAndAttach(newStore);
 
-        sampler.copySelected(selector, newStore);
+        subset.copySelected(selector, newStore);
 
         assertThat(newStore.getCount()).isEqualTo(6);
         assertThat(newStore.get("old_id").getString(0)).isEqualTo("1");

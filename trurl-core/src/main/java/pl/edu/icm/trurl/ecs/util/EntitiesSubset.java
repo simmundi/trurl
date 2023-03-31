@@ -33,7 +33,7 @@ import java.util.stream.IntStream;
 import static pl.edu.icm.trurl.ecs.util.EntityIterator.select;
 
 
-public class EntitiesSampler {
+public class EntitiesSubset {
     private final EngineConfiguration engineConfiguration;
     private final AtomicInteger newIds = new AtomicInteger();
     private int[] oldToNewIdMapping;
@@ -42,7 +42,7 @@ public class EntitiesSampler {
     private int maxFixedAttributeRow;
 
     @WithFactory
-    public EntitiesSampler(EngineConfiguration engineConfiguration) {
+    public EntitiesSubset(EngineConfiguration engineConfiguration) {
         this.engineConfiguration = engineConfiguration;
     }
 
@@ -55,8 +55,7 @@ public class EntitiesSampler {
         newStore.attributes().forEach(attribute -> {
             for (int newId = 0; newId < newToOldIdMapping.size(); newId++) {
                 String attributeName = attribute.name();
-                if (Arrays.stream(attribute.getClass().getInterfaces())
-                        .anyMatch(i -> i == EntityAttribute.class)) {
+                if (attribute instanceof EntityAttribute) {
 
                     EntityAttribute entityAttribute = oldStore.get(attributeName);
                     int oldEntityId = entityAttribute.getId(newToOldIdMapping.get(newId));
@@ -66,8 +65,7 @@ public class EntitiesSampler {
                         newEntityAttribute.setId(newId, oldToNewIdMapping[oldEntityId]);
                     }
 
-                } else if (Arrays.stream(attribute.getClass().getInterfaces())
-                        .anyMatch(i -> i == EntityListAttribute.class)) {
+                } else if (attribute instanceof EntityListAttribute) {
 
                     EntityListAttribute entityListAttribute = oldStore.get(attributeName);
 
@@ -154,31 +152,37 @@ public class EntitiesSampler {
 
     private void findAllFixedAttributes(Store oldStore, Store newStore) {
         Set<String> idsAndStartAttributeNames = new HashSet<>();
+        Map<String, AttributeType> attributeTypeMap = new HashMap<>();
         newStore.attributes().filter(a -> a.name().endsWith("_ids") || a.name().endsWith("_start")).forEach(attribute -> {
-            idsAndStartAttributeNames.add(attribute.name());
+            String rawAttributeName = attribute.name().replace("_ids", "").replace("_start", "");
+            idsAndStartAttributeNames.add(rawAttributeName);
+            if (attribute.name().endsWith("_ids")) {
+                attributeTypeMap.put(rawAttributeName, AttributeType.ARRAY_LIST);
+            } else {
+                attributeTypeMap.put(rawAttributeName, AttributeType.RANGE);
+            }
         });
         oldStore.attributes().filter(a -> idsAndStartAttributeNames.stream().anyMatch(is -> a.name()
-                        .startsWith(is.replace("_ids", "").replace("_start", "")) &&
+                        .startsWith(is) &&
                         !a.name().endsWith("_ids") && !a.name().endsWith("_start") && !a.name().endsWith("_length")))
                 .forEach(attribute -> {
                     String attributeName = attribute.name();
                     fixedAttributes.put(attribute.name(), new ArrayList<>());
                     String matched = idsAndStartAttributeNames.stream().filter(is -> attribute.name()
-                            .contains(is.replace("_ids", "").replace("_start", ""))).findAny().get();
+                            .contains(is)).findAny().get();
 
                     for (int i = 0; i < oldStore.getCount(); i++) {
-                        if (matched.endsWith("_ids")) {
-                            ValueObjectListAttribute oldAttribute = oldStore.get(matched);
+                        if (attributeTypeMap.get(matched) == AttributeType.ARRAY_LIST) {
+                            ValueObjectListAttribute oldAttribute = oldStore.get(matched + "_ids");
                             oldAttribute.loadIds(i, (row, id) -> {
                                 fixedAttributes.get(attributeName).add(id);
                                 maxFixedAttributeRow = Integer.max(maxFixedAttributeRow, id);
                             });
-                        } else if (matched.endsWith("_start")) {
-                            IntAttribute startAttribute = oldStore.get(matched);
+                        } else if (attributeTypeMap.get(matched) == AttributeType.RANGE) {
+                            IntAttribute startAttribute = oldStore.get(matched + "_start");
                             int start = startAttribute.getInt(i);
                             if (start >= 0) {
-                                String rawMatched = matched.replace("_start", "");
-                                Attribute lengthAttribute = oldStore.get(rawMatched + "_length");
+                                Attribute lengthAttribute = oldStore.get(matched + "_length");
                                 int length = Integer.parseInt(lengthAttribute.getString(i));
                                 IntStream ids = IntStream.range(start, start + length);
                                 ids.forEach(id -> fixedAttributes.get(attributeName).add(id));
@@ -195,20 +199,18 @@ public class EntitiesSampler {
 
         do {
             changed.set(false);
-            newStore.attributes().filter(a -> Arrays.stream(a.getClass().getInterfaces())
-                            .anyMatch(i -> i == EntityAttribute.class))
+            newStore.attributes().filter(a -> a instanceof EntityAttribute)
                     .forEach(attribute -> {
                         for (int newId = 0; newId < newToOldIdMapping.size(); newId++) {
                             EntityAttribute entityAttribute = oldStore.get(attribute.name());
 
                             int oldEntityId = entityAttribute.getId(newToOldIdMapping.get(newId));
                             if (oldEntityId >= 0) {
-                                changed.set(addOldToNewIdMapping(oldEntityId));
+                                changed.set(changed.get() || addOldToNewIdMapping(oldEntityId));
                             }
                         }
                     });
-            newStore.attributes().filter(a -> Arrays.stream(a.getClass().getInterfaces())
-                            .anyMatch(i -> i == EntityListAttribute.class))
+            newStore.attributes().filter(a -> a instanceof EntityListAttribute)
                     .forEach(attribute -> {
                         for (int newId = 0; newId < newToOldIdMapping.size(); newId++) {
                             EntityListAttribute entityListAttribute = oldStore.get(attribute.name());
@@ -218,12 +220,17 @@ public class EntitiesSampler {
 
                             oldEntityIds.forEach(oldId -> {
                                 if (oldId >= 0) {
-                                    changed.set(addOldToNewIdMapping(oldId));
+                                    changed.set(changed.get() || addOldToNewIdMapping(oldId));
                                 }
                             });
                         }
                     });
         } while (changed.get());
+    }
+
+    private enum AttributeType {
+        ARRAY_LIST,
+        RANGE
     }
 }
 
