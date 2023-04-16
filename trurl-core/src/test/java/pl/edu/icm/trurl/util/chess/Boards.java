@@ -19,35 +19,25 @@
 package pl.edu.icm.trurl.util.chess;
 
 import net.snowyhollows.bento.Bento;
-import net.snowyhollows.bento.BentoFactory;
 import net.snowyhollows.bento.annotation.WithFactory;
 import net.snowyhollows.bento.soft.SoftEnumManager;
 
-public class Columns extends SoftEnumManager<Column> {
-    public final Column A;
-    public final Column B;
-    public final Column C;
-    public final Column D;
-    public final Column E;
-    public final Column F;
-    public final Column G;
-    public final Column H;
+public class Boards extends SoftEnumManager<Board> {
+    public final Board FIRST;
+    public final Board SECOND;
+    public final Board THIRD;
 
     @WithFactory
-    public Columns(Bento bento) {
-        super(bento, "chess.column", ColumnFactory.IT);
-        A = getByName("a");
-        B = getByName("b");
-        C = getByName("c");
-        D = getByName("d");
-        E = getByName("e");
-        F = getByName("f");
-        G = getByName("g");
-        H = getByName("h");
+    public Boards(Bento bento) {
+        super(bento, "chess.board", BoardFactory.IT);
+
+        FIRST = getByName("FIRST");
+        SECOND = getByName("SECOND");
+        THIRD = getByName("THIRD");
     }
 
     @Override
-    public Column[] emptyArray() {
-        return new Column[0];
+    public Board[] emptyArray() {
+        return new Board[0];
     }
 }

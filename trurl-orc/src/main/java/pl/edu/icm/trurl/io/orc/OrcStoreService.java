@@ -26,14 +26,12 @@ import org.apache.orc.RecordReader;
 import org.apache.orc.TypeDescription;
 import org.apache.orc.Writer;
 import pl.edu.icm.trurl.io.orc.wrapper.AbstractColumnWrapper;
-import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreInspector;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -64,6 +62,7 @@ public class OrcStoreService {
 
         store.attributes().forEach(attribute -> attribute.ensureCapacity((int) reader.getNumberOfRows()));
         List<AbstractColumnWrapper> wrappers = new ArrayList<>();
+        List<String> unusedFieldNames = new ArrayList(schema.getFieldNames());
 
         store.attributes().forEach(attribute -> {
             int iof = schema.getFieldNames().indexOf(attribute.name());
@@ -71,8 +70,13 @@ public class OrcStoreService {
                 AbstractColumnWrapper wrapper = AbstractColumnWrapper.create(attribute);
                 wrapper.setColumnVector(batch.cols[iof]);
                 wrappers.add(wrapper);
+                unusedFieldNames.remove(attribute.name());
             }
         });
+
+        if (!unusedFieldNames.isEmpty()) {
+            System.out.println("ignoring columns: " + unusedFieldNames);
+        }
 
         int targetRow = 0;
         while (rows.nextBatch(batch)) {
