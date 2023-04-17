@@ -98,7 +98,7 @@ public class ConfigureStoreFeature implements Feature {
                     break;
                 case EMBEDDED_LIST:
                 case EMBEDDED_PROP:
-                    methodSpec.addStatement("$L = mappers.create($T.class)", name, property.businessType);
+                    methodSpec.addStatement("$L = mappers.create($T.class)", property.name, property.businessType);
                     methodSpec.addStatement("$L.configureStore($T.wrap(meta, $S))",
                             property.name, CommonTypes.PREFIXED_STORE, property.name);
                     break;
