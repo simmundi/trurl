@@ -157,7 +157,7 @@ class EntitiesSubsetTest {
 
         subset.copySelected(selector, newStore);
 
-        assertThat(newStore.getCount()).isEqualTo(6);
+        assertThat(newStore.getCount()).isEqualTo(9);
         assertThat(newStore.get("old_id").getString(0)).isEqualTo("1");
         assertThat(newStore.get("old_id").getString(1)).isEqualTo("4");
         assertThat(newStore.get("old_id").getString(2)).isEqualTo("5");
@@ -168,11 +168,17 @@ class EntitiesSubsetTest {
         assertThat(newStore.get("olives_start").getString(3)).isEqualTo("3");
         assertThat(newStore.get("olives_length").getString(2)).isEqualTo("3");
         assertThat(newStore.get("olives_length").getString(3)).isEqualTo("6");
+        assertThat(newStore.get("olives.color").getString(0)).isEqualTo("BLACK");
         assertThat(newStore.get("olives.color").getString(3)).isEqualTo("GREEN");
         assertThat(newStore.get("olives.color").getString(4)).isEqualTo("BLACK");
         assertThat(newStore.get("olives.color").getString(5)).isEqualTo("BLACK");
         assertThat(newStore.get("olives.color").getString(6)).isEqualTo("GREEN");
-        assertThat(newStore.get("toppings_ids").getString(2)).isEqualTo("1,2,3");
+        assertThat(newStore.get("olives.size").getString(0)).isEqualTo("1.0");
+        assertThat(newStore.get("olives.size").getString(3)).isEqualTo("1.0");
+        assertThat(newStore.get("olives.size").getString(4)).isEqualTo("2.0");
+        assertThat(newStore.get("olives.size").getString(5)).isEqualTo("3.0");
+        assertThat(newStore.get("olives.size").getString(6)).isEqualTo("4.0");
+        assertThat(newStore.get("toppings_ids").getString(2)).isEqualTo("0,1,2");
         assertThat(newStore.get("tenants").getString(4)).isEqualTo("5,1");
         assertThat(newStore.get("owner").getString(4)).isEqualTo("0");
     }

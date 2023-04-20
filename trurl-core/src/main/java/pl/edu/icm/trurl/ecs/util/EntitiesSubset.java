@@ -38,8 +38,9 @@ public class EntitiesSubset {
     private final AtomicInteger newIds = new AtomicInteger();
     private int[] oldToNewIdMapping;
     private List<Integer> newToOldIdMapping;
-    private final Map<String, List<Integer>> fixedAttributes = new HashMap<>();
-    private int maxFixedAttributeRow;
+    private final Map<String, Map<Integer, Integer>> objectAttributesOldToNewIdMapping = new HashMap<>();
+    private final Map<String, List<Integer>> objectAttributesNewToOldIdMapping = new HashMap<>();
+    private int objectAttributeMaxLength;
 
     @WithFactory
     public EntitiesSubset(EngineConfiguration engineConfiguration) {
@@ -51,7 +52,7 @@ public class EntitiesSubset {
         oldToNewIdMapping = createOldToNewIdMapping(selector);
         newToOldIdMapping = createNewToOldIdMapping();
         addAllRelatedEntities(oldStore, newStore);
-        findAllFixedAttributes(oldStore, newStore);
+        findAllObjectAttributes(oldStore, newStore);
         newStore.attributes().forEach(attribute -> {
             for (int newId = 0; newId < newToOldIdMapping.size(); newId++) {
                 String attributeName = attribute.name();
@@ -76,17 +77,41 @@ public class EntitiesSubset {
                     EntityListAttribute newEntityListAttribute = (EntityListAttribute) attribute;
                     newEntityListAttribute.saveIds(newId, oldEntityIds.size(), oldEntityIds::get);
 
-                } else if (fixedAttributes.containsKey(attributeName)) {
+                } else if (objectAttributesNewToOldIdMapping.containsKey(attributeName)) {
 
-                    if (fixedAttributes.get(attributeName).contains(newId)) {
-                        attribute.setString(newId, oldStore.get(attributeName).getString(newId));
+                    if (newId < objectAttributesNewToOldIdMapping.get(attributeName).size()) {
+                        attribute.setString(newId, oldStore.get(attributeName)
+                                .getString(objectAttributesNewToOldIdMapping.get(attributeName).get(newId)));
                     }
 
-                } else if (Arrays.stream(attribute.getClass().getInterfaces())
-                        .anyMatch(i -> i == ValueObjectListAttribute.class)) {
+                } else if (attributeName.endsWith("_start")) { //todo: wrap object range attribute similarly to entity
+                    Attribute objectAttribute = oldStore.get(attributeName);
+                    int oldObjectId = Integer.parseInt(objectAttribute
+                            .getString(newToOldIdMapping.get(newId)));
+
+                    if (oldObjectId >= 0) {
+                        String rawAttributeName = attributeName.replace("_start", "");
+                        String matchedAttributeName = objectAttributesNewToOldIdMapping.keySet().stream().filter(is ->
+                                is.contains(rawAttributeName)).findAny().get();
+                        attribute.setString(newId,
+                                String.valueOf(objectAttributesOldToNewIdMapping.get(matchedAttributeName).get(oldObjectId)));
+                    }
+                } else if (attribute instanceof ValueObjectListAttribute) {
                     if (!oldStore.get(attributeName).isEmpty(newToOldIdMapping.get(newId))) {
-                        attribute.setString(newId, oldStore.get(attributeName)
-                                .getString(newToOldIdMapping.get(newId)));
+                        String rawAttributeName = attributeName.replace("_ids", "");
+                        String matchedAttributeName = objectAttributesNewToOldIdMapping.keySet().stream().filter(oa ->
+                                oa.contains(rawAttributeName)).findAny().get();
+                        String[] oldObjectIdsString = oldStore.get(attributeName)
+                                .getString(newToOldIdMapping.get(newId)).split(",");
+                        StringBuilder newObjectIds = new StringBuilder();
+                        for (int i=0; i< oldObjectIdsString.length; i++) {
+                            if (i != 0) {
+                                newObjectIds.append(",");
+                            }
+                            newObjectIds.append(objectAttributesOldToNewIdMapping.get(matchedAttributeName)
+                                    .get(Integer.parseInt(oldObjectIdsString[i])));
+                            }
+                        attribute.setString(newId, newObjectIds.toString());
                     }
 
                 } else {
@@ -95,19 +120,18 @@ public class EntitiesSubset {
 
                 }
             }
-
-            for (int newId = newToOldIdMapping.size(); newId < maxFixedAttributeRow; newId++) {
-                String attributeName = attribute.name();
-                if (fixedAttributes.containsKey(attributeName)) {
-
-                    if (fixedAttributes.get(attributeName).contains(newId)) {
-                        attribute.setString(newId, oldStore.get(attributeName).getString(newId));
-                    }
-
-                }
-            }
         });
 
+        newStore.attributes().filter(a -> objectAttributesNewToOldIdMapping.containsKey(a.name())).forEach(attribute -> {
+                    for (int newId = newToOldIdMapping.size(); newId < objectAttributeMaxLength; newId++) {
+                        String attributeName = attribute.name();
+                        if (newId < objectAttributesNewToOldIdMapping.get(attributeName).size()) {
+                                attribute.setString(newId, oldStore.get(attributeName)
+                                        .getString(objectAttributesNewToOldIdMapping.get(attributeName).get(newId)));
+
+                    }
+                }
+        });
 
         newStore.addInt("old_id");
         IntAttribute oldIdsAttribute = newStore.get("old_id");
@@ -115,7 +139,7 @@ public class EntitiesSubset {
             oldIdsAttribute.setInt(i, newToOldIdMapping.get(i));
         }
 
-        newStore.fireUnderlyingDataChanged(0, newToOldIdMapping.size());
+        newStore.fireUnderlyingDataChanged(0, Math.max(newToOldIdMapping.size(), objectAttributeMaxLength));
     }
 
     private int[] createOldToNewIdMapping(Selector selector) {
@@ -150,43 +174,47 @@ public class EntitiesSubset {
         }
     }
 
-    private void findAllFixedAttributes(Store oldStore, Store newStore) {
-        Set<String> idsAndStartAttributeNames = new HashSet<>();
+    private void findAllObjectAttributes(Store oldStore, Store newStore) {
         Map<String, AttributeType> attributeTypeMap = new HashMap<>();
         newStore.attributes().filter(a -> a.name().endsWith("_ids") || a.name().endsWith("_start")).forEach(attribute -> {
             String rawAttributeName = attribute.name().replace("_ids", "").replace("_start", "");
-            idsAndStartAttributeNames.add(rawAttributeName);
             if (attribute.name().endsWith("_ids")) {
                 attributeTypeMap.put(rawAttributeName, AttributeType.ARRAY_LIST);
             } else {
                 attributeTypeMap.put(rawAttributeName, AttributeType.RANGE);
             }
         });
-        oldStore.attributes().filter(a -> idsAndStartAttributeNames.stream().anyMatch(is -> a.name()
+        oldStore.attributes().filter(a -> attributeTypeMap.keySet().stream().anyMatch(is -> a.name()
                         .startsWith(is) &&
                         !a.name().endsWith("_ids") && !a.name().endsWith("_start") && !a.name().endsWith("_length")))
                 .forEach(attribute -> {
                     String attributeName = attribute.name();
-                    fixedAttributes.put(attribute.name(), new ArrayList<>());
-                    String matched = idsAndStartAttributeNames.stream().filter(is -> attribute.name()
+                    objectAttributesNewToOldIdMapping.put(attribute.name(), new ArrayList<>());
+                    objectAttributesOldToNewIdMapping.put(attribute.name(), new HashMap<>());
+                    String matched = attributeTypeMap.keySet().stream().filter(is -> attribute.name()
                             .contains(is)).findAny().get();
 
-                    for (int i = 0; i < oldStore.getCount(); i++) {
+                    for (int oldId : newToOldIdMapping) {
                         if (attributeTypeMap.get(matched) == AttributeType.ARRAY_LIST) {
                             ValueObjectListAttribute oldAttribute = oldStore.get(matched + "_ids");
-                            oldAttribute.loadIds(i, (row, id) -> {
-                                fixedAttributes.get(attributeName).add(id);
-                                maxFixedAttributeRow = Integer.max(maxFixedAttributeRow, id);
+                            oldAttribute.loadIds(oldId, (row, id) -> {
+                                objectAttributesNewToOldIdMapping.get(attributeName).add(id);
+                                int newId = objectAttributesNewToOldIdMapping.get(attributeName).size() - 1;
+                                objectAttributesOldToNewIdMapping.get(attributeName).put(id, newId);
                             });
                         } else if (attributeTypeMap.get(matched) == AttributeType.RANGE) {
                             IntAttribute startAttribute = oldStore.get(matched + "_start");
-                            int start = startAttribute.getInt(i);
+                            int start = startAttribute.getInt(oldId);
                             if (start >= 0) {
                                 Attribute lengthAttribute = oldStore.get(matched + "_length");
-                                int length = Integer.parseInt(lengthAttribute.getString(i));
+                                int length = Integer.parseInt(lengthAttribute.getString(oldId));
                                 IntStream ids = IntStream.range(start, start + length);
-                                ids.forEach(id -> fixedAttributes.get(attributeName).add(id));
-                                maxFixedAttributeRow = Integer.max(maxFixedAttributeRow, start + length - 1);
+                                ids.forEach(id -> {
+                                    objectAttributesNewToOldIdMapping.get(attributeName).add(id);
+                                    int newId = objectAttributesNewToOldIdMapping.get(attributeName).size() - 1;
+                                    objectAttributesOldToNewIdMapping.get(attributeName).put(id, newId);
+                                    objectAttributeMaxLength = Math.max(objectAttributeMaxLength, newId + 1);
+                                });
                             }
 
                         }
@@ -206,7 +234,7 @@ public class EntitiesSubset {
 
                             int oldEntityId = entityAttribute.getId(newToOldIdMapping.get(newId));
                             if (oldEntityId >= 0) {
-                                changed.set(changed.get() || addOldToNewIdMapping(oldEntityId));
+                                changed.set(addOldToNewIdMapping(oldEntityId) || changed.get());
                             }
                         }
                     });

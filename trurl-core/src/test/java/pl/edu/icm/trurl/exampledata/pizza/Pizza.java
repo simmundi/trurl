@@ -25,7 +25,7 @@ import pl.edu.icm.trurl.ecs.annotation.WithMapper;
 import java.util.ArrayList;
 import java.util.List;
 
-@WithMapper
+@WithMapper(namespace = "pre")
 public class Pizza {
     @MappedCollection(margin = 2)
     List<Olive> olives = new ArrayList<>();
