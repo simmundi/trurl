@@ -100,22 +100,17 @@ public class EntitiesSubset {
                     }
                 } else if (attribute instanceof ValueObjectListAttribute) {
                     if (!oldStore.get(attributeName).isEmpty(newToOldIdMapping.get(newId))) {
+                        ValueObjectListAttribute valueObjectListAttribute = (ValueObjectListAttribute) attribute;
                         String rawAttributeNameWithPrefix = attributeName.replace("_ids", "");
                         String[] rawAttributeNameArray = rawAttributeNameWithPrefix.split("\\.");
                         String rawAttributeName = rawAttributeNameArray[rawAttributeNameArray.length - 1];
                         String matchedAttributeName = objectAttributesNewToOldIdMapping.keySet().stream().filter(oa ->
                                 oa.contains(rawAttributeName)).findAny().get();
-                        String[] oldObjectIdsString = oldStore.get(attributeName)
-                                .getString(newToOldIdMapping.get(newId)).split(",");
-                        StringBuilder newObjectIds = new StringBuilder();
-                        for (int i=0; i< oldObjectIdsString.length; i++) {
-                            if (i != 0) {
-                                newObjectIds.append(",");
-                            }
-                            newObjectIds.append(objectAttributesOldToNewIdMapping.get(matchedAttributeName)
-                                    .get(Integer.parseInt(oldObjectIdsString[i])));
-                            }
-                        attribute.setString(newId, newObjectIds.toString());
+                        ValueObjectListAttribute oldValueObjectListAttribute = oldStore.get(attributeName);
+                        List<Integer> objectIds = new ArrayList<>();
+                        oldValueObjectListAttribute.loadIds(newToOldIdMapping.get(newId), objectIds::add);
+                        objectIds.replaceAll(id -> id = objectAttributesOldToNewIdMapping.get(matchedAttributeName).get(id));
+                        valueObjectListAttribute.saveIds(newId, objectIds.size(), objectIds::get);
                     }
 
                 } else {
