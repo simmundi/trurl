@@ -179,6 +179,12 @@ class EntitiesSubsetTest {
         assertThat(newStore.get("olives.size").getString(5)).isEqualTo("3.0");
         assertThat(newStore.get("olives.size").getString(6)).isEqualTo("4.0");
         assertThat(newStore.get("toppings_ids").getString(2)).isEqualTo("0,1,2");
+        assertThat(newStore.get("toppings.amount").getString(0)).isEqualTo("1.0");
+        assertThat(newStore.get("toppings.amount").getString(1)).isEqualTo("10.0");
+        assertThat(newStore.get("toppings.amount").getString(2)).isEqualTo("1.0");
+        assertThat(newStore.get("toppings.ingredient").getString(0)).isEqualTo("BACON");
+        assertThat(newStore.get("toppings.ingredient").getString(1)).isEqualTo("CHEESE");
+        assertThat(newStore.get("toppings.ingredient").getString(2)).isEqualTo("ANCHOVIS");
         assertThat(newStore.get("tenants").getString(4)).isEqualTo("5,1");
         assertThat(newStore.get("owner").getString(4)).isEqualTo("0");
     }

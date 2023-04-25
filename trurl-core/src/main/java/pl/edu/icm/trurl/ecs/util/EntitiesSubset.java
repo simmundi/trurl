@@ -90,7 +90,9 @@ public class EntitiesSubset {
                             .getString(newToOldIdMapping.get(newId)));
 
                     if (oldObjectId >= 0) {
-                        String rawAttributeName = attributeName.replace("_start", "");
+                        String rawAttributeNameWithPrefix = attributeName.replace("_start", "");
+                        String[] rawAttributeNameArray = rawAttributeNameWithPrefix.split("\\.");
+                        String rawAttributeName = rawAttributeNameArray[rawAttributeNameArray.length - 1];
                         String matchedAttributeName = objectAttributesNewToOldIdMapping.keySet().stream().filter(is ->
                                 is.contains(rawAttributeName)).findAny().get();
                         attribute.setString(newId,
@@ -98,7 +100,9 @@ public class EntitiesSubset {
                     }
                 } else if (attribute instanceof ValueObjectListAttribute) {
                     if (!oldStore.get(attributeName).isEmpty(newToOldIdMapping.get(newId))) {
-                        String rawAttributeName = attributeName.replace("_ids", "");
+                        String rawAttributeNameWithPrefix = attributeName.replace("_ids", "");
+                        String[] rawAttributeNameArray = rawAttributeNameWithPrefix.split("\\.");
+                        String rawAttributeName = rawAttributeNameArray[rawAttributeNameArray.length - 1];
                         String matchedAttributeName = objectAttributesNewToOldIdMapping.keySet().stream().filter(oa ->
                                 oa.contains(rawAttributeName)).findAny().get();
                         String[] oldObjectIdsString = oldStore.get(attributeName)
@@ -176,37 +180,45 @@ public class EntitiesSubset {
 
     private void findAllObjectAttributes(Store oldStore, Store newStore) {
         Map<String, AttributeType> attributeTypeMap = new HashMap<>();
+        Map<String, String> rawAttributePrefixMap = new HashMap<>();
         newStore.attributes().filter(a -> a.name().endsWith("_ids") || a.name().endsWith("_start")).forEach(attribute -> {
-            String rawAttributeName = attribute.name().replace("_ids", "").replace("_start", "");
+            String rawAttributeNameWithPrefix = attribute.name()
+                    .replace("_ids", "").replace("_start", "");
+            String[] rawAttributeNameArray = rawAttributeNameWithPrefix.split("\\.");
+            String rawAttributeName = rawAttributeNameArray[rawAttributeNameArray.length - 1];
+            rawAttributePrefixMap.put(rawAttributeName, rawAttributeNameWithPrefix);
+
             if (attribute.name().endsWith("_ids")) {
                 attributeTypeMap.put(rawAttributeName, AttributeType.ARRAY_LIST);
             } else {
                 attributeTypeMap.put(rawAttributeName, AttributeType.RANGE);
             }
         });
-        oldStore.attributes().filter(a -> attributeTypeMap.keySet().stream().anyMatch(is -> a.name()
-                        .startsWith(is) &&
-                        !a.name().endsWith("_ids") && !a.name().endsWith("_start") && !a.name().endsWith("_length")))
+        oldStore.attributes().filter(a -> !a.name().endsWith("_ids")
+                        && !a.name().endsWith("_start")
+                        && !a.name().endsWith("_length")
+                        && attributeTypeMap.keySet().stream().anyMatch(is -> a.name().contains(is)))
                 .forEach(attribute -> {
                     String attributeName = attribute.name();
-                    objectAttributesNewToOldIdMapping.put(attribute.name(), new ArrayList<>());
-                    objectAttributesOldToNewIdMapping.put(attribute.name(), new HashMap<>());
-                    String matched = attributeTypeMap.keySet().stream().filter(is -> attribute.name()
-                            .contains(is)).findAny().get();
-
+                    objectAttributesNewToOldIdMapping.put(attributeName, new ArrayList<>());
+                    objectAttributesOldToNewIdMapping.put(attributeName, new HashMap<>());
+                    String matched = attributeTypeMap.keySet().stream()
+                            .filter(attributeName::contains).findAny()
+                            .orElseThrow(() -> new IllegalStateException("Could not find matching attribute for: " + attributeName));
+                    String matchedWithPrefix = rawAttributePrefixMap.get(matched);
                     for (int oldId : newToOldIdMapping) {
                         if (attributeTypeMap.get(matched) == AttributeType.ARRAY_LIST) {
-                            ValueObjectListAttribute oldAttribute = oldStore.get(matched + "_ids");
+                            ValueObjectListAttribute oldAttribute = oldStore.get(matchedWithPrefix + "_ids");
                             oldAttribute.loadIds(oldId, (row, id) -> {
                                 objectAttributesNewToOldIdMapping.get(attributeName).add(id);
                                 int newId = objectAttributesNewToOldIdMapping.get(attributeName).size() - 1;
                                 objectAttributesOldToNewIdMapping.get(attributeName).put(id, newId);
                             });
                         } else if (attributeTypeMap.get(matched) == AttributeType.RANGE) {
-                            IntAttribute startAttribute = oldStore.get(matched + "_start");
+                            IntAttribute startAttribute = oldStore.get(matchedWithPrefix + "_start");
                             int start = startAttribute.getInt(oldId);
                             if (start >= 0) {
-                                Attribute lengthAttribute = oldStore.get(matched + "_length");
+                                Attribute lengthAttribute = oldStore.get(matchedWithPrefix + "_length");
                                 int length = Integer.parseInt(lengthAttribute.getString(oldId));
                                 IntStream ids = IntStream.range(start, start + length);
                                 ids.forEach(id -> {
