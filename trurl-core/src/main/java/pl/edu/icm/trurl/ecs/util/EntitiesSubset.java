@@ -94,7 +94,8 @@ public class EntitiesSubset {
                         String[] rawAttributeNameArray = rawAttributeNameWithPrefix.split("\\.");
                         String rawAttributeName = rawAttributeNameArray[rawAttributeNameArray.length - 1];
                         String matchedAttributeName = objectAttributesNewToOldIdMapping.keySet().stream().filter(is ->
-                                is.contains(rawAttributeName)).findAny().get();
+                                        is.contains(rawAttributeName)).findAny()
+                                .orElseThrow(() -> new IllegalStateException("Could not find matching attribute for: " + attributeName));
                         attribute.setString(newId,
                                 String.valueOf(objectAttributesOldToNewIdMapping.get(matchedAttributeName).get(oldObjectId)));
                     }
@@ -105,7 +106,8 @@ public class EntitiesSubset {
                         String[] rawAttributeNameArray = rawAttributeNameWithPrefix.split("\\.");
                         String rawAttributeName = rawAttributeNameArray[rawAttributeNameArray.length - 1];
                         String matchedAttributeName = objectAttributesNewToOldIdMapping.keySet().stream().filter(oa ->
-                                oa.contains(rawAttributeName)).findAny().get();
+                                        oa.contains(rawAttributeName)).findAny()
+                                .orElseThrow(() -> new IllegalStateException("Could not find matching attribute for: " + attributeName));
                         ValueObjectListAttribute oldValueObjectListAttribute = oldStore.get(attributeName);
                         List<Integer> objectIds = new ArrayList<>();
                         oldValueObjectListAttribute.loadIds(newToOldIdMapping.get(newId), objectIds::add);
@@ -122,14 +124,14 @@ public class EntitiesSubset {
         });
 
         newStore.attributes().filter(a -> objectAttributesNewToOldIdMapping.containsKey(a.name())).forEach(attribute -> {
-                    for (int newId = newToOldIdMapping.size(); newId < objectAttributeMaxLength; newId++) {
-                        String attributeName = attribute.name();
-                        if (newId < objectAttributesNewToOldIdMapping.get(attributeName).size()) {
-                                attribute.setString(newId, oldStore.get(attributeName)
-                                        .getString(objectAttributesNewToOldIdMapping.get(attributeName).get(newId)));
+            for (int newId = newToOldIdMapping.size(); newId < objectAttributeMaxLength; newId++) {
+                String attributeName = attribute.name();
+                if (newId < objectAttributesNewToOldIdMapping.get(attributeName).size()) {
+                    attribute.setString(newId, oldStore.get(attributeName)
+                            .getString(objectAttributesNewToOldIdMapping.get(attributeName).get(newId)));
 
-                    }
                 }
+            }
         });
 
         newStore.addInt("old_id");
