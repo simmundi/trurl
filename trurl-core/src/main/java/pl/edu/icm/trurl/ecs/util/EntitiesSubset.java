@@ -37,7 +37,7 @@ public class EntitiesSubset {
     private final EngineConfiguration engineConfiguration;
     private final AtomicInteger newIds = new AtomicInteger();
     private int[] oldToNewIdMapping;
-    private List<Integer> newToOldIdMapping;
+    private Map<Integer, Integer> newToOldIdMapping;
     private final Map<String, Map<Integer, Integer>> objectAttributesOldToNewIdMapping = new HashMap<>();
     private final Map<String, List<Integer>> objectAttributesNewToOldIdMapping = new HashMap<>();
     private int objectAttributeMaxLength;
@@ -54,6 +54,7 @@ public class EntitiesSubset {
         addAllRelatedEntities(oldStore, newStore);
         findAllObjectAttributes(oldStore, newStore);
         newStore.attributes().forEach(attribute -> {
+            attribute.ensureCapacity(Math.max(newToOldIdMapping.size(), objectAttributeMaxLength));
             for (int newId = 0; newId < newToOldIdMapping.size(); newId++) {
                 String attributeName = attribute.name();
                 if (attribute instanceof EntityAttribute) {
@@ -136,6 +137,7 @@ public class EntitiesSubset {
 
         newStore.addInt("old_id");
         IntAttribute oldIdsAttribute = newStore.get("old_id");
+        oldIdsAttribute.ensureCapacity(newToOldIdMapping.size());
         for (int i = 0; i < newToOldIdMapping.size(); i++) {
             oldIdsAttribute.setInt(i, newToOldIdMapping.get(i));
         }
@@ -153,12 +155,12 @@ public class EntitiesSubset {
         return oldToNewMapping;
     }
 
-    private List<Integer> createNewToOldIdMapping() {
-        List<Integer> newToOldMapping = new ArrayList<>();
+    private Map<Integer, Integer> createNewToOldIdMapping() {
+        Map<Integer, Integer> newToOldMapping = new HashMap<>();
         for (int oldId = 0; oldId < oldToNewIdMapping.length; oldId++) {
             int newId = oldToNewIdMapping[oldId];
             if (newId >= 0) {
-                newToOldMapping.add(newId, oldId);
+                newToOldMapping.put(newId, oldId);
             }
         }
         return newToOldMapping;
@@ -170,7 +172,7 @@ public class EntitiesSubset {
         } else {
             int newId = newIds.getAndIncrement();
             oldToNewIdMapping[oldId] = newId;
-            newToOldIdMapping.add(newId, oldId);
+            newToOldIdMapping.put(newId, oldId);
             return true;
         }
     }
@@ -203,7 +205,7 @@ public class EntitiesSubset {
                             .filter(attributeName::contains).findAny()
                             .orElseThrow(() -> new IllegalStateException("Could not find matching attribute for: " + attributeName));
                     String matchedWithPrefix = rawAttributePrefixMap.get(matched);
-                    for (int oldId : newToOldIdMapping) {
+                    for (int oldId : newToOldIdMapping.values()) {
                         if (attributeTypeMap.get(matched) == AttributeType.ARRAY_LIST) {
                             ValueObjectListAttribute oldAttribute = oldStore.get(matchedWithPrefix + "_ids");
                             oldAttribute.loadIds(oldId, (row, id) -> {
@@ -257,7 +259,7 @@ public class EntitiesSubset {
 
                             oldEntityIds.forEach(oldId -> {
                                 if (oldId >= 0) {
-                                    changed.set(changed.get() || addOldToNewIdMapping(oldId));
+                                    changed.set(addOldToNewIdMapping(oldId) || changed.get());
                                 }
                             });
                         }
