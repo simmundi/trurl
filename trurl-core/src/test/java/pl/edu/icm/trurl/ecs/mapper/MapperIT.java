@@ -35,8 +35,15 @@ import pl.edu.icm.trurl.exampledata.Looks;
 import pl.edu.icm.trurl.exampledata.Stats;
 import pl.edu.icm.trurl.exampledata.Texture;
 import pl.edu.icm.trurl.store.Store;
+
+import pl.edu.icm.trurl.store.attribute.BooleanAttribute;
+import pl.edu.icm.trurl.store.attribute.ByteAttribute;
+import pl.edu.icm.trurl.store.attribute.DoubleAttribute;
+import pl.edu.icm.trurl.store.attribute.FloatAttribute;
+import pl.edu.icm.trurl.store.attribute.IntAttribute;
+import pl.edu.icm.trurl.store.attribute.ShortAttribute;
+import pl.edu.icm.trurl.store.attribute.StringAttribute;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
-import pl.edu.icm.trurl.store.attribute.*;
 import pl.edu.icm.trurl.store.attribute.CategoricalStaticAttribute;
 
 import java.util.ArrayList;
@@ -73,8 +80,6 @@ public class MapperIT {
     private BooleanAttribute booleanAttribute;
     private ByteAttribute byteAttribute;
     private DoubleAttribute doubleAttribute;
-    private EntityListAttribute entitiesAttribute;
-    private EntityAttribute entityAttribute;
     private CategoricalStaticAttribute<Color> categoricalStaticAttribute;
     private FloatAttribute floatAttribute;
     private IntAttribute intAttribute;
@@ -91,8 +96,6 @@ public class MapperIT {
         booleanAttribute = store.get("booleanProp");
         byteAttribute = store.get("byteProp");
         doubleAttribute = store.get("doubleProp");
-        entitiesAttribute = store.get("entitiesProp");
-        entityAttribute = store.get("entityProp");
         categoricalStaticAttribute = store.get("enumProp");
         floatAttribute = store.get("floatProp");
         intAttribute = store.get("intProp");
@@ -125,10 +128,7 @@ public class MapperIT {
         assertThat(stringAttribute.getString(5)).isEqualTo("blebleble");
         assertThat(shortAttribute.getShort(5)).isEqualTo((short) 78);
 
-        assertThat(entityAttribute.getEntity(5, session)).isEqualTo(createEntity(34));
-        assertThat(entitiesAttribute.getSize(5)).isEqualTo(3);
         List<Integer> entityIds = new ArrayList<>();
-        entitiesAttribute.loadIds(5, entityIds::add);
         assertThat(entityIds).containsExactly(4, 5, 6);
 
         verify(mapperListener).savingComponent(5, dto);
@@ -160,8 +160,6 @@ public class MapperIT {
         mapper.save(dto, 7);
 
         // assert
-        entitiesAttribute.loadIds(7, entityList::add);
-        assertThat(entityAttribute.getEntity(7, session)).isNull();
         assertThat(entityList).isEmpty();
     }
 

@@ -20,6 +20,7 @@ package pl.edu.icm.trurl.exampledata.pizza;
 
 import pl.edu.icm.trurl.ecs.annotation.WithMapper;
 
+import java.util.Objects;
 import java.util.Random;
 
 @WithMapper
@@ -61,4 +62,16 @@ public class Olive {
         return of(colors[random.nextInt(colors.length)], random.nextFloat() * 10 + 1);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Olive olive = (Olive) o;
+        return Float.compare(size, olive.size) == 0 && color == olive.color;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(color, size);
+    }
 }

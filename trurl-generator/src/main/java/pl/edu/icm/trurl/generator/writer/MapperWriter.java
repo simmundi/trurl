@@ -47,7 +47,6 @@ public class MapperWriter {
 
         List<Feature> features = Arrays.asList(
                 new CommonFieldsFeature(beanMetadata),
-                new CountFeature(),
                 new ConstructorFeature(beanMetadata, processingEnvironment.getTypeUtils()),
                 new SetEmptyFeature(beanMetadata),
                 new IsModifiedFeature(beanMetadata),
@@ -57,7 +56,6 @@ public class MapperWriter {
                 new IsPresentFeature(beanMetadata),
                 new LoadFeature(beanMetadata),
                 new SaveFeature(beanMetadata),
-                new EnsureCapacityFeature(beanMetadata),
                 new AttributesFeature(beanMetadata),
                 new MapperListenersFeature(beanMetadata),
                 new ColumnarAccessFeature(beanMetadata),

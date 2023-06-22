@@ -45,5 +45,6 @@ public interface AttributeFactory {
 
     StringAttribute createString(String name);
 
+    IntListAttribute createIntList(String name);
 }
 

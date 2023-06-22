@@ -23,15 +23,14 @@ import pl.edu.icm.trurl.ecs.mapper.MapperListeners;
 import pl.edu.icm.trurl.ecs.selector.Selector;
 import pl.edu.icm.trurl.ecs.util.Selectors;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.StoreFactory;
-import pl.edu.icm.trurl.store.StoreListener;
+import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-public final class Engine implements StoreListener {
+public final class Engine {
     private final AtomicInteger count = new AtomicInteger();
     private final Store store;
     private final MapperSet mapperSet;
@@ -40,9 +39,8 @@ public final class Engine implements StoreListener {
 
     private int capacityHeadroom;
 
-    public Engine(StoreFactory storeFactory, int initialCapacity, int capacityHeadroom, MapperSet mapperSet, boolean shared) {
-        this.store = storeFactory.create(initialCapacity);
-        this.store.addStoreListener(this);
+    public Engine(int initialCapacity, int capacityHeadroom, MapperSet mapperSet, boolean shared, AttributeFactory attributeFactory) {
+        this.store = new Store(attributeFactory, initialCapacity + capacityHeadroom);
         this.capacityHeadroom = capacityHeadroom;
         this.mapperSet = mapperSet;
         if (shared) {
@@ -59,10 +57,8 @@ public final class Engine implements StoreListener {
     public Engine(Store store, int capacityHeadroom, MapperSet mapperSet, boolean shared) {
         this.store = store;
         this.capacityHeadroom = capacityHeadroom;
-        this.store.addStoreListener(this);
         this.mapperSet = mapperSet;
         this.defaultSessionFactory = new SessionFactory(this, shared ? Session.Mode.SHARED : Session.Mode.NORMAL);
-        this.count.set(mapperSet.streamMappers().mapToInt(m -> m.getCount()).max().getAsInt());
         mappers = this.mapperSet
                 .streamMappers()
                 .collect(toList())
@@ -106,13 +102,6 @@ public final class Engine implements StoreListener {
                 .withModeAndCount(Session.Mode.STUB_ENTITIES, 0)
                 .create();
 
-        if (toExclusive > this.count.get()) {
-            this.count.set(toExclusive);
-            for (Mapper mapper : mappers) {
-                mapper.setCount(toExclusive);
-            }
-        }
-
         for (Mapper mapper : mappers) {
             MapperListeners mapperListeners = mapper.getMapperListeners();
 
@@ -134,8 +123,6 @@ public final class Engine implements StoreListener {
 
     private void ensureHeadroom() {
         int targetCapacity = count.get() + capacityHeadroom;
-        mapperSet.streamMappers().forEach(mapper -> {
-            mapper.ensureCapacity(targetCapacity);
-        });
+        store.ensureCapacity(targetCapacity);
     }
 }

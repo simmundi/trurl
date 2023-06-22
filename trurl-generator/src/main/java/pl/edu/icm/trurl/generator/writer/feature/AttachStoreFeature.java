@@ -60,8 +60,14 @@ public class AttachStoreFeature implements Feature {
 
         for (ComponentProperty property : properties) {
             switch (property.type) {
-                case EMBEDDED_PROP:
                 case EMBEDDED_LIST:
+                    // if property is based on a reference (like - a list), we need to get the reference first
+                    // TODO: entity list will also go here
+                    methodSpec.addStatement("$LReference = store.getReference($S))", property.name, property.name);
+                    // fallthrough
+                case EMBEDDED_PROP:
+                    // if the property has a substore and a mapper, we need to attach the substore
+                    methodSpec.addStatement("$L.attachStore(store.getSubstore($S))", property.name, property.name);
                     break;
                 default:
                     methodSpec.addStatement("$L = ($T) store.get($S)",
@@ -71,7 +77,7 @@ public class AttachStoreFeature implements Feature {
             }
         }
 
-        methodSpec.addStatement("this.setCount(store.getCount())");
+        methodSpec.addStatement("this.counter = store.getCounter()");
         return methodSpec.build();
     }
 }

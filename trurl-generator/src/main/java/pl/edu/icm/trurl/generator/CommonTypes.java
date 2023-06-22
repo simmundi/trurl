@@ -65,10 +65,7 @@ public class CommonTypes {
     public static final ClassName STRING_COLUMN = ClassName.get(StringAttribute.class);
     public static final ClassName CATEGORICAL_STATIC_COLUMN = ClassName.get(CategoricalStaticAttribute.class);
     public static final ClassName BOOLEAN_COLUMN = ClassName.get(BooleanAttribute.class);
-    public static final ClassName ENTITY_LIST_COLUMN = ClassName.get(EntityListAttribute.class);
-    public static final ClassName VALUE_OBJECT_LIST_COLUMN = ClassName.get(ValueObjectListAttribute.class);
     public static final ClassName CATEGORICAL_DYNAMIC_COLUMN = ClassName.get(CategoricalDynamicAttribute.class);
-    public static final ClassName ENTITY_COLUMN = ClassName.get(EntityAttribute.class);
     public static final ClassName SOFT_ENUM = ClassName.get(SoftEnum.class);
     public static final ClassName SOFT_ENUM_MANAGER = ClassName.get(SoftEnumManager.class);
 

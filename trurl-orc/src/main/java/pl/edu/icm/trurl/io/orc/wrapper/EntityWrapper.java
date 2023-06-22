@@ -20,13 +20,13 @@ package pl.edu.icm.trurl.io.orc.wrapper;
 
 import org.apache.hadoop.hive.ql.exec.vector.LongColumnVector;
 import org.apache.orc.TypeDescription;
-import pl.edu.icm.trurl.store.attribute.EntityAttribute;
+import pl.edu.icm.trurl.store.attribute.IdentifierAttribute;
 
-final class EntityWrapper extends AbstractColumnWrapper<LongColumnVector, EntityAttribute> {
+final class EntityWrapper extends AbstractColumnWrapper<LongColumnVector, IdentifierAttribute> {
 
     private int firstValue;
 
-    public EntityWrapper(EntityAttribute attribute) {
+    public EntityWrapper(IdentifierAttribute attribute) {
         super(attribute);
     }
 

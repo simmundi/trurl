@@ -98,12 +98,6 @@ public class IsModifiedFeature implements Feature {
                 case STRING_PROP:
                     methodSpec.addStatement("if (!$T.equals($L.getString(row), component.$L())) return true", CommonTypes.LANG_OBJECTS, property.name, property.getterName);
                     break;
-                case ENTITY_LIST_PROP:
-                    methodSpec.addStatement("if (!$L.isEqual(row, component.$L().size(), (idx) -> component.$L().get(idx).getId())) return true", property.name, property.getterName, property.getterName);
-                    break;
-                case ENTITY_PROP:
-                    methodSpec.addStatement("if (!$L.isEqual(row, component.$L())) return true", property.name, property.getterName);
-                    break;
                 case EMBEDDED_LIST:
                     createEmbeddedList(methodSpec, property);
                     break;

@@ -26,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.MapperListeners;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.StoreFactory;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,8 +51,6 @@ class EngineTest {
     @Mock
     Store store;
 
-    @Mock
-    StoreFactory storeFactory;
 
     @Mock
     MapperSet mapperSet;
@@ -85,14 +83,13 @@ class EngineTest {
                 mapperA,
                 mapperB
         ));
-        lenient().when(storeFactory.create(anyInt())).thenReturn(store);
         lenient().when(sessionFactory.create()).thenReturn(session);
     }
 
     @Test
     void construct() {
         // execute
-        new Engine(storeFactory, INITIAL_CAPACITY, CAPACITY_HEADROOM, mapperSet, false);
+        new Engine(INITIAL_CAPACITY, CAPACITY_HEADROOM, mapperSet, false);
 
         // assert
         verify(mapperA).configureStore(store);

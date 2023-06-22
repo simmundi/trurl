@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 
 public class BeanFinder {
 
-    public Stream<BeanMetadata> findBeans(ProcessingEnvironment processingEnvironment, RoundEnvironment roundEnvironment, SyntheticPropertiesSynthesizer syntheticPropertiesSynthesizer) {
+    public Stream<BeanMetadata> findBeans(ProcessingEnvironment processingEnvironment, RoundEnvironment roundEnvironment) {
         ComponentFeatureExtractor featureExtractor = new ComponentFeatureExtractor(processingEnvironment);
         return roundEnvironment
                 .getElementsAnnotatedWith(WithMapper.class)
@@ -40,8 +40,7 @@ public class BeanFinder {
                                 processingEnvironment,
                                 element,
                                 element.getAnnotation(WithMapper.class).namespace(),
-                                featureExtractor.extractFeatures(element),
-                                syntheticPropertiesSynthesizer
+                                featureExtractor.extractFeatures(element)
                         ));
     }
 }

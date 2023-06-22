@@ -19,7 +19,7 @@ It consists of:
 terms of tables or relations, then an attribute represents a single column.
 
 Different implementations of stores can use different mechanisms for storing data under the hood;
-the two implementation available out-of-the-box are `ArrayStore` (using simple Java arrays)
+the two implementation available out-of-the-box are `Store` (using simple Java arrays)
 and `TablesawStore` (using the tablesaw library's `Table` class).
 
 TODO: describe how row references and lists of row references are considered special values

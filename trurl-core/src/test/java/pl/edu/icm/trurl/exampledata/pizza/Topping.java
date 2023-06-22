@@ -20,6 +20,7 @@ package pl.edu.icm.trurl.exampledata.pizza;
 
 import pl.edu.icm.trurl.ecs.annotation.WithMapper;
 
+import java.util.Objects;
 import java.util.Random;
 
 @WithMapper
@@ -59,5 +60,18 @@ public class Topping {
         Ingredient[] ingredients = Ingredient.values();
         Random random = new Random();
         return of(ingredients[random.nextInt(ingredients.length)], random.nextFloat() * 3);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Topping topping = (Topping) o;
+        return Float.compare(amount, topping.amount) == 0 && ingredient == topping.ingredient;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ingredient, amount);
     }
 }

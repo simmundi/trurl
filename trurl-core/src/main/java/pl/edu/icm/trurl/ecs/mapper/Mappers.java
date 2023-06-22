@@ -43,8 +43,15 @@ public class Mappers {
     }
 
     public <T> Mapper<T> create(Class<T> clazz) {
+        return create(clazz, "");
+    }
+
+
+    public <T> Mapper<T> create(Class<T> clazz, String mapperPrefix) {
         try {
-            return bento.get(
+            Bento child = bento.create();
+            child.register("mapperPrefix", mapperPrefix);
+            return child.get(
                     Class.forName(clazz.getPackage().getName() + ".MapperOf" + clazz.getSimpleName() + "Factory")
                             .getField("IT")
                             .get(null));

@@ -20,15 +20,12 @@ package pl.edu.icm.trurl.generator.model;
 
 import com.squareup.javapoet.ClassName;
 import pl.edu.icm.trurl.ecs.annotation.WithMapper;
-import pl.edu.icm.trurl.generator.SyntheticPropertiesSynthesizer;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,19 +38,16 @@ public final class BeanMetadata {
     public final Set<ComponentFeature> componentFeatures;
 
     private final ProcessingEnvironment processingEnvironment;
-    private final SyntheticPropertiesSynthesizer synthesizer;
 
     public BeanMetadata(ProcessingEnvironment processingEnvironment,
                         TypeElement componentClass,
                         String namespace,
-                        Set<ComponentFeature> componentFeatures,
-                        SyntheticPropertiesSynthesizer syntheticPropertiesSynthesizer) {
+                        Set<ComponentFeature> componentFeatures) {
         this.processingEnvironment = processingEnvironment;
         this.componentClass = componentClass;
         this.namespace = namespace;
         this.componentName = ClassName.get(componentClass);
         this.componentFeatures = componentFeatures;
-        this.synthesizer = syntheticPropertiesSynthesizer;
     }
 
     public List<ComponentProperty> getComponentProperties() {
@@ -76,7 +70,6 @@ public final class BeanMetadata {
         }
         return properties
                 .stream()
-                .flatMap(synthesizer::synthesize)
                 .collect(Collectors.toList());
     }
 }
