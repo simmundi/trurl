@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.ecs.util;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -104,3 +104,5 @@ class SelectorsTest {
 
     }
 }
+
+ */

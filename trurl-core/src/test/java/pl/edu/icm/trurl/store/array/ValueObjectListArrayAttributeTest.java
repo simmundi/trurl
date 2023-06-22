@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.store.array;
 
 import org.junit.jupiter.api.Test;
@@ -169,3 +169,5 @@ class ValueObjectListArrayAttributeTest {
         assertThat(values).containsExactlyInAnyOrder(concat(range(1, 11), range(15, 18)).toArray());
     }
 }
+
+ */

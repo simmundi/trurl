@@ -23,26 +23,22 @@ import pl.edu.icm.trurl.ecs.mapper.MapperListeners;
 import pl.edu.icm.trurl.ecs.selector.Selector;
 import pl.edu.icm.trurl.ecs.util.Selectors;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.StoreFactory;
-import pl.edu.icm.trurl.store.StoreListener;
+import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-public final class Engine implements StoreListener {
-    private final AtomicInteger count = new AtomicInteger();
-    private final Store store;
+public final class Engine {
+    private final Store rootStore;
     private final MapperSet mapperSet;
     private final Mapper<?>[] mappers;
     private final SessionFactory defaultSessionFactory;
 
     private int capacityHeadroom;
 
-    public Engine(StoreFactory storeFactory, int initialCapacity, int capacityHeadroom, MapperSet mapperSet, boolean shared) {
-        this.store = storeFactory.create(initialCapacity);
-        this.store.addStoreListener(this);
+    public Engine(int initialCapacity, int capacityHeadroom, MapperSet mapperSet, boolean shared, AttributeFactory attributeFactory) {
+        this.rootStore = new Store(attributeFactory, initialCapacity + capacityHeadroom);
         this.capacityHeadroom = capacityHeadroom;
         this.mapperSet = mapperSet;
         if (shared) {
@@ -51,18 +47,16 @@ public final class Engine implements StoreListener {
             this.defaultSessionFactory = new SessionFactory(this, Session.Mode.NORMAL);
         }
         mappers = this.mapperSet.streamMappers().peek(mapper -> {
-            mapper.configureStore(store);
-            mapper.attachStore(store);
+            mapper.configureStore(rootStore);
+            mapper.attachStore(rootStore);
         }).collect(toList()).toArray(new Mapper<?>[0]);
     }
 
     public Engine(Store store, int capacityHeadroom, MapperSet mapperSet, boolean shared) {
-        this.store = store;
+        this.rootStore = store;
         this.capacityHeadroom = capacityHeadroom;
-        this.store.addStoreListener(this);
         this.mapperSet = mapperSet;
         this.defaultSessionFactory = new SessionFactory(this, shared ? Session.Mode.SHARED : Session.Mode.NORMAL);
-        this.count.set(mapperSet.streamMappers().mapToInt(m -> m.getCount()).max().getAsInt());
         mappers = this.mapperSet
                 .streamMappers()
                 .collect(toList())
@@ -85,8 +79,8 @@ public final class Engine implements StoreListener {
         system.execute(defaultSessionFactory);
     }
 
-    public Store getStore() {
-        return store;
+    public Store getRootStore() {
+        return rootStore;
     }
 
     public MapperSet getMapperSet() {
@@ -94,24 +88,17 @@ public final class Engine implements StoreListener {
     }
 
     public int getCount() {
-        return count.get();
+        return rootStore.getCounter().getCount();
     }
 
     int nextId() {
-        return count.getAndIncrement();
+        return rootStore.getCounter().next();
     }
 
     public void onUnderlyingDataChanged(int fromInclusive, int toExclusive) {
         Session session = defaultSessionFactory
                 .withModeAndCount(Session.Mode.STUB_ENTITIES, 0)
                 .create();
-
-        if (toExclusive > this.count.get()) {
-            this.count.set(toExclusive);
-            for (Mapper mapper : mappers) {
-                mapper.setCount(toExclusive);
-            }
-        }
 
         for (Mapper mapper : mappers) {
             MapperListeners mapperListeners = mapper.getMapperListeners();
@@ -133,9 +120,7 @@ public final class Engine implements StoreListener {
     }
 
     private void ensureHeadroom() {
-        int targetCapacity = count.get() + capacityHeadroom;
-        mapperSet.streamMappers().forEach(mapper -> {
-            mapper.ensureCapacity(targetCapacity);
-        });
+        int targetCapacity = rootStore.getCounter().getCount() + capacityHeadroom;
+        rootStore.ensureCapacity(targetCapacity);
     }
 }

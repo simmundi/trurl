@@ -20,12 +20,16 @@ package pl.edu.icm.trurl.generator.writer.feature;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import pl.edu.icm.trurl.ecs.annotation.MappedCollection;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.CommonTypes;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
+import pl.edu.icm.trurl.generator.model.PropertyType;
+import pl.edu.icm.trurl.store.StoreConfigurer;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class ConfigureStoreFeature implements Feature {
@@ -87,18 +91,18 @@ public class ConfigureStoreFeature implements Feature {
                 case STRING_PROP:
                     methodSpec.addStatement("meta.addString($S)", name);
                     break;
-                case ENTITY_LIST_PROP:
-                    methodSpec.addStatement("meta.addEntityList($S)", name);
-                    break;
-                case VALUE_OBJECT_LIST_PROP:
-                    methodSpec.addStatement("meta.addValueObjectList($S)", name);
-                    break;
-                case ENTITY_PROP:
-                    methodSpec.addStatement("meta.addEntity($S)", name);
-                    break;
                 case EMBEDDED_LIST:
+                    String methodName = property.type == PropertyType.EMBEDDED_LIST ? "rangeTyped" : "arrayTyped";
+                    Optional<MappedCollection> mappedCollection = Optional.ofNullable(property.attribute.getAnnotation(MappedCollection.class));
+                    int sizeMin = mappedCollection.map(MappedCollection::minReservation).orElse(1);
+                    int sizeMargin = mappedCollection.map(MappedCollection::margin).orElse(2);
+
+                    methodSpec.addStatement("$L = mappers.create($T.class, mapperPrefix + $S)", property.name, property.businessType, ".");
+                    methodSpec.addStatement("$L.configureStore(meta.addReference($S).$L($L, $L).toSubstore())", property.name, name, methodName, sizeMin, sizeMargin);
+                    break;
                 case EMBEDDED_PROP:
-                    methodSpec.addStatement("$L = mappers.create($T.class)", property.name, property.businessType);
+                    methodSpec.addStatement("$L = mappers.create($T.class, mapperPrefix + $S)", property.name, property.businessType, ".");
+                    methodSpec.addStatement("$L.configureStore(meta)");
                     break;
 
                 default:

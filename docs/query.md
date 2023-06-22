@@ -49,7 +49,7 @@ results in a single `Result` implementation, which could be:
 
 Some examples:
 
-```java
+```jshelllanguage
         // a query filtering out households:
 
         Query query = (e, results, label) -> {
@@ -60,7 +60,7 @@ Some examples:
         };
 ```
 
-```java
+```jshelllanguage
         // filter out households, chunk them by teryt
 
         Query query = (e, results, label) -> {
@@ -72,7 +72,7 @@ Some examples:
         };
 ```
 
-```java
+```jshelllanguage
         // find all the kids of 10 and less, if they share household with a senior
 
         Query query = (e, results, label) -> {

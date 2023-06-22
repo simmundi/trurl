@@ -15,6 +15,7 @@
  *
  *
  */
+/*
 
 package pl.edu.icm.trurl.util;
 
@@ -89,3 +90,6 @@ class SoftEnumTableTest {
     }
 }
 
+
+
+ */

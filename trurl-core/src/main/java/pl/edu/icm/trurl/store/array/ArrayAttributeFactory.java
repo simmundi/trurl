@@ -75,4 +75,7 @@ public final class ArrayAttributeFactory implements AttributeFactory {
     public StringAttribute createString(String name) {
         return new StringArrayAttribute(name, defaultCapacity);
     }
+
+    @Override
+    public IntListAttribute createIntList(String name) { return new IntListArrayAttribute(name, defaultCapacity); }
 }

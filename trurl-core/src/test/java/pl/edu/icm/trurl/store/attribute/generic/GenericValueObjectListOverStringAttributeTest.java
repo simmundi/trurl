@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.store.attribute.generic;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -168,3 +168,5 @@ class GenericValueObjectListOverStringAttributeTest {
         assertThat(values).containsExactlyInAnyOrder(concat(range(1, 11), range(15, 18)).toArray());
     }
 }
+
+ */

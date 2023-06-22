@@ -55,7 +55,7 @@ public class StoreIO {
 
         List<String> substoresNamespaces = new LinkedList<>();
         for (Store substore : store.allDescendants()) {
-            String namespace = substore.getNamespace();
+            String namespace = substore.getName();
             substoresNamespaces.add(namespace);
             singleStoreWriter.write(getFile(parentDir, baseName + "." + namespace, format), substore);
         }
@@ -70,7 +70,7 @@ public class StoreIO {
         List<String> substoreNames = new ArrayList<>(asList(substores.split(",")));
         singleStoreReader.read(getFile(parentDir, baseName, format), store);
         for (Store substore : store.allDescendants()) {
-            String namespace = substore.getNamespace();
+            String namespace = substore.getName();
             if (!substoreNames.contains(namespace)) {
                 throw new IllegalStateException(String.format("No loading candidate found for substore: %s", namespace));
             }

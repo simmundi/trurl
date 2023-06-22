@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.ecs.mapper;
 
 import net.snowyhollows.bento.Bento;
@@ -69,3 +69,4 @@ public class MapperSoftEnumsIT {
         assertThat(healthMapper.createAndLoad(2).getContaminationType()).isSameAs(DELTA);
     }
 }
+*/

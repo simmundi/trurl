@@ -43,8 +43,15 @@ public class Mappers {
     }
 
     public <T> Mapper<T> create(Class<T> clazz) {
+        return create(clazz, "");
+    }
+
+
+    public <T> Mapper<T> create(Class<T> clazz, String mapperPrefix) {
         try {
-            return bento.get(
+            Bento child = bento.create();
+            child.register("mapperPrefix", mapperPrefix);
+            return child.get(
                     Class.forName(clazz.getPackage().getName() + ".MapperOf" + clazz.getSimpleName() + "Factory")
                             .getField("IT")
                             .get(null));
@@ -69,12 +76,13 @@ public class Mappers {
     }
 
     static public <T> Stream<T> stream(Mapper<T> mapper) {
-        return IntStream.range(0, mapper.getCount())
-                .filter(row -> mapper.isPresent(row))
-                .mapToObj(row -> {
-                    T t = mapper.create();
-                    mapper.load(null, t, row);
-                    return t;
-                });
+        throw new UnsupportedOperationException("mapper.getCount");
+//        return IntStream.range(0, mapper.getCount())
+//                .filter(row -> mapper.isPresent(row))
+//                .mapToObj(row -> {
+//                    T t = mapper.create();
+//                    mapper.load(null, t, row);
+//                    return t;
+//                });
     }
 }

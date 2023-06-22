@@ -34,12 +34,6 @@ public interface StoreConfigurer {
 
     void addDouble(String name);
 
-    void addEntity(String name);
-
-    void addEntityList(String name);
-
-    void addValueObjectList(String name);
-
     <E extends Enum<E>> void addEnum(String name, Class<E> enumType);
 
     <E extends SoftEnum> void addSoftEnum(String name, SoftEnumManager<E> enumType);
@@ -51,4 +45,25 @@ public interface StoreConfigurer {
     void addShort(String name);
 
     void addString(String name);
+
+    void addIntList(String name);
+
+    JoinConfigurer addJoin(String name);
+
+    StoreConfigurer addSubstore(String name);
+
+    void hideAttribute(String name);
+
+    interface JoinConfigurer {
+        Store rangeTyped(int minimumSize, int margin);
+
+        Store arrayTyped(int minimumSize, int margin);
+    }
+
+    interface ReferenceConfigurer {
+
+        void arrayTyped(int minimumSize, int margin);
+
+        void single();
+    }
 }

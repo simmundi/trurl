@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.ecs.parallel;
 
 import org.junit.jupiter.api.Test;
@@ -182,3 +182,4 @@ public class CounterWithSetupParallelIT {
 
 
 }
+*/

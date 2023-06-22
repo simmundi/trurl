@@ -5,3 +5,5 @@ include 'trurl-core',
         'trurl-io',
         'trurl-xml',
         'trurl-store-tablesaw'
+include 'trurl-util'
+

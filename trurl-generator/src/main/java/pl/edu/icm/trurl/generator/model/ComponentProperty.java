@@ -146,10 +146,6 @@ public class ComponentProperty {
             return PropertyType.STRING_PROP;
         } else if (isEnum(processingEnvironment, typeMirror, typeName)) {
             return PropertyType.ENUM_PROP;
-        } else if (typeName.equals(CommonTypes.ENTITY_LIST)) {
-            return PropertyType.ENTITY_LIST_PROP;
-        } else if (typeName.equals(CommonTypes.ENTITY)) {
-            return PropertyType.ENTITY_PROP;
         } else if (typeName instanceof ParameterizedTypeName
                 && ((ParameterizedTypeName) typeName).rawType.equals(CommonTypes.LIST)) {
             return PropertyType.EMBEDDED_LIST;

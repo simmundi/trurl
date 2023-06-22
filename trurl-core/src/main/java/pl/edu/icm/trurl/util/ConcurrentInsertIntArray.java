@@ -36,9 +36,9 @@ public class ConcurrentInsertIntArray {
         this.table = new int[maxSize];
     }
 
-
     public void add(int value) {
         try {
+            // tee-hee... this is an invalid publication of an int.
             table[counter.getAndIncrement()] = value;
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new ArrayIndexOutOfBoundsException("Maximum table size exceeded");

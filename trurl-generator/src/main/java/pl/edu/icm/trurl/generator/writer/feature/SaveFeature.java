@@ -145,12 +145,6 @@ public class SaveFeature implements Feature {
                 case STRING_PROP:
                     methodSpec.addStatement("$L.setString(row, component.$L())", property.name, property.getterName);
                     break;
-                case ENTITY_LIST_PROP:
-                    methodSpec.addStatement("$L.saveIds(row, component.$L().size(), (idx) -> component.$L().get(idx).getId())", property.name, property.getterName, property.getterName);
-                    break;
-                case ENTITY_PROP:
-                    methodSpec.addStatement("$L.setEntity(row, component.$L())", property.name, property.getterName);
-                    break;
                 case EMBEDDED_PROP:
                     methodSpec.addStatement("if (component.$L() != null) $L.save(component.$L(), row)", property.getterName, property.name, property.getterName);
                     break;

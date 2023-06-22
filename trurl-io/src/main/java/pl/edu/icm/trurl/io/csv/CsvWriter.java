@@ -42,7 +42,7 @@ public class CsvWriter implements SingleStoreWriter {
         try (OutputStream outputStream = Files.newOutputStream(outputPath.toPath());
              OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
              BufferedWriter bufferedWriter = new BufferedWriter(streamWriter, 1024 * 1024 * 128)) {
-            write(bufferedWriter, store, 0, store.getCount());
+            write(bufferedWriter, store, 0, store.getCounter().getCount());
         }
     }
 

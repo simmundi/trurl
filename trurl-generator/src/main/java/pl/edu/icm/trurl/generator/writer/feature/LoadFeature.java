@@ -154,12 +154,6 @@ public class LoadFeature implements Feature {
                 case STRING_PROP:
                     methodSpec.addStatement("component.$L($L.getString(row))", property.setterName, property.name);
                     break;
-                case ENTITY_LIST_PROP:
-                    methodSpec.addStatement("$L.loadIds(row, (idx, id) -> component.$L().add(session.getEntity(id)))", property.name, property.getterName);
-                    break;
-                case ENTITY_PROP:
-                    methodSpec.addStatement("component.$L($L.getEntity(row, session))", property.setterName, property.name);
-                    break;
                 case EMBEDDED_PROP:
                     String instanceName = property.name + "Instance";
                     methodSpec.addCode(CodeBlock.builder()

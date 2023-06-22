@@ -47,7 +47,6 @@ public class ColumnarAccessFeature implements Feature {
     public Stream<MethodSpec> methods() {
         return Stream.of(
                 propertiesForAttributeAccess().map(this::createAttributeAccessor),
-                propertiesForEntityListAccess().map(this::createEntityListAccessor),
                 propertiesForMapperAccess().map(this::createMapperAccessor)).flatMap(Function.identity());
     }
 
@@ -56,10 +55,7 @@ public class ColumnarAccessFeature implements Feature {
                 .stream()
                 .filter(property -> property.getterName != null
                         && property.type != PropertyType.EMBEDDED_LIST
-                        && property.type != PropertyType.EMBEDDED_PROP
-                        && property.type != PropertyType.ENTITY_PROP
-                        && property.type != PropertyType.ENTITY_LIST_PROP
-                        && property.type != PropertyType.VALUE_OBJECT_LIST_PROP);
+                        && property.type != PropertyType.EMBEDDED_PROP);
     }
 
     private Stream<ComponentProperty> propertiesForMapperAccess() {
@@ -67,12 +63,6 @@ public class ColumnarAccessFeature implements Feature {
                 .stream()
                 .filter(property -> property.type == PropertyType.EMBEDDED_LIST
                         || property.type == PropertyType.EMBEDDED_PROP);
-    }
-
-    private Stream<ComponentProperty> propertiesForEntityListAccess() {
-        return beanMetadata.getComponentProperties()
-                .stream()
-                .filter(property -> property.type == PropertyType.ENTITY_LIST_PROP);
     }
 
     private MethodSpec createMapperAccessor(ComponentProperty property) {

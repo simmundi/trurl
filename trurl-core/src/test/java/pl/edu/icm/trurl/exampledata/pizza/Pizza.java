@@ -24,6 +24,7 @@ import pl.edu.icm.trurl.ecs.annotation.WithMapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @WithMapper
 public class Pizza {
@@ -38,5 +39,18 @@ public class Pizza {
 
     public List<Topping> getToppings() {
         return toppings;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Pizza pizza = (Pizza) o;
+        return Objects.equals(olives, pizza.olives) && Objects.equals(toppings, pizza.toppings);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(olives, toppings);
     }
 }

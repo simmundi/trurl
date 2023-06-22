@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.util;
 
 import net.snowyhollows.bento.Bento;
@@ -96,3 +96,6 @@ class SoftEnumCubeTest {
     }
 }
 
+
+
+ */

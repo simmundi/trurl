@@ -18,13 +18,11 @@
 
 package pl.edu.icm.trurl.store.attribute;
 
-public class StubAttribute implements Attribute {
-
-    private int capacity = 0;
+public final class StubAttribute implements Attribute {
 
     @Override
     public void ensureCapacity(int capacity) {
-        this.capacity = capacity;
+
     }
 
     @Override

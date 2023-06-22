@@ -83,7 +83,6 @@ final public class CategoricalStaticArrayAttribute<T extends Enum<T>> implements
         byte ordinal = values[row];
         return ordinal == Byte.MIN_VALUE ? null : instances[ordinal];
     }
-
     @Override
     public void setEnum(int row, T value) {
         setOrdinal(row, value != null ? (byte) value.ordinal() : Byte.MIN_VALUE);

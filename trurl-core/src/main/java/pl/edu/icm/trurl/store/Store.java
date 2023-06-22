@@ -20,12 +20,18 @@ package pl.edu.icm.trurl.store;
 
 import net.snowyhollows.bento.soft.SoftEnum;
 import net.snowyhollows.bento.soft.SoftEnumManager;
+import pl.edu.icm.trurl.ecs.Counter;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.AttributeFactory;
+import pl.edu.icm.trurl.store.join.ArrayJoin;
+import pl.edu.icm.trurl.store.join.Join;
+import pl.edu.icm.trurl.store.join.RandgedJoin;
+import pl.edu.icm.trurl.store.reference.ArrayReference;
+import pl.edu.icm.trurl.store.reference.Reference;
+import pl.edu.icm.trurl.store.reference.SingleReference;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,7 +57,8 @@ import java.util.stream.Stream;
  *     </li>
  *     <li>
  *         the instance is passed to Mappers, which use the StoreMetadata
- *     interface to configure types and names of the store's columns
+ *     interface to configure types and names of the store's columns, joins
+ *     and references
  *     </li>
  *     <li>
  *         the mappers are then attached to the store (i.e. get all the
@@ -67,158 +74,234 @@ import java.util.stream.Stream;
  *     </li>
  * </ul>
  */
-public final class Store implements StoreConfigurer, StoreInspector, StoreObservable {
-    private final String namespace;
-    private final Store rootStore;
+public final class Store implements StoreConfigurer, StoreInspector {
+    private final Map<String, Attribute> allAttributes = new LinkedHashMap<>(40);
+    private final CopyOnWriteArrayList<Attribute> visibleAttributes = new CopyOnWriteArrayList<>();
     private final Map<String, Store> substores = new LinkedHashMap<>();
-    private final AttributeFactory attributeFactory;
-    private final CopyOnWriteArrayList<StoreListener> listeners = new CopyOnWriteArrayList<>();
-    private final Map<String, Attribute> attributes = new LinkedHashMap<>(40);
+    private final Map<String, Join> joins = new LinkedHashMap<>();
+    private final Map<String, Reference> references = new LinkedHashMap<>();
+
     private final int defaultCapacity;
-    private final AtomicInteger count = new AtomicInteger();
+    private final Counter counter;
+    private final String name;
+    private final AttributeFactory attributeFactory;
 
     public Store(AttributeFactory attributeFactory, int defaultCapacity) {
+        counter = new Counter(defaultCapacity);
         this.attributeFactory = attributeFactory;
-        this.namespace = "";
+        this.name = "";
         this.defaultCapacity = defaultCapacity;
-        this.rootStore = this;
     }
 
-    private Store(Store rootStore, AttributeFactory attributeFactory, String namespace, int defaultCapacity) {
+    private Store(AttributeFactory attributeFactory, String name, int defaultCapacity) {
+        counter = new Counter(defaultCapacity);
         this.attributeFactory = attributeFactory;
-        this.namespace = namespace;
+        this.name = name;
         this.defaultCapacity = defaultCapacity;
-        this.rootStore = rootStore;
-    }
-
-    public Store flatten() {
-        Store flatStore = new Store(attributeFactory, defaultCapacity);
-        flatStore.count.set(count.get());
-        attributes().forEach(attribute ->
-                flatStore.attributes.put(attribute.name(), attribute));
-        substores.values().forEach(store -> {
-            Store newStore = store.flatten();
-            flatStore.count.set(Math.max(flatStore.getCount(), newStore.getCount()));
-            flatStore.attributes.putAll(newStore.attributes);
-        });
-        return flatStore;
-    }
-
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public Store getRootStore() {
-        return rootStore;
-    }
-
-    public Collection<Store> getSubstores() {
-        return substores.values();
     }
 
     public Collection<Store> allDescendants() {
         return recursivelyAllDescendants().collect(Collectors.toSet());
     }
 
-    public Store getSubstore(String name) {
-        return substores.get(name);
+    @Override
+    public void erase(int row) {
+        for (Attribute attribute : visibleAttributes) {
+            attribute.setEmpty(row);
+        }
+        for (Join join : joins.values()) {
+            join.setSize(row, 0);
+        }
+        for (Reference reference : references.values()) {
+            reference.setSize(row, 0);
+        }
+        counter.free(row);
     }
 
-    public void createSubstore(String namespace) {
-        String substoreNamespace = this.namespace.isEmpty() ? namespace : this.namespace + "." + namespace;
-        substores.put(namespace, new Store(rootStore, attributeFactory, substoreNamespace, defaultCapacity));
+    public void ensureCapacity(int capacity) {
+        allAttributes.values().forEach(a -> a.ensureCapacity(capacity));
     }
 
     @Override
-    public <T extends Attribute> T get(String name) {
-        return (T) attributes.get(name);
-    }
-
-    @Override
-    public void addStoreListener(StoreListener storeListener) {
-        listeners.add(storeListener);
-    }
-
-    @Override
-    public void fireUnderlyingDataChanged(int fromInclusive, int toExclusive, StoreListener... excluded) {
-        count.set(toExclusive);
-        List<StoreListener> excludedList = Arrays.asList(excluded);
-        for (StoreListener storeListener : listeners) {
-            if (!excludedList.contains(storeListener)) {
-                storeListener.onUnderlyingDataChanged(fromInclusive, toExclusive);
+    public boolean isEmpty(int row) {
+        for (Attribute attribute : allAttributes.values()) {
+            if (!attribute.isEmpty(row)) {
+                return false;
             }
         }
+        return true;
     }
 
     @Override
     public Stream<Attribute> attributes() {
-        return attributes.values().stream();
+        return allAttributes.values().stream();
     }
 
     @Override
-    public int getCount() {
-        return count.get();
+    public Stream<Attribute> visibleAttributes() {
+        return visibleAttributes.stream();
+    }
+
+    @Override
+    public Store getSubstore(String name) {
+        return substores.get(name);
+    }
+
+    @Override
+    public Counter getCounter() {
+        return counter;
+    }
+
+    @Override
+    public Reference getReference(String name) {
+        return references.get(name);
+    }
+
+    public Join getJoin(String name) {
+        return joins.get(name);
     }
 
     @Override
     public void addBoolean(String name) {
-        attributes.putIfAbsent(name, attributeFactory.createBoolean(name));
-
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createBoolean(name));
+        if (former == null) {
+            visibleAttributes.add(allAttributes.get(name));
+        }
     }
 
     @Override
     public void addByte(String name) {
-        attributes.putIfAbsent(name, attributeFactory.createByte(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createByte(name));
+        if (former == null) {
+            visibleAttributes.add(allAttributes.get(name));
+        }
     }
 
     @Override
     public void addDouble(String name) {
-        attributes.putIfAbsent(name, attributeFactory.createDouble(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createDouble(name));
+        if (former == null) {
+            visibleAttributes.add(allAttributes.get(name));
+        }
     }
 
-    @Override
-    public void addEntity(String name) {
-        throw new UnsupportedOperationException("Adding entity is not supported.");
-    }
 
     @Override
-    public void addEntityList(String name) {
-        throw new UnsupportedOperationException("Adding entity list is not supported.");
-    }
-
-    @Override
-    public void addValueObjectList(String name) {
-        throw new UnsupportedOperationException("Adding value object list is not supported.");
+    public void addIntList(String name) {
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createIntList(name));
+        if (former == null) {
+            visibleAttributes.add(allAttributes.get(name));
+        }
     }
 
     @Override
     public <E extends Enum<E>> void addEnum(String name, Class<E> enumType) {
-        attributes.putIfAbsent(name, attributeFactory.createStaticCategory(name, enumType));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createStaticCategory(name, enumType));
+        if (former == null) {
+            visibleAttributes.add(allAttributes.get(name));
+        }
     }
 
     @Override
     public <E extends SoftEnum> void addSoftEnum(String name, SoftEnumManager<E> enumType) {
-        attributes.putIfAbsent(name, attributeFactory.createDynamicCategory(name, enumType));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createDynamicCategory(name, enumType));
+        if (former == null) {
+            visibleAttributes.add(allAttributes.get(name));
+        }
     }
 
     @Override
     public void addFloat(String name) {
-        attributes.putIfAbsent(name, attributeFactory.createFloat(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createFloat(name));
+        if (former == null) {
+            visibleAttributes.add(allAttributes.get(name));
+        }
     }
 
     @Override
     public void addInt(String name) {
-        attributes.putIfAbsent(name, attributeFactory.createInt(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createFloat(name));
+        if (former == null) {
+            visibleAttributes.add(allAttributes.get(name));
+        }
     }
 
     @Override
     public void addShort(String name) {
-        attributes.putIfAbsent(name, attributeFactory.createShort(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createShort(name));
+        if (former == null) {
+            visibleAttributes.add(allAttributes.get(name));
+        }
     }
 
     @Override
     public void addString(String name) {
-        attributes.putIfAbsent(name, attributeFactory.createString(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createString(name));
+        if (former == null) {
+            visibleAttributes.add(allAttributes.get(name));
+        }
+    }
+
+    public ReferenceConfigurer addReference(String name) {
+        return new ReferenceConfigurer() {
+            @Override
+            public void arrayTyped(int minimumSize, int margin) {
+                ArrayReference reference = new ArrayReference(Store.this, name, minimumSize, margin);
+                references.put(name, reference);
+            }
+
+            @Override
+            public void single() {
+                SingleReference reference = new SingleReference(Store.this, name);
+                references.put(name, reference);
+            }
+        };
+    }
+
+    @Override
+    public JoinConfigurer addJoin(String name) {
+        return new JoinConfigurer() {
+
+            public Store rangeTyped(int minimum, int margin) {
+                RandgedJoin join = new RandgedJoin(Store.this, name, minimum, margin);
+                joins.put(name, join);
+                return getSubstore(name);
+            }
+
+            public Store arrayTyped(int minimum, int margin) {
+                ArrayJoin join = new ArrayJoin(Store.this, name, minimum, margin);
+                joins.put(name, join);
+                return getSubstore(name);
+            }
+        };
+    }
+
+    @Override
+    public void hideAttribute(String name) {
+        visibleAttributes.remove(allAttributes.get(name));
+    }
+
+    public Store flatten() {
+        throw new UnsupportedOperationException("sadly, not at the moment, too much has changed");
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Stream<Store> getSubstores() {
+        return substores.values().stream();
+    }
+
+    public Store addSubstore(String namespace) {
+        String substoreNamespace = this.name.isEmpty() ? namespace : this.name + "." + namespace;
+        substores.put(namespace, new Store(attributeFactory, substoreNamespace, defaultCapacity));
+        return substores.get(name);
+    }
+
+    @Override
+    public <T extends Attribute> T get(String name) {
+        return (T) allAttributes.get(name);
     }
 
     private Stream<Store> recursivelyAllDescendants() {

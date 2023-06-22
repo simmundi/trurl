@@ -1,0 +1,23 @@
+plugins {
+    id 'java'
+}
+
+group = 'pl.edu.icm.em'
+version = '1.2--better-stores-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(":trurl-core")
+    implementation "net.snowyhollows.bento:bento-config:${bentoVersion}"
+    implementation "com.google.guava:guava:${guavaVersion}"
+    implementation "it.unimi.dsi:fastutil:${fastutilVersion}"
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
