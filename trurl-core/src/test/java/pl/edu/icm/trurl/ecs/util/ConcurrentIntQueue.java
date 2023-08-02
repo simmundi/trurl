@@ -34,16 +34,42 @@ public class ConcurrentIntQueue {
     private final int[] table;
 
     // All the indices are one-based, 0 is not used.
-    // head is special: it can be negative, which means that the queue is full
-    private AtomicInteger head = new AtomicInteger(1);
-    private AtomicInteger tail = new AtomicInteger(1);
+
+    // sequencedHead is the index of the first free slot; setting sequencedHead happens-after
+    // the last value is written to the table, and (except for wrapping from the end to the beginning) - it
+    // is guaranteed to me monotonic.
     private AtomicInteger sequencedHead = new AtomicInteger(1);
+    // tail is the index of the first potentially occupied slot. If tail == sequencedHead, the queue is empty.
+    private AtomicInteger tail = new AtomicInteger(1);
+    // head is the index of the first free slot, but it has additional meaning - if it is negative, it means that
+    // the last try to push failed because the queue was full. This is because the operation of generating the next
+    // value must be atomic, but needs to return two values: whether the operation succeeded, and the value itself.
+    // We are using the fact that the queue is one-based, so a valid index must be positive.
+    private AtomicInteger head = new AtomicInteger(1);
 
     public ConcurrentIntQueue(int size) {
         this.table = new int[size + 1];
     }
 
+    /**
+     * Pushes a value to the queue. If the queue is full, returns false, otherwise returns true.
+     * @param value
+     * @return
+     */
     public boolean push(int value) {
+        // The algorithm is as follows:
+        // 1. Try to increment head and wrap it around if necessary
+        // 2. If the new head is equal to tail, the queue is full.
+        // 3. The above operation is atomic, but it needs to return two values: whether the operation succeeded, and
+        //    the value itself. We are using the fact that the queue is one-based (a valid index must be positive) to
+        //    pass the information about the success of the operation as the sign of the value.
+        // 3. If the new head is negative, it means that the queue was full, and the push fails.
+        // 4. If the new head is positive, it means that the queue was not full, and the value can be written to the
+        //    slot at the previous head.
+        // 5. We set the sequencedHead to the new head, which means that the value is now visible to the readers. This
+        //    must be done in a loop with a CAS, because the sequencedHead can be changed by other threads and we
+        //    need to make sure this happens monotonically.
+
         int nextHead = head.accumulateAndGet(0, (previous, unused) -> {
             previous = abs(previous);
             int candidate = incrementAndWrapOneBased(previous);
@@ -69,6 +95,10 @@ public class ConcurrentIntQueue {
         }
     }
 
+    /**
+     * Returns the oldest value from the queue, or Integer.MIN_VALUE if the queue is empty.
+     * @return
+     */
     public int shift() {
         while (true) {
             int knownHead = sequencedHead.get();
