@@ -20,7 +20,7 @@ package pl.edu.icm.trurl.ecs.util;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ConcurrentIntStack {
+public class ConcurrentIntQueue {
     private final int[] table;
 
     private AtomicInteger tail = new AtomicInteger(-1);
@@ -28,38 +28,35 @@ public class ConcurrentIntStack {
     private AtomicInteger sequencedHead = new AtomicInteger(-1);
 
 
-    public ConcurrentIntStack(int size) {
+    public ConcurrentIntQueue(int size) {
         this.table = new int[size];
+        head.set(size - 1);
+        sequencedHead.set(size - 1);
+        tail.set(size - 1);
     }
 
     public boolean push(int value) {
-        if (tail.get() == sequencedHead.get() + 1) {
+        if (sequencedHead.get() == tail.get()) {
             return false;
         }
-        int newHead = head.accumulateAndGet(0, (oldHead, unused) -> {
-            int newHeadValue = oldHead + 1;
-            if (newHeadValue == table.length) {
-                return 0;
-            }
-
-            return newHeadValue;
-        });
+        int newHead = head.accumulateAndGet(0, (oldHead, unused) -> oldHead == table.length - 1 ? 0 : oldHead + 1);
         if (newHead != tail.get()) {
             table[newHead] = value;
         }
-        do {} while (!sequencedHead.compareAndSet(newHead - 1, newHead));
+        do {} while (!sequencedHead.compareAndSet(newHead == 0 ? table.length - 1 : newHead - 1, newHead));
         return true;
     }
 
     public int pop() {
-        int newTail = tail.accumulateAndGet(0, (oldTail, unused) -> {
-            int newTailValue = oldTail + 1;
-            return newTailValue < table.length ? newTailValue : 0;
-        });
-
-        if (tail.get() == sequencedHead.get()) {
-            return Integer.MIN_VALUE;
+        while (true) {
+            int knownTail = tail.get();
+            if (knownTail == sequencedHead.get()) {
+                return Integer.MIN_VALUE;
+            }
+            int newTailValue = (knownTail + 1) < table.length ? (knownTail + 1) : 0;
+            if (tail.compareAndSet(knownTail, newTailValue)) {
+                return table[newTailValue];
+            }
         }
-        return table[newTail];
     }
 }
