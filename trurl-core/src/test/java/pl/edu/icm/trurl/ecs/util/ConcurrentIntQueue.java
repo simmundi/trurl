@@ -20,43 +20,73 @@ package pl.edu.icm.trurl.ecs.util;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.Math.abs;
+
+/**
+ * A concurrent queue of ints with a fixed capacity.
+ *
+ * The queue is not blocking. If the capacity is extended:
+ * <li>> shift will return Integer.MIN_VALUE
+ * <li> push will return false
+ */
 public class ConcurrentIntQueue {
+    // The table acts as a ring buffer.
     private final int[] table;
 
-    private AtomicInteger tail = new AtomicInteger(-1);
-    private AtomicInteger head = new AtomicInteger(-1);
-    private AtomicInteger sequencedHead = new AtomicInteger(-1);
-
+    // All the indices are one-based, 0 is not used.
+    // head is special: it can be negative, which means that the queue is full
+    private AtomicInteger head = new AtomicInteger(1);
+    private AtomicInteger tail = new AtomicInteger(1);
+    private AtomicInteger sequencedHead = new AtomicInteger(1);
 
     public ConcurrentIntQueue(int size) {
-        this.table = new int[size];
-        head.set(size - 1);
-        sequencedHead.set(size - 1);
-        tail.set(size - 1);
+        this.table = new int[size + 1];
     }
 
     public boolean push(int value) {
-        if (sequencedHead.get() == tail.get()) {
+        int nextHead = head.accumulateAndGet(0, (previous, unused) -> {
+            previous = abs(previous);
+            int candidate = incrementAndWrapOneBased(previous);
+            if (candidate == tail.get()) {
+                return -previous;
+            } else {
+                return candidate;
+            }
+        });
+
+        if (nextHead < 0) {
             return false;
         }
-        int newHead = head.accumulateAndGet(0, (oldHead, unused) -> oldHead == table.length - 1 ? 0 : oldHead + 1);
-        if (newHead != tail.get()) {
-            table[newHead] = value;
+
+
+        int formerHead = nextHead == 1 ? table.length : nextHead - 1;
+        table[formerHead - 1] = value;
+
+        while (true) {
+            if (sequencedHead.compareAndSet(formerHead, nextHead)) {
+                return true;
+            }
         }
-        do {} while (!sequencedHead.compareAndSet(newHead == 0 ? table.length - 1 : newHead - 1, newHead));
-        return true;
     }
 
-    public int pop() {
+    public int shift() {
         while (true) {
+            int knownHead = sequencedHead.get();
             int knownTail = tail.get();
-            if (knownTail == sequencedHead.get()) {
+
+            if (knownHead == knownTail) {
                 return Integer.MIN_VALUE;
             }
-            int newTailValue = (knownTail + 1) < table.length ? (knownTail + 1) : 0;
-            if (tail.compareAndSet(knownTail, newTailValue)) {
-                return table[newTailValue];
+
+            int nextTail = incrementAndWrapOneBased(knownTail);
+
+            if (tail.compareAndSet(knownTail, nextTail)) {
+                return table[knownTail - 1];
             }
         }
+    }
+
+    private int incrementAndWrapOneBased(int index) {
+        return (index + 1) == table.length + 1 ? 1 : (index + 1);
     }
 }
