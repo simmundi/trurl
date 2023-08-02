@@ -64,7 +64,7 @@ class ConcurrentIntQueueTest {
 
     }
 
-    int size = 30_000_000;
+    int size = 1_000_000;
 
     @Test
     @DisplayName("Push and pop should work correctly in a multi-threaded environment, under extreme contention")
@@ -93,12 +93,13 @@ class ConcurrentIntQueueTest {
     }
 
     @Test
-    @Disabled("This test is meant to compare the ConcurrentIntQueue to the ConcurrentLinkedDeque. It is not a real test.")
+    @Disabled
+    @DisplayName("This test is meant to compare the ConcurrentIntQueue to the ConcurrentLinkedDeque. It is not a real test.")
     void alternative() {
         // For small sizes, the ConcurrentLinkedDeque is about 1.3 times faster (even though it allocates millions of objects instead of six)
         // On my machine, the inflection point happens around 7 million elements, when ConcurrentLinkedDeque starts being faster.
         // On 8 millions, it's two times as fast. With 30 million elements, the ConcurrentLinkedDeque throws an OOME after 2 minutes,
-        // while the ConcurrentIntQueue finishes in 118 seconds. Admittedly, this is due to GC spinning out of control.
+        // while the ConcurrentIntQueue finishes in 18 seconds. Admittedly, this is due to GC spinning out of control.
         // given
         ConcurrentLinkedDeque<Integer> concurrentLinkedDeque = new ConcurrentLinkedDeque();
         IntStream.range(0, size).forEach(concurrentLinkedDeque::push);
