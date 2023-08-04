@@ -25,15 +25,11 @@ import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.ecs.SessionFactory;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
+import pl.edu.icm.trurl.store.DefaultStore;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayStore;
+import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,7 +68,7 @@ public class VnAreaExporter<T> {
         int size = width * height;
         File file = new File(baseFilePath);
         this.baseFileName = file.getName();
-        this.store = new ArrayStore(size);
+        this.store = new DefaultStore(new ArrayAttributeFactory());
         this.mapper = mapper;
         this.mapper.configureStore(store);
         this.mapper.attachStore(store);

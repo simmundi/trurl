@@ -21,14 +21,7 @@ package pl.edu.icm.trurl.store;
 import net.snowyhollows.bento.annotation.ImplementationSwitch;
 import pl.edu.icm.trurl.store.array.ArrayStoreFactory;
 
-/**
- * Used instead of a full store in situations where
- * it's important to show that the store might be assumed to be empty.
- *
- */
-@ImplementationSwitch(configKey = "trurl.engine.storeFactory", cases = {
-        @ImplementationSwitch.When(name = "array", implementation = ArrayStoreFactory.class, useByDefault = true)
-})
+
 public interface StoreFactory {
     Store create(int initialCapacity);
 }

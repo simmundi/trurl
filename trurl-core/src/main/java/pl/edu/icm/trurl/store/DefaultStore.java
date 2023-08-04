@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,13 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store;
 
 import net.snowyhollows.bento.soft.SoftEnum;
 import net.snowyhollows.bento.soft.SoftEnumManager;
-import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.StoreListener;
+import pl.edu.icm.trurl.store.array.*;
 import pl.edu.icm.trurl.store.attribute.Attribute;
-import pl.edu.icm.trurl.store.attribute.generic.GenericEntityListOverIntArrayAttribute;
-import pl.edu.icm.trurl.store.attribute.generic.GenericEntityOverIntAttribute;
+import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -34,14 +32,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-public final class ArrayStore implements Store {
+public final class DefaultStore implements Store {
     private final CopyOnWriteArrayList<StoreListener> listeners = new CopyOnWriteArrayList();
     private final Map<String, Attribute> attributes = new LinkedHashMap<>(40);
-    private final int defaultCapacity;
     private final AtomicInteger count = new AtomicInteger();
+    private final AttributeFactory attributeFactory;
 
-    public ArrayStore(int defaultCapacity) {
-        this.defaultCapacity = defaultCapacity;
+    public DefaultStore(AttributeFactory attributeFactory) {
+        this.attributeFactory = attributeFactory;
     }
 
 
@@ -51,7 +49,7 @@ public final class ArrayStore implements Store {
     }
 
     @Override
-    public void addStoreListener(StoreListener storeListener) {
+    public void createStoreListener(StoreListener storeListener) {
         listeners.add(storeListener);
     }
 
@@ -77,44 +75,49 @@ public final class ArrayStore implements Store {
     }
 
     @Override
-    public void addBoolean(String name) {
+    public void createBoolean(String name) {
         attributes.putIfAbsent(name, new BooleanArrayAttribute(name, defaultCapacity));
 
     }
 
     @Override
-    public void addByte(String name) {
+    public void createByte(String name) {
         attributes.putIfAbsent(name, new ByteArrayAttribute(name, defaultCapacity));
     }
 
     @Override
-    public void addDouble(String name) {
+    public void createDouble(String name) {
         attributes.putIfAbsent(name, new DoubleArrayAttribute(name, defaultCapacity));
     }
 
     @Override
-    public void addEntity(String name) {
+    public void createEntity(String name) {
         attributes.putIfAbsent(name, new GenericEntityOverIntAttribute(new IntArrayAttribute(name, defaultCapacity)));
     }
 
     @Override
-    public void addEntityList(String name) {
+    public void createEntityList(String name) {
         attributes.putIfAbsent(name, new GenericEntityListOverIntArrayAttribute(new IntListArrayAttribute(name, defaultCapacity)));
     }
 
     @Override
-    public void addValueObjectList(String name) {
+    public void createValueObjectList(String name) {
         attributes.putIfAbsent(name, new ValueObjectListArrayAttribute(name, defaultCapacity));
     }
 
     @Override
-    public <E extends Enum<E>> void addEnum(String name, Class<E> enumType) {
-        attributes.putIfAbsent(name, new EnumArrayAttribute<>(enumType, name, defaultCapacity));
+    public <E extends Enum<E>> void addStaticCategory(String name, Class<E> enumType) {
+        attributes.putIfAbsent(name, new CategoricalStaticArrayAttribute<>(enumType, name, defaultCapacity));
     }
 
     @Override
-    public <E extends SoftEnum> void addSoftEnum(String name, SoftEnumManager<E> enumType) {
-        attributes.putIfAbsent(name, new SoftEnumArrayAttribute<>(enumType, name, defaultCapacity));
+    public <E extends SoftEnum> void addDynamicCategory(String name, SoftEnumManager<E> enumType) {
+
+    }
+
+    @Override
+    public <E extends SoftEnum> void addStaticCategory(String name, SoftEnumManager<E> enumType) {
+        attributes.putIfAbsent(name, new CategoricalDynamicArrayAttribute<>(enumType, name, defaultCapacity));
     }
 
     @Override
@@ -135,5 +138,25 @@ public final class ArrayStore implements Store {
     @Override
     public void addString(String name) {
         attributes.putIfAbsent(name, new StringArrayAttribute(name, defaultCapacity));
+    }
+
+    @Override
+    public Store addReference(String name) {
+        return null;
+    }
+
+    @Override
+    public Store addReferenceList(String referenceName) {
+        return null;
+    }
+
+    @Override
+    public void addRootReference(String name) {
+
+    }
+
+    @Override
+    public void addRootReferenceList(String name) {
+
     }
 }

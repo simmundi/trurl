@@ -18,8 +18,8 @@
 
 package pl.edu.icm.trurl.store.attribute;
 
-import pl.edu.icm.trurl.store.IntSink;
-import pl.edu.icm.trurl.store.IntSource;
+import pl.edu.icm.trurl.store.util.IntSink;
+import pl.edu.icm.trurl.store.util.IntSource;
 
 public interface IntListAttribute extends Attribute {
 

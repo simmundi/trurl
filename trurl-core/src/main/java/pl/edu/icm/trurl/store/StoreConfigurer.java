@@ -20,12 +20,12 @@ package pl.edu.icm.trurl.store;
 
 import net.snowyhollows.bento.soft.SoftEnum;
 import net.snowyhollows.bento.soft.SoftEnumManager;
+import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 
 /**
  * This is usually used as superinterface of Store.
  * <p>
- * It is used by store clients to configure the store (i.e. associate
- * column names with column types).
+ * It is used by store clients to configure the store metadata, which is required for importing and exporting data.
  */
 public interface StoreConfigurer {
     void addBoolean(String name);
@@ -34,15 +34,9 @@ public interface StoreConfigurer {
 
     void addDouble(String name);
 
-    void addEntity(String name);
+    <E extends Enum<E>> void addStaticCategory(String name, Class<E> enumType);
 
-    void addEntityList(String name);
-
-    void addValueObjectList(String name);
-
-    <E extends Enum<E>> void addEnum(String name, Class<E> enumType);
-
-    <E extends SoftEnum> void addSoftEnum(String name, SoftEnumManager<E> enumType);
+    <E extends SoftEnum> void addDynamicCategory(String name, SoftEnumManager<E> enumType);
 
     void addFloat(String name);
 
@@ -51,4 +45,10 @@ public interface StoreConfigurer {
     void addShort(String name);
 
     void addString(String name);
+    Store addReference(String name);
+
+    Store addReferenceList(String referenceName);
+    void addRootReference(String name);
+
+    void addRootReferenceList(String name);
 }

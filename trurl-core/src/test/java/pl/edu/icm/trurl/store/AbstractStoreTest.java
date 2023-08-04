@@ -21,19 +21,8 @@ package pl.edu.icm.trurl.store;
 import org.assertj.core.api.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.store.attribute.Attribute;
-import pl.edu.icm.trurl.store.attribute.BooleanAttribute;
-import pl.edu.icm.trurl.store.attribute.ByteAttribute;
-import pl.edu.icm.trurl.store.attribute.DoubleAttribute;
-import pl.edu.icm.trurl.store.attribute.EntityAttribute;
-import pl.edu.icm.trurl.store.attribute.EntityListAttribute;
-import pl.edu.icm.trurl.store.attribute.EnumAttribute;
-import pl.edu.icm.trurl.store.attribute.FloatAttribute;
-import pl.edu.icm.trurl.store.attribute.IntAttribute;
-import pl.edu.icm.trurl.store.attribute.ShortAttribute;
-import pl.edu.icm.trurl.store.attribute.StringAttribute;
-
-import java.util.Optional;
+import pl.edu.icm.trurl.store.attribute.*;
+import pl.edu.icm.trurl.store.attribute.CategoricalStaticAttribute;
 
 public abstract class AbstractStoreTest<T extends Store> {
 
@@ -116,11 +105,11 @@ public abstract class AbstractStoreTest<T extends Store> {
         Store tablesawComponentStore = createStore();
 
         // execute
-        tablesawComponentStore.addEnum("enum", Letters.class);
+        tablesawComponentStore.addStaticCategory("enum", Letters.class);
         Attribute attribute = tablesawComponentStore.get("enum");
 
         // assert
-        Assertions.assertThat(attribute).isInstanceOf(EnumAttribute.class);
+        Assertions.assertThat(attribute).isInstanceOf(CategoricalStaticAttribute.class);
     }
 
     @Test

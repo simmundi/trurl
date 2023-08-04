@@ -29,14 +29,14 @@ import pl.edu.icm.trurl.exampledata.pizza.OliveColor;
 import pl.edu.icm.trurl.exampledata.pizza.Pizza;
 import pl.edu.icm.trurl.exampledata.pizza.Topping;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayStore;
+import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
 import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class MapperCollectionsIT {
     Mapper<Pizza> mapper;
-    Store store = new ArrayStore(100);
+    Store store = new ArrayAttributeFactory(100);
 
     @BeforeEach
     void before() {

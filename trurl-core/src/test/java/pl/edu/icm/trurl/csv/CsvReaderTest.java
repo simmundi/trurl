@@ -20,7 +20,7 @@ package pl.edu.icm.trurl.csv;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.store.array.ArrayStore;
+import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
 import java.io.InputStream;
@@ -38,9 +38,9 @@ class CsvReaderTest {
     public void load() {
         // given
         CsvReader csvReader = new CsvReader();
-        ArrayStore store = new ArrayStore(1000);
+        ArrayAttributeFactory store = new ArrayAttributeFactory(1000);
         store.addInt("age");
-        store.addEnum("letter", Letter.class);
+        store.addStaticCategory("letter", Letter.class);
         store.addEntityList("entities");
         store.addFloat("number");
         store.addString("name");

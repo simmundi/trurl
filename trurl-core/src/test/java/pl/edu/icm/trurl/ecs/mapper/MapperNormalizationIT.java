@@ -26,11 +26,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.exampledata.Person;
 import pl.edu.icm.trurl.exampledata.PersonMapper;
-import pl.edu.icm.trurl.store.array.ArrayStore;
+import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
 @ExtendWith(MockitoExtension.class)
 public class MapperNormalizationIT {
-    ArrayStore store = new ArrayStore(1);
+    ArrayAttributeFactory store = new ArrayAttributeFactory(1);
     PersonMapper personMapper = new PersonMapper();
 
     @BeforeEach

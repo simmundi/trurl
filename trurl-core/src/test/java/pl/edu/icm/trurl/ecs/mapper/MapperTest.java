@@ -27,7 +27,7 @@ import pl.edu.icm.trurl.exampledata.Color;
 import pl.edu.icm.trurl.exampledata.Looks;
 import pl.edu.icm.trurl.exampledata.Texture;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.attribute.EnumAttribute;
+import pl.edu.icm.trurl.store.attribute.CategoricalStaticAttribute;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,10 +48,10 @@ class MapperTest {
     Store store;
 
     @Mock
-    EnumAttribute colorAttribute;
+    CategoricalStaticAttribute colorAttribute;
 
     @Mock
-    EnumAttribute textureAttribute;
+    CategoricalStaticAttribute textureAttribute;
 
     @Mock
     MapperListener<Looks> mapperListener;
@@ -70,8 +70,8 @@ class MapperTest {
     @Test
     void construct() {
         // assert
-        verify(store).addEnum("color", Color.class);
-        verify(store).addEnum("texture", Texture.class);
+        verify(store).addStaticCategory("color", Color.class);
+        verify(store).addStaticCategory("texture", Texture.class);
 
         verify(store).get("color");
         verify(store).get("texture");

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,8 @@
  *
  */
 
-package pl.edu.icm.trurl.store.attribute;
+package pl.edu.icm.trurl.store.util;
 
-import pl.edu.icm.trurl.store.IntSink;
-import pl.edu.icm.trurl.store.IntSource;
-
-public interface EntityListAttribute extends Attribute {
-    int getSize(int row);
-
-    void loadIds(int row, IntSink ids);
-
-    void saveIds(int row, int size, IntSource ids);
-
-    boolean isEqual(int row, int size, IntSource ids);
+public interface IntSource {
+    int getInt(int index);
 }

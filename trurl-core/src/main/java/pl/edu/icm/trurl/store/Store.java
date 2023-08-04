@@ -18,10 +18,6 @@
 
 package pl.edu.icm.trurl.store;
 
-import pl.edu.icm.trurl.store.attribute.Attribute;
-
-import java.util.stream.Stream;
-
 /**
  * Represents a columnar store.
  * <p>

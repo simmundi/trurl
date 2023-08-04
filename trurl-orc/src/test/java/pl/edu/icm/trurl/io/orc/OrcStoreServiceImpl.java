@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import pl.edu.icm.trurl.csv.CsvReader;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayStore;
+import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,9 +41,9 @@ class OrcStoreServiceImpl {
     public void writeThenRead() throws IOException {
         // given
         String filename = new File(tempDir, "dump.orc").getAbsolutePath();
-        ArrayStore storeToWrite = new ArrayStore(1024);
+        ArrayAttributeFactory storeToWrite = new ArrayAttributeFactory(1024);
         configureStore(storeToWrite);
-        ArrayStore storeToRead = new ArrayStore(1024);
+        ArrayAttributeFactory storeToRead = new ArrayAttributeFactory(1024);
         configureStore(storeToRead);
         loadFromCsvResource(storeToWrite, "/store.csv");
         OrcStoreService orcStoreService = new OrcStoreService(new OrcImplementationsService());
@@ -60,7 +60,7 @@ class OrcStoreServiceImpl {
                 .isEqualTo(dataFromStore(storeToRead, writeCount));
     }
 
-    private void loadFromCsvResource(ArrayStore storeToWrite, String name) {
+    private void loadFromCsvResource(ArrayAttributeFactory storeToWrite, String name) {
         new CsvReader().load(
                 OrcStoreServiceImpl.class.getResourceAsStream(name),
                 storeToWrite
@@ -74,13 +74,13 @@ class OrcStoreServiceImpl {
         ).collect(Collectors.toList());
     }
 
-    private void configureStore(ArrayStore store) {
+    private void configureStore(ArrayAttributeFactory store) {
         store.addBoolean("bools");
         store.addByte("bytes");
         store.addDouble("doubles");
         store.addEntity("entities");
         store.addEntityList("entityLists");
-        store.addEnum("enums", Shape.class);
+        store.addStaticCategory("enums", Shape.class);
         store.addFloat("floats");
         store.addInt("ints");
         store.addShort("shorts");

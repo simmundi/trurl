@@ -16,20 +16,15 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store.attribute;
 
-import net.snowyhollows.bento.annotation.WithFactory;
-import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.StoreFactory;
+import net.snowyhollows.bento.soft.SoftEnum;
 
-public class ArrayStoreFactory implements StoreFactory {
+public interface CategoricalDynamicAttribute<E extends SoftEnum> extends Attribute {
+    E getEnum(int row);
+    void setEnum(int row, E value);
+    byte getOrdinal(int row);
+    void setOrdinal(int row, byte value);
 
-    @WithFactory
-    public ArrayStoreFactory() {
-    }
-
-    @Override
-    public Store create(int initialCapacity) {
-        return new ArrayStore(initialCapacity);
-    }
+    E[] values();
 }

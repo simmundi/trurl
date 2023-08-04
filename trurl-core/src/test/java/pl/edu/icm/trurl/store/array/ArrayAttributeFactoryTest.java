@@ -20,9 +20,9 @@ package pl.edu.icm.trurl.store.array;
 
 import pl.edu.icm.trurl.store.AbstractStoreTest;
 
-class ArrayStoreTest extends AbstractStoreTest<ArrayStore> {
+class ArrayAttributeFactoryTest extends AbstractStoreTest<ArrayAttributeFactory> {
     @Override
-    protected ArrayStore createStore() {
-        return new ArrayStore(1024);
+    protected ArrayAttributeFactory createStore() {
+        return new ArrayAttributeFactory(1024);
     }
 }

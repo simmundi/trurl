@@ -18,13 +18,7 @@
 
 package pl.edu.icm.trurl.visnow;
 
-import pl.edu.icm.trurl.store.attribute.Attribute;
-import pl.edu.icm.trurl.store.attribute.BooleanAttribute;
-import pl.edu.icm.trurl.store.attribute.DoubleAttribute;
-import pl.edu.icm.trurl.store.attribute.EnumAttribute;
-import pl.edu.icm.trurl.store.attribute.FloatAttribute;
-import pl.edu.icm.trurl.store.attribute.IntAttribute;
-import pl.edu.icm.trurl.store.attribute.ShortAttribute;
+import pl.edu.icm.trurl.store.attribute.*;
 
 import java.io.DataOutput;
 import java.io.IOException;
@@ -130,11 +124,11 @@ public interface ColumnWrapper {
                     return attribute.name();
                 }
             };
-        } else if (attribute instanceof EnumAttribute) {
+        } else if (attribute instanceof CategoricalStaticAttribute) {
             return new ColumnWrapper() {
                 @Override
                 public void writeData(DataOutput dataOutput, int row) throws IOException {
-                    Enum datum = ((EnumAttribute) attribute).getEnum(row);
+                    Enum datum = ((CategoricalStaticAttribute) attribute).getEnum(row);
                     dataOutput.writeByte(datum == null ? Byte.MIN_VALUE : datum.ordinal());
                 }
 
@@ -142,7 +136,7 @@ public interface ColumnWrapper {
                 public String headerDefinition() {
                     return
                             String.format("component %s byte, user:\"map\";", attribute.name())
-                            + Arrays.stream(((EnumAttribute<?>) attribute).values())
+                            + Arrays.stream(((CategoricalStaticAttribute<?>) attribute).values())
                                     .map(e -> "\"" + e.ordinal() + ": " + e + "\"")
                                     .collect(Collectors.joining(";"));
                 }

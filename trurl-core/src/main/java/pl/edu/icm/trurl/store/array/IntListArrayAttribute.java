@@ -19,8 +19,8 @@
 package pl.edu.icm.trurl.store.array;
 
 import com.google.common.base.Strings;
-import pl.edu.icm.trurl.store.IntSink;
-import pl.edu.icm.trurl.store.IntSource;
+import pl.edu.icm.trurl.store.util.IntSink;
+import pl.edu.icm.trurl.store.util.IntSource;
 import pl.edu.icm.trurl.store.attribute.IntListAttribute;
 
 import java.util.Arrays;
