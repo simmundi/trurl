@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store;
 
-import pl.edu.icm.trurl.store.AbstractStoreTest;
+import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
-class ArrayStoreTest extends AbstractStoreTest<ArrayStore> {
+class ArrayStoreTest extends AbstractStoreTest {
     @Override
-    protected ArrayStore createStore() {
-        return new ArrayStore(1024);
+    protected Store createStore() {
+        return new Store(new ArrayAttributeFactory(), 1024);
     }
 }

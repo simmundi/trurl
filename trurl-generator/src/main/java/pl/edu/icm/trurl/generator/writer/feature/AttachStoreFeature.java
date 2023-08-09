@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,12 +61,7 @@ public class AttachStoreFeature implements Feature {
         for (ComponentProperty property : properties) {
             switch (property.type) {
                 case EMBEDDED_PROP:
-                    methodSpec.addStatement("$L.attachStore($T.wrap(store, $S))",
-                            property.name, CommonTypes.PREFIXED_STORE, property.name);
-                    break;
                 case EMBEDDED_LIST:
-                    methodSpec.addStatement("$L.attachStore($T.wrap(store, $S))",
-                            property.name, CommonTypes.PREFIXED_STORE, property.name);
                     break;
                 default:
                     methodSpec.addStatement("$L = ($T) store.get($S)",

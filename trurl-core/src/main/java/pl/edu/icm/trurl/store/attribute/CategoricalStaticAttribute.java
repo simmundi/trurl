@@ -16,21 +16,12 @@
  *
  */
 
-package pl.edu.icm.trurl.store.tablesaw;
+package pl.edu.icm.trurl.store.attribute;
 
-import net.snowyhollows.bento.annotation.WithFactory;
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
-import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.StoreFactory;
-
-public class TablesawStoreFactory implements StoreFactory {
-
-    @WithFactory
-    public TablesawStoreFactory() {
-    }
-
-    @Override
-    public Store create(int ignoredInitialCapacity) {
-        return new TablesawStore();
-    }
+public interface CategoricalStaticAttribute<E extends Enum<E>> extends Attribute {
+    E getEnum(int row);
+    void setEnum(int row, E value);
+    byte getOrdinal(int row);
+    void setOrdinal(int row, byte value);
+    E[] values();
 }

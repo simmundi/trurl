@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.MapperListeners;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
 import pl.edu.icm.trurl.store.IntSink;
-import pl.edu.icm.trurl.store.PrefixedStore;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreConfigurer;
 import pl.edu.icm.trurl.store.attribute.*;
@@ -40,7 +39,6 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 public class CommonTypes {
     public static final ClassName COMPONENT_STORE_METADATA = ClassName.get(StoreConfigurer.class);
     public static final ClassName STORE = ClassName.get(Store.class);
-    public static final ClassName PREFIXED_STORE = ClassName.get(PrefixedStore.class);
     public static final ClassName LIFECYCLE_EVENT = ClassName.get(LifecycleEvent.class);
     public static final ClassName INT_SINK = ClassName.get(IntSink.class);
     public static final ClassName MAPPER = ClassName.get(Mapper.class);
@@ -65,11 +63,11 @@ public class CommonTypes {
     public static final ClassName BYTE_COLUMN = ClassName.get(ByteAttribute.class);
     public static final ClassName SHORT_COLUMN = ClassName.get(ShortAttribute.class);
     public static final ClassName STRING_COLUMN = ClassName.get(StringAttribute.class);
-    public static final ClassName ENUM_COLUMN = ClassName.get(EnumAttribute.class);
+    public static final ClassName CATEGORICAL_STATIC_COLUMN = ClassName.get(CategoricalStaticAttribute.class);
     public static final ClassName BOOLEAN_COLUMN = ClassName.get(BooleanAttribute.class);
     public static final ClassName ENTITY_LIST_COLUMN = ClassName.get(EntityListAttribute.class);
     public static final ClassName VALUE_OBJECT_LIST_COLUMN = ClassName.get(ValueObjectListAttribute.class);
-    public static final ClassName SOFT_ENUM_COLUMN = ClassName.get(SoftEnumAttribute.class);
+    public static final ClassName CATEGORICAL_DYNAMIC_COLUMN = ClassName.get(CategoricalDynamicAttribute.class);
     public static final ClassName ENTITY_COLUMN = ClassName.get(EntityAttribute.class);
     public static final ClassName SOFT_ENUM = ClassName.get(SoftEnum.class);
     public static final ClassName SOFT_ENUM_MANAGER = ClassName.get(SoftEnumManager.class);

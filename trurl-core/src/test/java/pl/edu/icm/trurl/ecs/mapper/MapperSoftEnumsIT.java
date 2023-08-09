@@ -20,13 +20,11 @@ package pl.edu.icm.trurl.ecs.mapper;
 
 import net.snowyhollows.bento.Bento;
 import net.snowyhollows.bento.config.Configurer;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.exampledata.*;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayStore;
-import pl.edu.icm.trurl.util.chess.RowsFactory;
+import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
 import java.io.IOException;
 
@@ -40,7 +38,7 @@ public class MapperSoftEnumsIT {
     @DisplayName("Should correctly map a component with a SoftEnum")
     void test() throws IOException {
         // given
-        Store store = new ArrayStore(1024);
+        Store store = new Store(new ArrayAttributeFactory(), 1024);
         Bento config = new Configurer().loadConfigResource("/contamination.properties").getConfig();
         HealthMapper healthMapper = config.get(MapperOfHealthFactory.IT);
         ContaminationTypes contaminationTypes = config.get(ContaminationTypesFactory.IT);

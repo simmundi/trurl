@@ -29,7 +29,7 @@ import pl.edu.icm.trurl.ecs.parallel.domain.HasAAndB;
 import pl.edu.icm.trurl.ecs.parallel.domain.ParallelCounter;
 import pl.edu.icm.trurl.ecs.parallel.domain.ParallelCounterMapper;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayStore;
+import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 import pl.edu.icm.trurl.util.Status;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -46,7 +46,7 @@ public class CounterWithSetupParallelIT {
     @Test
     void test_parallel() {
         // given
-        Store store = new ArrayStore(SIZE);
+        Store store = new Store(new ArrayAttributeFactory(), SIZE);
         ParallelCounterMapper parallelMapper = new ParallelCounterMapper();
         parallelMapper.configureAndAttach(store);
         this.prepareZeroedCounters(parallelMapper);
@@ -77,7 +77,7 @@ public class CounterWithSetupParallelIT {
     @Test
     void test_sequential() {
         // given
-        Store store = new ArrayStore(SIZE);
+        Store store = new Store(new ArrayAttributeFactory(), SIZE);
         CounterMapper counterMapper = new CounterMapper();
         counterMapper.configureAndAttach(store);
         prepareZeroedCounters(counterMapper);
@@ -106,7 +106,7 @@ public class CounterWithSetupParallelIT {
     @Test
     void test_sequential_incorrect_results() {
         // given
-        Store store = new ArrayStore(SIZE);
+        Store store = new Store(new ArrayAttributeFactory(), SIZE);
         CounterMapper sequentialMapper = new CounterMapper();
         sequentialMapper.configureAndAttach(store);
         prepareZeroedCounters(sequentialMapper);

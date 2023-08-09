@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,8 +99,6 @@ public class ConfigureStoreFeature implements Feature {
                 case EMBEDDED_LIST:
                 case EMBEDDED_PROP:
                     methodSpec.addStatement("$L = mappers.create($T.class)", property.name, property.businessType);
-                    methodSpec.addStatement("$L.configureStore($T.wrap(meta, $S))",
-                            property.name, CommonTypes.PREFIXED_STORE, property.name);
                     break;
 
                 default:

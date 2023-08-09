@@ -25,7 +25,7 @@ import pl.edu.icm.trurl.ecs.SessionFactory;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayStore;
+import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -50,7 +50,7 @@ public class VnPointsExporter<T extends VnCoords> {
     private VnPointsExporter(Mapper<T> mapper, WorkDir workDir, String baseFilePath) throws FileNotFoundException {
         File file = new File(baseFilePath);
         this.baseFileName = file.getName();
-        this.store = new ArrayStore(1);
+        this.store = new Store(new ArrayAttributeFactory(), 1);
         this.mapper = mapper;
         this.mapper.configureStore(store);
         this.mapper.attachStore(store);
