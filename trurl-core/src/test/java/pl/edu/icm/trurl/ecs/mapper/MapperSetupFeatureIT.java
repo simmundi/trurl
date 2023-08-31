@@ -25,7 +25,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.exampledata.CounterWithSetup;
 import pl.edu.icm.trurl.exampledata.CounterWithSetupMapper;
-import pl.edu.icm.trurl.store.array.ArrayStore;
+import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.Store;
 
 import java.util.stream.Collectors;
 
@@ -33,7 +34,7 @@ import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class MapperSetupFeatureIT {
-    ArrayStore store = new ArrayStore(1);
+    Store store = new Store(new ArrayAttributeFactory(), 1);
     CounterWithSetupMapper counterMapper = new CounterWithSetupMapper();
 
     @BeforeEach

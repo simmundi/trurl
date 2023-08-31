@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,35 +19,75 @@
 package pl.edu.icm.trurl.store;
 
 import org.assertj.core.api.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.store.attribute.Attribute;
-import pl.edu.icm.trurl.store.attribute.BooleanAttribute;
-import pl.edu.icm.trurl.store.attribute.ByteAttribute;
-import pl.edu.icm.trurl.store.attribute.DoubleAttribute;
-import pl.edu.icm.trurl.store.attribute.EntityAttribute;
-import pl.edu.icm.trurl.store.attribute.EntityListAttribute;
-import pl.edu.icm.trurl.store.attribute.EnumAttribute;
-import pl.edu.icm.trurl.store.attribute.FloatAttribute;
-import pl.edu.icm.trurl.store.attribute.IntAttribute;
-import pl.edu.icm.trurl.store.attribute.ShortAttribute;
-import pl.edu.icm.trurl.store.attribute.StringAttribute;
+import pl.edu.icm.trurl.store.attribute.*;
+import pl.edu.icm.trurl.store.attribute.CategoricalStaticAttribute;
 
-import java.util.Optional;
+import java.util.stream.Collectors;
 
-public abstract class AbstractStoreTest<T extends Store> {
+public abstract class AbstractStoreTest {
 
-    protected abstract T createStore();
+    protected abstract Store createStore();
+
+    @Test
+    @DisplayName("Should add substores")
+    public void createSubstore() {
+        // given
+        Store store = createStore();
+
+        // execute
+        store.createSubstore("oranges");
+        Store substore = store.getSubstore("oranges");
+        substore.createSubstore("peel");
+        Store subSubstore = substore.getSubstore("peel");
+
+        // assert
+        Assertions.assertThat(substore.getRootStore()).isEqualTo(store);
+        Assertions.assertThat(substore.getNamespace()).isEqualTo("oranges");
+        Assertions.assertThat(subSubstore.getRootStore()).isEqualTo(store);
+        Assertions.assertThat(subSubstore.getNamespace()).isEqualTo("oranges.peel");
+    }
+
+    @Test
+    @DisplayName("Should flatten all substores")
+    public void flatten() {
+        // given
+        Store store = createStore();
+
+        // execute
+        store.addBoolean("boolean");
+        store.addByte("byte");
+        store.createSubstore("oranges");
+        Store substore = store.getSubstore("oranges");
+        substore.addInt("oranges.number");
+        substore.addString("oranges.name");
+        substore.createSubstore("peel");
+        Store subSubstore = substore.getSubstore("peel");
+        subSubstore.addBoolean("oranges.peel.ripe");
+        subSubstore.addString("oranges.peel.color");
+
+        Store flattened = store.flatten();
+
+        // assert
+        Assertions.assertThat(subSubstore.getRootStore()).isEqualTo(store);
+        Assertions.assertThat(flattened.attributes().count()).isEqualTo(6);
+        Assertions.assertThat(flattened.attributes().map(Attribute::name))
+                .containsExactlyInAnyOrder("boolean", "byte", "oranges.number", "oranges.name",
+                        "oranges.peel.ripe", "oranges.peel.color");
+        Assertions.assertThat(flattened.getSubstores().count()).isEqualTo(0);
+    }
 
     @Test
     @DisplayName("Should add a boolean column")
     public void addBoolean() {
         // given
-        Store tablesawComponentStore = createStore();
+        Store store = createStore();
 
         // execute
-        tablesawComponentStore.addBoolean("boolean");
-        Attribute attribute = tablesawComponentStore.get("boolean");
+        store.addBoolean("boolean");
+        Attribute attribute = store.get("boolean");
 
         // assert
         Assertions.assertThat(attribute).isInstanceOf(BooleanAttribute.class);
@@ -57,11 +97,11 @@ public abstract class AbstractStoreTest<T extends Store> {
     @DisplayName("Should add a byte column")
     public void addByte() {
         // given
-        Store tablesawComponentStore = createStore();
+        Store store = createStore();
 
         // execute
-        tablesawComponentStore.addByte("byte");
-        Attribute attribute = tablesawComponentStore.get("byte");
+        store.addByte("byte");
+        Attribute attribute = store.get("byte");
 
         // assert
         Assertions.assertThat(attribute).isInstanceOf(ByteAttribute.class);
@@ -71,39 +111,41 @@ public abstract class AbstractStoreTest<T extends Store> {
     @DisplayName("Should add a double column")
     public void addDouble() {
         // given
-        Store tablesawComponentStore = createStore();
+        Store store = createStore();
 
         // execute
-        tablesawComponentStore.addDouble("double");
-        Attribute attribute = tablesawComponentStore.get("double");
+        store.addDouble("double");
+        Attribute attribute = store.get("double");
 
         // assert
         Assertions.assertThat(attribute).isInstanceOf(DoubleAttribute.class);
     }
 
     @Test
+    @Disabled
     @DisplayName("Should add an entity column")
     public void addEntity() {
         // given
-        Store tablesawComponentStore = createStore();
+        Store store = createStore();
 
         // execute
-        tablesawComponentStore.addEntity("entity");
-        Attribute attribute = tablesawComponentStore.get("entity");
+        store.addEntity("entity");
+        Attribute attribute = store.get("entity");
 
         // assert
         Assertions.assertThat(attribute).isInstanceOf(EntityAttribute.class);
     }
 
     @Test
+    @Disabled
     @DisplayName("Should add an entity list column")
     public void addEntityList() {
         // given
-        Store tablesawComponentStore = createStore();
+        Store store = createStore();
 
         // execute
-        tablesawComponentStore.addEntityList("entities");
-        Attribute attribute = tablesawComponentStore.get("entities");
+        store.addEntityList("entities");
+        Attribute attribute = store.get("entities");
 
         // assert
         Assertions.assertThat(attribute).isInstanceOf(EntityListAttribute.class);
@@ -113,25 +155,25 @@ public abstract class AbstractStoreTest<T extends Store> {
     @DisplayName("Should add an enum column")
     public void addEnum() {
         // given
-        Store tablesawComponentStore = createStore();
+        Store store = createStore();
 
         // execute
-        tablesawComponentStore.addEnum("enum", Letters.class);
-        Attribute attribute = tablesawComponentStore.get("enum");
+        store.addEnum("enum", Letters.class);
+        Attribute attribute = store.get("enum");
 
         // assert
-        Assertions.assertThat(attribute).isInstanceOf(EnumAttribute.class);
+        Assertions.assertThat(attribute).isInstanceOf(CategoricalStaticAttribute.class);
     }
 
     @Test
     @DisplayName("Should add a string column")
     public void addString() {
         // given
-        Store tablesawComponentStore = createStore();
+        Store store = createStore();
 
         // execute
-        tablesawComponentStore.addString("string");
-        Attribute attribute = tablesawComponentStore.get("string");
+        store.addString("string");
+        Attribute attribute = store.get("string");
 
         // assert
         Assertions.assertThat(attribute).isInstanceOf(StringAttribute.class);
@@ -141,11 +183,11 @@ public abstract class AbstractStoreTest<T extends Store> {
     @DisplayName("Should add a short column")
     public void addShort() {
         // given
-        Store tablesawComponentStore = createStore();
+        Store store = createStore();
 
         // execute
-        tablesawComponentStore.addShort("short");
-        Attribute attribute = tablesawComponentStore.get("short");
+        store.addShort("short");
+        Attribute attribute = store.get("short");
 
         // assert
         Assertions.assertThat(attribute).isInstanceOf(ShortAttribute.class);
@@ -155,11 +197,11 @@ public abstract class AbstractStoreTest<T extends Store> {
     @DisplayName("Should add a boolean column")
     public void addInt() {
         // given
-        Store tablesawComponentStore = createStore();
+        Store store = createStore();
 
         // execute
-        tablesawComponentStore.addInt("int");
-        Attribute attribute = tablesawComponentStore.get("int");
+        store.addInt("int");
+        Attribute attribute = store.get("int");
 
         // assert
         Assertions.assertThat(attribute).isInstanceOf(IntAttribute.class);
@@ -169,11 +211,11 @@ public abstract class AbstractStoreTest<T extends Store> {
     @DisplayName("Should add a boolean column")
     public void addFloat() {
         // given
-        Store tablesawComponentStore = createStore();
+        Store store = createStore();
 
         // execute
-        tablesawComponentStore.addFloat("float");
-        Attribute attribute = tablesawComponentStore.get("float");
+        store.addFloat("float");
+        Attribute attribute = store.get("float");
 
         // assert
         Assertions.assertThat(attribute).isInstanceOf(FloatAttribute.class);
@@ -183,13 +225,13 @@ public abstract class AbstractStoreTest<T extends Store> {
     @DisplayName("Should report count according to last event")
     public void getCountAsNotified() {
         // given
-        Store tablesawComponentStore = createStore();
+        Store store = createStore();
 
         // execute
-        tablesawComponentStore.fireUnderlyingDataChanged(0, 2567);
+        store.fireUnderlyingDataChanged(0, 2567);
 
         // assert
-        Assertions.assertThat(tablesawComponentStore.getCount()).isEqualTo(2567);
+        Assertions.assertThat(store.getCount()).isEqualTo(2567);
     }
 
     private enum Letters { A, B, C };

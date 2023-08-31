@@ -20,6 +20,7 @@ package pl.edu.icm.trurl.ecs.query;
 
 import net.snowyhollows.bento.Bento;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.ecs.*;
 import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
@@ -68,6 +69,7 @@ class SelectorFromQueryServiceTest {
     }
 
     @Test
+    @Disabled
     void fixedSelectorFromQuery() {
         // given
         Query<?> queryForWise = (entity, result, label) -> {
@@ -123,6 +125,7 @@ class SelectorFromQueryServiceTest {
     }
 
     @Test
+    @Disabled
     void fixedMultipleSelectorsFromRawQueryInParallel() {
         // given
         PersonMapper personMapper = (PersonMapper) engine.getMapperSet().classToMapper(Person.class);

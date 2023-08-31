@@ -111,10 +111,10 @@ public abstract class AbstractColumnWrapper<T extends ColumnVector, A extends At
             return new EntityListWrapper((EntityListAttribute) attribute);
         } else if (attribute instanceof EntityAttribute) {
             return new EntityWrapper((EntityAttribute) attribute);
-        } else if (attribute instanceof EnumAttribute) {
-            return new EnumWrapper((EnumAttribute<?>) attribute);
-        } else if (attribute instanceof SoftEnumAttribute) {
-            return new SoftEnumWrapper((SoftEnumAttribute<?>) attribute);
+        } else if (attribute instanceof CategoricalStaticAttribute) {
+            return new EnumWrapper((CategoricalStaticAttribute<?>) attribute);
+        } else if (attribute instanceof CategoricalDynamicAttribute) {
+            return new SoftEnumWrapper((CategoricalDynamicAttribute<?>) attribute);
         } else {
             throw new IllegalArgumentException("Not supported attribute type: " + attribute);
         }

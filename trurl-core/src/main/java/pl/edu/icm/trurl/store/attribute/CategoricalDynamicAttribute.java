@@ -20,7 +20,7 @@ package pl.edu.icm.trurl.store.attribute;
 
 import net.snowyhollows.bento.soft.SoftEnum;
 
-public interface SoftEnumAttribute<E extends SoftEnum> extends Attribute {
+public interface CategoricalDynamicAttribute<E extends SoftEnum> extends Attribute {
     E getEnum(int row);
     void setEnum(int row, E value);
     byte getOrdinal(int row);

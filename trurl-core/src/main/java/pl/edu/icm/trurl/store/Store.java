@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,20 @@
 
 package pl.edu.icm.trurl.store;
 
+import net.snowyhollows.bento.soft.SoftEnum;
+import net.snowyhollows.bento.soft.SoftEnumManager;
 import pl.edu.icm.trurl.store.attribute.Attribute;
+import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 /**
  * Represents a columnar store.
  * <p>
- * The interface gives access to specific attributes (instances of Attribute, which can be
+ * The store gives access to specific attributes (instances of Attribute, which can be
  * downcast to interfaces like ShortAttribute, StringAttribute etc.) and acts as a hub
  * for adding listeners and firing general events.
  * <p>
@@ -60,6 +66,153 @@ import java.util.stream.Stream;
  *     </li>
  * </ul>
  */
-public interface Store extends StoreConfigurer, StoreInspector, StoreObservable {
+public final class Store implements StoreConfigurer, StoreInspector, StoreObservable {
+    private final String namespace;
+    private final Store rootStore;
+    private final Map<String, Store> substores = new LinkedHashMap<>();
+    private final AttributeFactory attributeFactory;
+    private final CopyOnWriteArrayList<StoreListener> listeners = new CopyOnWriteArrayList();
+    private final Map<String, Attribute> attributes = new LinkedHashMap<>(40);
+    private final int defaultCapacity;
+    private final AtomicInteger count = new AtomicInteger();
 
+    public Store(AttributeFactory attributeFactory, int defaultCapacity) {
+        this.attributeFactory = attributeFactory;
+        this.namespace = "";
+        this.defaultCapacity = defaultCapacity;
+        this.rootStore = this;
+    }
+
+    private Store(Store rootStore, AttributeFactory attributeFactory, String namespace, int defaultCapacity) {
+        this.attributeFactory = attributeFactory;
+        this.namespace = namespace;
+        this.defaultCapacity = defaultCapacity;
+        this.rootStore = rootStore;
+    }
+
+    public Store flatten() {
+        Store flatStore = new Store(attributeFactory, defaultCapacity);
+        flatStore.count.set(count.get());
+        attributes().forEach(attribute ->
+                flatStore.attributes.put(attribute.name(), attribute));
+        substores.values().forEach(store -> {
+            Store newStore = store.flatten();
+            flatStore.count.set(Math.max(flatStore.getCount(), newStore.getCount()));
+            flatStore.attributes.putAll(newStore.attributes);
+        });
+        return flatStore;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public Store getRootStore() {
+        return rootStore;
+    }
+
+    public Stream<Store> getSubstores() {
+        return substores.values().stream();
+    }
+
+    public Store getSubstore(String name) {
+        return substores.get(name);
+    }
+
+    public void createSubstore(String namespace) {
+        String substoreNamespace = this.namespace.isEmpty() ? namespace : this.namespace + "." + namespace;
+        substores.put(namespace, new Store(rootStore, attributeFactory, substoreNamespace, defaultCapacity));
+    }
+
+    @Override
+    public <T extends Attribute> T get(String name) {
+        return (T) attributes.get(name);
+    }
+
+    @Override
+    public void addStoreListener(StoreListener storeListener) {
+        listeners.add(storeListener);
+    }
+
+    @Override
+    public void fireUnderlyingDataChanged(int fromInclusive, int toExclusive, StoreListener... excluded) {
+        count.set(toExclusive);
+        List<StoreListener> excludedList = Arrays.asList(excluded);
+        for (StoreListener storeListener : listeners) {
+            if (!excludedList.contains(storeListener)) {
+                storeListener.onUnderlyingDataChanged(fromInclusive, toExclusive);
+            }
+        }
+    }
+
+    @Override
+    public Stream<Attribute> attributes() {
+        return attributes.values().stream();
+    }
+
+    @Override
+    public int getCount() {
+        return count.get();
+    }
+
+    @Override
+    public void addBoolean(String name) {
+        attributes.putIfAbsent(name, attributeFactory.createBoolean(name));
+
+    }
+
+    @Override
+    public void addByte(String name) {
+        attributes.putIfAbsent(name, attributeFactory.createByte(name));
+    }
+
+    @Override
+    public void addDouble(String name) {
+        attributes.putIfAbsent(name, attributeFactory.createDouble(name));
+    }
+
+    @Override
+    public void addEntity(String name) {
+        throw new UnsupportedOperationException("Adding entity is not supported.");
+    }
+
+    @Override
+    public void addEntityList(String name) {
+        throw new UnsupportedOperationException("Adding entity list is not supported.");
+    }
+
+    @Override
+    public void addValueObjectList(String name) {
+        throw new UnsupportedOperationException("Adding value object list is not supported.");
+    }
+
+    @Override
+    public <E extends Enum<E>> void addEnum(String name, Class<E> enumType) {
+        attributes.putIfAbsent(name, attributeFactory.createStaticCategory(name, enumType));
+    }
+
+    @Override
+    public <E extends SoftEnum> void addSoftEnum(String name, SoftEnumManager<E> enumType) {
+        attributes.putIfAbsent(name, attributeFactory.createDynamicCategory(name, enumType));
+    }
+
+    @Override
+    public void addFloat(String name) {
+        attributes.putIfAbsent(name, attributeFactory.createFloat(name));
+    }
+
+    @Override
+    public void addInt(String name) {
+        attributes.putIfAbsent(name, attributeFactory.createInt(name));
+    }
+
+    @Override
+    public void addShort(String name) {
+        attributes.putIfAbsent(name, attributeFactory.createShort(name));
+    }
+
+    @Override
+    public void addString(String name) {
+        attributes.putIfAbsent(name, attributeFactory.createString(name));
+    }
 }

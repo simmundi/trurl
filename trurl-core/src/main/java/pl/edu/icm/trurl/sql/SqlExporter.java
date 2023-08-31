@@ -22,16 +22,8 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
-import pl.edu.icm.trurl.store.attribute.Attribute;
-import pl.edu.icm.trurl.store.attribute.BooleanAttribute;
-import pl.edu.icm.trurl.store.attribute.DoubleAttribute;
-import pl.edu.icm.trurl.store.attribute.EntityAttribute;
-import pl.edu.icm.trurl.store.attribute.EntityListAttribute;
-import pl.edu.icm.trurl.store.attribute.EnumAttribute;
-import pl.edu.icm.trurl.store.attribute.FloatAttribute;
-import pl.edu.icm.trurl.store.attribute.IntAttribute;
-import pl.edu.icm.trurl.store.attribute.ShortAttribute;
-import pl.edu.icm.trurl.store.attribute.StringAttribute;
+import pl.edu.icm.trurl.store.attribute.*;
+import pl.edu.icm.trurl.store.attribute.CategoricalStaticAttribute;
 import pl.edu.icm.trurl.util.Status;
 
 import java.sql.Connection;
@@ -182,7 +174,7 @@ public class SqlExporter {
             } else {
                 preparedStatement.setNull(index, Types.INTEGER);
             }
-        } else if (attribute instanceof EnumAttribute) {
+        } else if (attribute instanceof CategoricalStaticAttribute) {
             preparedStatement.setString(index, attribute.getString(row));
         } else {
             throw new IllegalArgumentException("Not supported column type: " + attribute);
@@ -205,7 +197,7 @@ public class SqlExporter {
             return attribute.name() + " text";
         } else if (attribute instanceof EntityAttribute) {
             return attribute.name() + " int";
-        } else if (attribute instanceof EnumAttribute) {
+        } else if (attribute instanceof CategoricalStaticAttribute) {
             return attribute.name() + " text";
         }
         throw new IllegalArgumentException("Not supported column type: " + attribute);

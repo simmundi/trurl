@@ -21,13 +21,13 @@ package pl.edu.icm.trurl.io.orc.wrapper;
 import net.snowyhollows.bento.soft.SoftEnum;
 import org.apache.hadoop.hive.ql.exec.vector.LongColumnVector;
 import org.apache.orc.TypeDescription;
-import pl.edu.icm.trurl.store.attribute.SoftEnumAttribute;
+import pl.edu.icm.trurl.store.attribute.CategoricalDynamicAttribute;
 
-final class SoftEnumWrapper<E extends SoftEnum> extends AbstractColumnWrapper<LongColumnVector, SoftEnumAttribute<E>> {
+final class SoftEnumWrapper<E extends SoftEnum> extends AbstractColumnWrapper<LongColumnVector, CategoricalDynamicAttribute<E>> {
 
     private byte firstValue;
 
-    public SoftEnumWrapper(SoftEnumAttribute<E> attribute) {
+    public SoftEnumWrapper(CategoricalDynamicAttribute<E> attribute) {
         super(attribute);
     }
 

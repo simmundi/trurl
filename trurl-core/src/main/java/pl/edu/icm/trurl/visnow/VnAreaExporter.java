@@ -26,7 +26,7 @@ import pl.edu.icm.trurl.ecs.SessionFactory;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayStore;
+import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
@@ -72,7 +72,7 @@ public class VnAreaExporter<T> {
         int size = width * height;
         File file = new File(baseFilePath);
         this.baseFileName = file.getName();
-        this.store = new ArrayStore(size);
+        this.store = new Store(new ArrayAttributeFactory(), size);
         this.mapper = mapper;
         this.mapper.configureStore(store);
         this.mapper.attachStore(store);
