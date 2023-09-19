@@ -21,7 +21,7 @@ package pl.edu.icm.trurl.ecs;
 import net.snowyhollows.bento.annotation.ImplementationSwitch;
 import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
 
-@ImplementationSwitch(configKey = "trurl.engine.componentAccessor", cases = {
+@ImplementationSwitch(configKey = "trurl.engine.component-accessor", cases = {
         @ImplementationSwitch.When(name = "dynamic", implementation = DynamicComponentAccessor.class, useByDefault = true)
 })
 public interface ComponentAccessor {

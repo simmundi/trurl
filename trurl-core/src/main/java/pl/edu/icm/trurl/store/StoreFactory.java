@@ -26,7 +26,7 @@ import pl.edu.icm.trurl.store.array.ArrayStoreFactory;
  * it's important to show that the store might be assumed to be empty.
  *
  */
-@ImplementationSwitch(configKey = "trurl.engine.storeFactory", cases = {
+@ImplementationSwitch(configKey = "trurl.engine.store-factory", cases = {
         @ImplementationSwitch.When(name = "array", implementation = ArrayStoreFactory.class, useByDefault = true)
 })
 public interface StoreFactory {

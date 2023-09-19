@@ -46,9 +46,9 @@ public class EngineConfiguration {
     @WithFactory
     public EngineConfiguration(ComponentAccessorCreator componentAccessorCreator,
                                StoreFactory storeFactory,
-                               @ByName(value = "trurl.engine.initialCapacity", fallbackValue = "1024") int initialCapacity,
-                               @ByName(value = "trurl.engine.capacityHeadroom", fallbackValue = "128") int capacityHeadroom,
-                               @ByName(value = "trurl.engine.sharedSession", fallbackValue = "false") boolean sharedSession,
+                               @ByName(value = "trurl.engine.initial-capacity", fallbackValue = "1024") int initialCapacity,
+                               @ByName(value = "trurl.engine.capacity-headroom", fallbackValue = "128") int capacityHeadroom,
+                               @ByName(value = "trurl.engine.shared-session", fallbackValue = "false") boolean sharedSession,
                                Bento bento) {
         this.componentAccessorCreator = componentAccessorCreator;
         this.storeFactory = storeFactory;

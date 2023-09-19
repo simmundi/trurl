@@ -34,9 +34,9 @@ When `Engine` is **really** needed during object's setup, there are two ways:
 are as follows:
 
 ```properties
-trurl.engine.storeFactory=array
-trurl.engine.componentAccessor=dynamic
-trurl.engine.initialCapacity=1024
-trurl.engine.capacityHeadroom=128
-trurl.engine.sharedSession=false
+trurl.engine.store-factory=array
+trurl.engine.component-accessor=dynamic
+trurl.engine.initial-capacity=1024
+trurl.engine.capacity-headroom=128
+trurl.engine.shared-session=false
 ```

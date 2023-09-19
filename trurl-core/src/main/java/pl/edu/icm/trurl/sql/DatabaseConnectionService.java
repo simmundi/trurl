@@ -18,6 +18,9 @@
 
 package pl.edu.icm.trurl.sql;
 
+import net.snowyhollows.bento.annotation.ByName;
+import net.snowyhollows.bento.annotation.WithFactory;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -26,7 +29,10 @@ public class DatabaseConnectionService {
 
     private final Connection connection;
 
-    public DatabaseConnectionService(String jdbcUrl, String jdbcUser, String jdbcPassword) {
+    @WithFactory
+    public DatabaseConnectionService(@ByName("trurl.sql.jdbc-url") String jdbcUrl,
+                                     @ByName("trurl.sql.jdbc-user") String jdbcUser,
+                                     @ByName("trurl.sql.jdbc-password") String jdbcPassword) {
         try {
             connection = DriverManager.getConnection(jdbcUrl, jdbcUser, jdbcPassword);
             connection.setAutoCommit(false);
