@@ -26,6 +26,7 @@ import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -71,7 +72,7 @@ public final class Store implements StoreConfigurer, StoreInspector, StoreObserv
     private final Store rootStore;
     private final Map<String, Store> substores = new LinkedHashMap<>();
     private final AttributeFactory attributeFactory;
-    private final CopyOnWriteArrayList<StoreListener> listeners = new CopyOnWriteArrayList();
+    private final CopyOnWriteArrayList<StoreListener> listeners = new CopyOnWriteArrayList<>();
     private final Map<String, Attribute> attributes = new LinkedHashMap<>(40);
     private final int defaultCapacity;
     private final AtomicInteger count = new AtomicInteger();
@@ -111,8 +112,12 @@ public final class Store implements StoreConfigurer, StoreInspector, StoreObserv
         return rootStore;
     }
 
-    public Stream<Store> getSubstores() {
-        return substores.values().stream();
+    public Collection<Store> getSubstores() {
+        return substores.values();
+    }
+
+    public Collection<Store> allDescendants() {
+        return recursivelyAllDescendants().collect(Collectors.toSet());
     }
 
     public Store getSubstore(String name) {
@@ -214,5 +219,11 @@ public final class Store implements StoreConfigurer, StoreInspector, StoreObserv
     @Override
     public void addString(String name) {
         attributes.putIfAbsent(name, attributeFactory.createString(name));
+    }
+
+    private Stream<Store> recursivelyAllDescendants() {
+        return substores.values().stream().flatMap(
+                store -> Stream.concat(Stream.of(store), store.recursivelyAllDescendants())
+        );
     }
 }

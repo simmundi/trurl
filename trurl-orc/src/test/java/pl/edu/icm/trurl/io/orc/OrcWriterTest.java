@@ -18,42 +18,42 @@
 
 package pl.edu.icm.trurl.io.orc;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import pl.edu.icm.trurl.csv.CsvReader;
+import pl.edu.icm.trurl.io.csv.CsvReader;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-class OrcStoreServiceImpl {
+class OrcWriterReaderTest {
 
     @TempDir
     File tempDir;
 
     @Test
-    @Disabled
     public void writeThenRead() throws IOException {
         // given
-        String filename = new File(tempDir, "dump.orc").getAbsolutePath();
+        File file = new File(tempDir, "dump.orc");
         Store storeToWrite = new Store(new ArrayAttributeFactory(), 1024);
         configureStore(storeToWrite);
         Store storeToRead = new Store(new ArrayAttributeFactory(), 1024);
         configureStore(storeToRead);
         loadFromCsvResource(storeToWrite, "/store.csv");
-        OrcStoreService orcStoreService = new OrcStoreService(new OrcImplementationsService());
+        OrcWriter orcWriter = new OrcWriter(new OrcImplementationsService());
+        OrcReader orcStoreReader = new OrcReader(new OrcImplementationsService());
         int writeCount = storeToWrite.getCount();
 
         // execute
-        orcStoreService.write(storeToWrite, filename);
-        orcStoreService.read(storeToRead, filename);
+        orcWriter.write(file,storeToWrite);
+        orcStoreReader.read(file,storeToRead);
         int readCount = storeToRead.getCount();
 
         // assert
@@ -62,9 +62,9 @@ class OrcStoreServiceImpl {
                 .isEqualTo(dataFromStore(storeToRead, writeCount));
     }
 
-    private void loadFromCsvResource(Store storeToWrite, String name) {
-        new CsvReader().load(
-                OrcStoreServiceImpl.class.getResourceAsStream(name),
+    private void loadFromCsvResource(Store storeToWrite, String name) throws IOException {
+        new CsvReader().read(
+                new File(Objects.requireNonNull(this.getClass().getResource(name)).getFile()),
                 storeToWrite
         );
     }
@@ -80,8 +80,9 @@ class OrcStoreServiceImpl {
         store.addBoolean("bools");
         store.addByte("bytes");
         store.addDouble("doubles");
-        store.addEntity("entities");
-        store.addEntityList("entityLists");
+//        todo uncomment
+//        store.addEntity("entities");
+//        store.addEntityList("entityLists");
         store.addEnum("enums", Shape.class);
         store.addFloat("floats");
         store.addInt("ints");
