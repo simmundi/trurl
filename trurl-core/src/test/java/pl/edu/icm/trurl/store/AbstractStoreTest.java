@@ -18,14 +18,13 @@
 
 package pl.edu.icm.trurl.store;
 
-import org.assertj.core.api.*;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.store.attribute.*;
-import pl.edu.icm.trurl.store.attribute.CategoricalStaticAttribute;
 
-import java.util.stream.Collectors;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 public abstract class AbstractStoreTest {
 
@@ -44,10 +43,26 @@ public abstract class AbstractStoreTest {
         Store subSubstore = substore.getSubstore("peel");
 
         // assert
-        Assertions.assertThat(substore.getRootStore()).isEqualTo(store);
-        Assertions.assertThat(substore.getNamespace()).isEqualTo("oranges");
-        Assertions.assertThat(subSubstore.getRootStore()).isEqualTo(store);
-        Assertions.assertThat(subSubstore.getNamespace()).isEqualTo("oranges.peel");
+        assertThat(substore.getRootStore()).isEqualTo(store);
+        assertThat(substore.getNamespace()).isEqualTo("oranges");
+        assertThat(subSubstore.getRootStore()).isEqualTo(store);
+        assertThat(subSubstore.getNamespace()).isEqualTo("oranges.peel");
+    }
+
+    @Test
+    public void allDescendants() {
+        // given
+        Store store = createStore();
+
+        // execute
+        store.createSubstore("oranges");
+        Store substore = store.getSubstore("oranges");
+        substore.createSubstore("peel");
+        Store subSubstore = substore.getSubstore("peel");
+
+        // assert
+        assertThat(store.allDescendants()).containsExactlyInAnyOrder(substore, subSubstore);
+
     }
 
     @Test
@@ -71,12 +86,12 @@ public abstract class AbstractStoreTest {
         Store flattened = store.flatten();
 
         // assert
-        Assertions.assertThat(subSubstore.getRootStore()).isEqualTo(store);
-        Assertions.assertThat(flattened.attributes().count()).isEqualTo(6);
-        Assertions.assertThat(flattened.attributes().map(Attribute::name))
+        assertThat(subSubstore.getRootStore()).isEqualTo(store);
+        assertThat(flattened.attributes().count()).isEqualTo(6);
+        assertThat(flattened.attributes().map(Attribute::name))
                 .containsExactlyInAnyOrder("boolean", "byte", "oranges.number", "oranges.name",
                         "oranges.peel.ripe", "oranges.peel.color");
-        Assertions.assertThat(flattened.getSubstores().count()).isEqualTo(0);
+        assertThat(flattened.getSubstores().size()).isEqualTo(0);
     }
 
     @Test
@@ -90,7 +105,7 @@ public abstract class AbstractStoreTest {
         Attribute attribute = store.get("boolean");
 
         // assert
-        Assertions.assertThat(attribute).isInstanceOf(BooleanAttribute.class);
+        assertThat(attribute).isInstanceOf(BooleanAttribute.class);
     }
 
     @Test
@@ -104,7 +119,7 @@ public abstract class AbstractStoreTest {
         Attribute attribute = store.get("byte");
 
         // assert
-        Assertions.assertThat(attribute).isInstanceOf(ByteAttribute.class);
+        assertThat(attribute).isInstanceOf(ByteAttribute.class);
     }
 
     @Test
@@ -118,7 +133,7 @@ public abstract class AbstractStoreTest {
         Attribute attribute = store.get("double");
 
         // assert
-        Assertions.assertThat(attribute).isInstanceOf(DoubleAttribute.class);
+        assertThat(attribute).isInstanceOf(DoubleAttribute.class);
     }
 
     @Test
@@ -133,7 +148,7 @@ public abstract class AbstractStoreTest {
         Attribute attribute = store.get("entity");
 
         // assert
-        Assertions.assertThat(attribute).isInstanceOf(EntityAttribute.class);
+        assertThat(attribute).isInstanceOf(EntityAttribute.class);
     }
 
     @Test
@@ -148,7 +163,7 @@ public abstract class AbstractStoreTest {
         Attribute attribute = store.get("entities");
 
         // assert
-        Assertions.assertThat(attribute).isInstanceOf(EntityListAttribute.class);
+        assertThat(attribute).isInstanceOf(EntityListAttribute.class);
     }
 
     @Test
@@ -162,7 +177,7 @@ public abstract class AbstractStoreTest {
         Attribute attribute = store.get("enum");
 
         // assert
-        Assertions.assertThat(attribute).isInstanceOf(CategoricalStaticAttribute.class);
+        assertThat(attribute).isInstanceOf(CategoricalStaticAttribute.class);
     }
 
     @Test
@@ -176,7 +191,7 @@ public abstract class AbstractStoreTest {
         Attribute attribute = store.get("string");
 
         // assert
-        Assertions.assertThat(attribute).isInstanceOf(StringAttribute.class);
+        assertThat(attribute).isInstanceOf(StringAttribute.class);
     }
 
     @Test
@@ -190,7 +205,7 @@ public abstract class AbstractStoreTest {
         Attribute attribute = store.get("short");
 
         // assert
-        Assertions.assertThat(attribute).isInstanceOf(ShortAttribute.class);
+        assertThat(attribute).isInstanceOf(ShortAttribute.class);
     }
 
     @Test
@@ -204,7 +219,7 @@ public abstract class AbstractStoreTest {
         Attribute attribute = store.get("int");
 
         // assert
-        Assertions.assertThat(attribute).isInstanceOf(IntAttribute.class);
+        assertThat(attribute).isInstanceOf(IntAttribute.class);
     }
 
     @Test
@@ -218,7 +233,7 @@ public abstract class AbstractStoreTest {
         Attribute attribute = store.get("float");
 
         // assert
-        Assertions.assertThat(attribute).isInstanceOf(FloatAttribute.class);
+        assertThat(attribute).isInstanceOf(FloatAttribute.class);
     }
 
     @Test
@@ -231,9 +246,11 @@ public abstract class AbstractStoreTest {
         store.fireUnderlyingDataChanged(0, 2567);
 
         // assert
-        Assertions.assertThat(store.getCount()).isEqualTo(2567);
+        assertThat(store.getCount()).isEqualTo(2567);
     }
 
-    private enum Letters { A, B, C };
+    private enum Letters {A, B, C}
+
+    ;
 
 }

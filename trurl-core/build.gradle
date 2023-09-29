@@ -10,7 +10,6 @@ dependencies {
     implementation "com.google.guava:guava:${guavaVersion}"
     implementation "org.roaringbitmap:RoaringBitmap:${roaringBitmapVersion}"
     implementation "it.unimi.dsi:fastutil:${fastutilVersion}"
-    implementation "com.univocity:univocity-parsers:${univocityVersion}"
     implementation "org.slf4j:slf4j-api:${slf4jVersion}"
     api "net.snowyhollows.bento:bento-core:${bentoVersion}"
     implementation "net.snowyhollows.bento:bento-config:${bentoVersion}"

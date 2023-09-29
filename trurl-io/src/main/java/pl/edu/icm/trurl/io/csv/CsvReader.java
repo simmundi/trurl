@@ -16,54 +16,53 @@
  *
  */
 
-package pl.edu.icm.trurl.csv;
+package pl.edu.icm.trurl.io.csv;
 
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import net.snowyhollows.bento.annotation.WithFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pl.edu.icm.trurl.ecs.mapper.Mapper;
-import pl.edu.icm.trurl.ecs.mapper.Mappers;
-import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.StoreFactory;
+import pl.edu.icm.trurl.io.store.SingleStoreReader;
+import pl.edu.icm.trurl.store.StoreInspector;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.StubAttribute;
 
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-public class CsvReader {
-
+public class CsvReader implements SingleStoreReader {
     private final Logger logger = LoggerFactory.getLogger(CsvReader.class);
+
     private final Attribute SKIP = new StubAttribute();
 
     @WithFactory
     public CsvReader() {
     }
 
-    public <T> Mapper<T> load(InputStream stream, StoreFactory storeFactory, Class<T> model, String... columns) {
-        Store store = storeFactory.create(1024);
-        Mapper<T> mapper = new Mappers().create(model);
-        mapper.configureStore(store);
-        int count = load(stream, store, columns);
-        mapper.attachStore(store);
-        mapper.setCount(count);
-        return mapper;
+
+    @Override
+    public void read(File file, StoreInspector store) throws IOException {
+        try (InputStream stream = Files.newInputStream(file.toPath())) {
+            load(stream, store);
+        }
+    }
+
+    public void load(InputStream stream, StoreInspector store, String... columns) {
+        load(stream, store, Collections.emptyMap(), columns);
     }
 
 
-    public int load(InputStream stream, Store store, String... columns) {
-        return load(stream, store, Collections.emptyMap(), columns);
-    }
-
-
-    public int load(InputStream stream, Store store, Map<String, String> mappings, String... columns) {
+    private void load(InputStream stream, StoreInspector store, Map<String, String> mappings, String... columns) {
         CsvParserSettings settings = new CsvParserSettings();
         settings.detectFormatAutomatically(',', '\t');
+        settings.setSkipEmptyLines(false);
         CsvParser csvParser = new CsvParser(settings);
         csvParser.beginParsing(new BufferedInputStream(stream, 1024 * 1024));
         String[] header = columns.length > 0 ? columns : csvParser.parseNext();
@@ -95,7 +94,6 @@ public class CsvReader {
             }
         }
         store.fireUnderlyingDataChanged(0, rowCount);
-        return rowCount;
     }
 }
 
