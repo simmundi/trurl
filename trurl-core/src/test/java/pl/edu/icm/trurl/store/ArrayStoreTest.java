@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.store;
 
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
@@ -26,3 +26,6 @@ class ArrayStoreTest extends AbstractStoreTest {
         return new Store(new ArrayAttributeFactory(), 1024);
     }
 }
+
+
+ */

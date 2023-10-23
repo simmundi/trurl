@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.sql;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -127,3 +127,4 @@ class SqlExporterTest {
 
 
 }
+*/

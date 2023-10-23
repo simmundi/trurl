@@ -93,7 +93,7 @@ public class CsvReader implements SingleStoreReader {
                         .replace('\r', ' '));
             }
         }
-        store.fireUnderlyingDataChanged(0, rowCount);
+//        store.fireUnderlyingDataChanged(0, rowCount);
     }
 }
 

@@ -32,7 +32,6 @@ import pl.edu.icm.trurl.store.reference.SingleReference;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -107,7 +106,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void erase(int row) {
-        for (Attribute attribute : allAttributes.values()) {
+        for (Attribute attribute : visibleAttributes) {
             attribute.setEmpty(row);
         }
         for (Join join : joins.values()) {
@@ -121,7 +120,6 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     public void ensureCapacity(int capacity) {
         allAttributes.values().forEach(a -> a.ensureCapacity(capacity));
-        substores.values().forEach(s -> s.ensureCapacity(capacity));
     }
 
     @Override
@@ -279,18 +277,12 @@ public final class Store implements StoreConfigurer, StoreInspector {
     }
 
     @Override
-    public Store addSubstore(String name) {
-        substores.put(name, new Store(attributeFactory, name, defaultCapacity));
-        return substores.get(name);
-    }
-
-    @Override
     public void hideAttribute(String name) {
         visibleAttributes.remove(allAttributes.get(name));
     }
 
     public Store flatten() {
-        throw new UnsupportedOperationException("sadly, not yet");
+        throw new UnsupportedOperationException("sadly, not at the moment, too much has changed");
     }
 
     public String getName() {
@@ -301,9 +293,10 @@ public final class Store implements StoreConfigurer, StoreInspector {
         return substores.values().stream();
     }
 
-    public void createSubstore(String namespace) {
+    public Store addSubstore(String namespace) {
         String substoreNamespace = this.name.isEmpty() ? namespace : this.name + "." + namespace;
         substores.put(namespace, new Store(attributeFactory, substoreNamespace, defaultCapacity));
+        return substores.get(name);
     }
 
     @Override

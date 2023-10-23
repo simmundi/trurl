@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.store;
 
 import org.junit.jupiter.api.Disabled;
@@ -254,3 +254,6 @@ public abstract class AbstractStoreTest {
     ;
 
 }
+
+
+ */

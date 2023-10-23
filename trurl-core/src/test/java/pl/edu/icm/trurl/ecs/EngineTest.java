@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.ecs;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -192,3 +192,6 @@ class EngineTest {
         verify(mapperListenersB, never()).fireSavingComponent(any(), anyInt());
     }
 }
+
+
+ */

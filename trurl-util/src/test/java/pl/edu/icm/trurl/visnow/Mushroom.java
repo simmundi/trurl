@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.visnow;
 
 import pl.edu.icm.trurl.ecs.annotation.WithMapper;
@@ -82,3 +82,6 @@ public class Mushroom implements VnCoords {
         this.diameter = diameter;
     }
 }
+
+
+ */

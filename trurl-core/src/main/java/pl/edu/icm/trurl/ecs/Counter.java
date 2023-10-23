@@ -22,6 +22,21 @@ import pl.edu.icm.trurl.util.ConcurrentIntQueue;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Handles used/unused slots in a contignous, zero-based range of integers.
+ *
+ * It is meant to use by Store, to handle assigning ids to new entities and
+ * to recycle ids of deleted entities.
+ *
+ * Counters are thread-safe.
+ *
+ * A future plans include addind a slab allocator, to help avoid fragmentation;
+ * to measure performance of a bitmap-based allocator.
+ *
+ * A short term plan is to publish the free list, so that clients can persist
+ * it and reuse the counter after restart (a store, for example, should save the free list
+ * as an attribute.)
+ */
 final public class Counter {
     private final AtomicInteger count = new AtomicInteger();
     private final ConcurrentIntQueue freeList;
@@ -36,7 +51,6 @@ final public class Counter {
     }
 
     public int next(int delta) {
-        // TODO: slab allocator with configurable slab sizes
         return count.getAndAdd(delta);
     }
 
@@ -49,7 +63,6 @@ final public class Counter {
     }
 
     public void free(int id, int delta) {
-        // TODO: slab allocator with configurable slab sizes
         for (int i = id; i < id + delta; i++) {
             freeList.push(i);
         }

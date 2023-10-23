@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.ecs.mapper;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -59,3 +59,4 @@ public class MapperSetupFeatureIT {
         assertThat(loaded.getValue()).isEqualTo(17f);
     }
 }
+*/

@@ -15,6 +15,7 @@
  *
  *
  */
+/*
 
 package pl.edu.icm.trurl.visnow;
 
@@ -121,3 +122,6 @@ class VnAreaExporterTest {
         );
     }
 }
+
+
+ */

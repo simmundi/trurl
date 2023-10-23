@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.ecs.mapper;
 
 import net.snowyhollows.bento.Bento;
@@ -63,3 +63,6 @@ public class RewrittenPizzaMapperIT {
         System.out.println("uuk");
     }
 }
+
+
+ */

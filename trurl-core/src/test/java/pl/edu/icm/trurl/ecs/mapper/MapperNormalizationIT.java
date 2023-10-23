@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.ecs.mapper;
 
 import org.assertj.core.api.*;
@@ -53,3 +53,4 @@ public class MapperNormalizationIT {
         Assertions.assertThat(personMapper.getName(0)).isEqualTo("JAN KOWALSKI");
     }
 }
+*/

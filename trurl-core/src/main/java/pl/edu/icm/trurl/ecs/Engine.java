@@ -25,14 +25,12 @@ import pl.edu.icm.trurl.ecs.util.Selectors;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
 public final class Engine {
-    private final AtomicInteger count = new AtomicInteger();
-    private final Store store;
+    private final Store rootStore;
     private final MapperSet mapperSet;
     private final Mapper<?>[] mappers;
     private final SessionFactory defaultSessionFactory;
@@ -40,7 +38,7 @@ public final class Engine {
     private int capacityHeadroom;
 
     public Engine(int initialCapacity, int capacityHeadroom, MapperSet mapperSet, boolean shared, AttributeFactory attributeFactory) {
-        this.store = new Store(attributeFactory, initialCapacity + capacityHeadroom);
+        this.rootStore = new Store(attributeFactory, initialCapacity + capacityHeadroom);
         this.capacityHeadroom = capacityHeadroom;
         this.mapperSet = mapperSet;
         if (shared) {
@@ -49,13 +47,13 @@ public final class Engine {
             this.defaultSessionFactory = new SessionFactory(this, Session.Mode.NORMAL);
         }
         mappers = this.mapperSet.streamMappers().peek(mapper -> {
-            mapper.configureStore(store);
-            mapper.attachStore(store);
+            mapper.configureStore(rootStore);
+            mapper.attachStore(rootStore);
         }).collect(toList()).toArray(new Mapper<?>[0]);
     }
 
     public Engine(Store store, int capacityHeadroom, MapperSet mapperSet, boolean shared) {
-        this.store = store;
+        this.rootStore = store;
         this.capacityHeadroom = capacityHeadroom;
         this.mapperSet = mapperSet;
         this.defaultSessionFactory = new SessionFactory(this, shared ? Session.Mode.SHARED : Session.Mode.NORMAL);
@@ -81,8 +79,8 @@ public final class Engine {
         system.execute(defaultSessionFactory);
     }
 
-    public Store getStore() {
-        return store;
+    public Store getRootStore() {
+        return rootStore;
     }
 
     public MapperSet getMapperSet() {
@@ -90,11 +88,11 @@ public final class Engine {
     }
 
     public int getCount() {
-        return count.get();
+        return rootStore.getCounter().getCount();
     }
 
     int nextId() {
-        return count.getAndIncrement();
+        return rootStore.getCounter().next();
     }
 
     public void onUnderlyingDataChanged(int fromInclusive, int toExclusive) {
@@ -122,7 +120,7 @@ public final class Engine {
     }
 
     private void ensureHeadroom() {
-        int targetCapacity = count.get() + capacityHeadroom;
-        store.ensureCapacity(targetCapacity);
+        int targetCapacity = rootStore.getCounter().getCount() + capacityHeadroom;
+        rootStore.ensureCapacity(targetCapacity);
     }
 }

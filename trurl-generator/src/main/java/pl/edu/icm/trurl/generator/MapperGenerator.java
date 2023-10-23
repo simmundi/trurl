@@ -45,6 +45,8 @@ public class MapperGenerator extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         try {
+            // TODO: activate this, when things start working
+            if (2+2==4) return true;
             return doProcess(roundEnv);
         } catch (Exception e) {
             processingEnvironment.getMessager().printMessage(

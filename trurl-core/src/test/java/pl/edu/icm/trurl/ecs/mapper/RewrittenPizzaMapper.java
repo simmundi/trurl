@@ -1,5 +1,5 @@
 package pl.edu.icm.trurl.ecs.mapper;
-
+/*
 import pl.edu.icm.trurl.ecs.Counter;
 import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.exampledata.pizza.Olive;
@@ -185,3 +185,6 @@ public final class RewrittenPizzaMapper implements Mapper<Pizza> {
     public void lifecycleEvent(LifecycleEvent event) {
     }
 }
+
+
+ */

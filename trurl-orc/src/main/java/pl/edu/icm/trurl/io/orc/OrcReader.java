@@ -68,6 +68,7 @@ public class OrcReader implements SingleStoreReader {
             targetRow += batch.size;
         }
 
-        store.fireUnderlyingDataChanged(0, targetRow);
+        // TODO
+//        store.fireUnderlyingDataChanged(0, targetRow);
     }
 }

@@ -50,7 +50,7 @@ public class OrcWriter implements SingleStoreWriter {
 
     @Override
     public void write(File file, StoreInspector store) throws IOException {
-        int count = store.getCount();
+        int count = store.getCounter().getCount();
         TypeDescription typeDescription = TypeDescription.createStruct();
         List<AbstractColumnWrapper> wrappers = store.attributes().map(AbstractColumnWrapper::create).collect(Collectors.toList());
 

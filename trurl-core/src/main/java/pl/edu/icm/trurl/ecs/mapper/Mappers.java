@@ -76,12 +76,13 @@ public class Mappers {
     }
 
     static public <T> Stream<T> stream(Mapper<T> mapper) {
-        return IntStream.range(0, mapper.getCount())
-                .filter(row -> mapper.isPresent(row))
-                .mapToObj(row -> {
-                    T t = mapper.create();
-                    mapper.load(null, t, row);
-                    return t;
-                });
+        throw new UnsupportedOperationException("mapper.getCount");
+//        return IntStream.range(0, mapper.getCount())
+//                .filter(row -> mapper.isPresent(row))
+//                .mapToObj(row -> {
+//                    T t = mapper.create();
+//                    mapper.load(null, t, row);
+//                    return t;
+//                });
     }
 }

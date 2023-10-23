@@ -107,10 +107,8 @@ public abstract class AbstractColumnWrapper<T extends ColumnVector, A extends At
             return new ByteWrapper((ByteAttribute) attribute);
         } else if (attribute instanceof StringAttribute) {
             return new StringWrapper((StringAttribute) attribute);
-        } else if (attribute instanceof EntityListAttribute) {
-            return new EntityListWrapper((EntityListAttribute) attribute);
-        } else if (attribute instanceof IdentifierAttribute) {
-            return new EntityWrapper((IdentifierAttribute) attribute);
+        } else if (attribute instanceof IntListAttribute) {
+            return new IntListWrapper((IntListAttribute) attribute);
         } else if (attribute instanceof CategoricalStaticAttribute) {
             return new EnumWrapper((CategoricalStaticAttribute<?>) attribute);
         } else if (attribute instanceof CategoricalDynamicAttribute) {

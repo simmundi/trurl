@@ -20,17 +20,17 @@ package pl.edu.icm.trurl.io.orc.wrapper;
 
 import org.apache.hadoop.hive.ql.exec.vector.BytesColumnVector;
 import org.apache.orc.TypeDescription;
-import pl.edu.icm.trurl.store.attribute.EntityListAttribute;
+import pl.edu.icm.trurl.store.attribute.IntListAttribute;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
 
-final class EntityListWrapper extends AbstractColumnWrapper<BytesColumnVector, EntityListAttribute> {
+final class IntListWrapper extends AbstractColumnWrapper<BytesColumnVector, IntListAttribute> {
 
     private byte[] firstValue;
 
-    public EntityListWrapper(EntityListAttribute attribute) {
+    public IntListWrapper(IntListAttribute attribute) {
         super(attribute);
     }
     public ByteBuffer bytes = ByteBuffer.wrap(new byte[1024 * 512 * 4]); // 512K entities should be enough for everybody
@@ -44,7 +44,7 @@ final class EntityListWrapper extends AbstractColumnWrapper<BytesColumnVector, E
     @Override
     void handleValue(int vectorIndex, int attributeRow) {
         ids.clear();
-        attribute.loadIds(attributeRow, (idx, id) -> ids.put(id));
+        attribute.loadInts(attributeRow, (idx, id) -> ids.put(id));
         byte[] data = new byte[ids.position() * 4];
         bytes.rewind();
         bytes.get(data);
@@ -61,7 +61,7 @@ final class EntityListWrapper extends AbstractColumnWrapper<BytesColumnVector, E
             return;
         }
         ids.clear();
-        attribute.loadIds(attributeRow, (idx, id) -> ids.put(id));
+        attribute.loadInts(attributeRow, (idx, id) -> ids.put(id));
         firstValue = new byte[ids.position() * 4];
         bytes.get(firstValue);
     }
@@ -79,7 +79,7 @@ final class EntityListWrapper extends AbstractColumnWrapper<BytesColumnVector, E
                 ids.rewind();
                 int size = bytes.position() / 4;
                 ids.limit(size);
-                attribute.saveIds(targetRow, size, ids::get);
+                attribute.saveInts(targetRow, size, ids::get);
             }
         }
     }

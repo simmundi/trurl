@@ -15,7 +15,7 @@
  *
  *
  */
-
+/*
 package pl.edu.icm.trurl.sql;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -51,7 +51,7 @@ public class SqlExporter {
         Connection connection = databaseConnectionService.getConnection();
 
         List<Attribute> attributes = mapper.attributes();
-        int count = mapper.getCount();
+        int count = mapper.getCounter().getCount();
 
         if (attributes.stream().anyMatch(a -> !(a instanceof EntityListAttribute))) {
             String ddl = "create table if not exists " + name + " (\n"
@@ -203,3 +203,6 @@ public class SqlExporter {
         throw new IllegalArgumentException("Not supported column type: " + attribute);
     }
 }
+
+
+ */
