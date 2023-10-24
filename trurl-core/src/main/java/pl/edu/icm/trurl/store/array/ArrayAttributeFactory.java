@@ -25,57 +25,55 @@ import pl.edu.icm.trurl.store.attribute.*;
 
 public final class ArrayAttributeFactory implements AttributeFactory {
 
-    private final int defaultCapacity = 1000;
-
     @WithFactory
     public ArrayAttributeFactory() {
     }
 
     @Override
-    public BooleanAttribute createBoolean(String name) {
+    public BooleanAttribute createBoolean(String name, int defaultCapacity) {
         return new BooleanArrayAttribute(name, defaultCapacity);
     }
 
     @Override
-    public ByteAttribute createByte(String name) {
+    public ByteAttribute createByte(String name, int defaultCapacity) {
         return new ByteArrayAttribute(name, defaultCapacity);
     }
 
     @Override
-    public DoubleArrayAttribute createDouble(String name) {
+    public DoubleArrayAttribute createDouble(String name, int defaultCapacity) {
         return new DoubleArrayAttribute(name, defaultCapacity);
     }
 
     @Override
-    public <E extends Enum<E>> CategoricalStaticAttribute<E> createStaticCategory(String name, Class<E> enumType) {
+    public <E extends Enum<E>> CategoricalStaticAttribute<E> createStaticCategory(String name, Class<E> enumType, int defaultCapacity) {
         return new CategoricalStaticArrayAttribute<>(enumType, name, defaultCapacity);
     }
 
     @Override
-    public <E extends SoftEnum> CategoricalDynamicAttribute<E> createDynamicCategory(String name, SoftEnumManager<E> enumType) {
+    public <E extends SoftEnum> CategoricalDynamicAttribute<E> createDynamicCategory(String name, SoftEnumManager<E> enumType, int defaultCapacity) {
         return new CategoricalDynamicArrayAttribute<>(enumType, name, defaultCapacity);
     }
 
     @Override
-    public FloatAttribute createFloat(String name) {
+    public FloatAttribute createFloat(String name, int defaultCapacity) {
         return new FloatArrayAttribute(name, defaultCapacity);
     }
 
     @Override
-    public IntAttribute createInt(String name) {
+    public IntAttribute createInt(String name, int defaultCapacity) {
         return new IntArrayAttribute(name, defaultCapacity);
     }
 
     @Override
-    public ShortAttribute createShort(String name) {
+    public ShortAttribute createShort(String name, int defaultCapacity) {
         return new ShortArrayAttribute(name, defaultCapacity);
     }
 
     @Override
-    public StringAttribute createString(String name) {
+    public StringAttribute createString(String name, int defaultCapacity) {
         return new StringArrayAttribute(name, defaultCapacity);
     }
 
     @Override
-    public IntListAttribute createIntList(String name) { return new IntListArrayAttribute(name, defaultCapacity); }
+    public IntListAttribute createIntList(String name, int defaultCapacity) { return new IntListArrayAttribute(name, defaultCapacity); }
 }

@@ -25,12 +25,14 @@ import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 import pl.edu.icm.trurl.store.join.ArrayJoin;
 import pl.edu.icm.trurl.store.join.Join;
-import pl.edu.icm.trurl.store.join.RandgedJoin;
+import pl.edu.icm.trurl.store.join.RangedJoin;
 import pl.edu.icm.trurl.store.reference.ArrayReference;
 import pl.edu.icm.trurl.store.reference.Reference;
 import pl.edu.icm.trurl.store.reference.SingleReference;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -39,40 +41,21 @@ import java.util.stream.Stream;
  * Represents a columnar store.
  * <p>
  * The store gives access to specific attributes (instances of Attribute, which can be
- * downcast to interfaces like ShortAttribute, StringAttribute etc.) and acts as a hub
- * for adding listeners and firing general events.
+ * downcast to interfaces like ShortAttribute, StringAttribute etc.). An attribute
+ * can be imagined as a function from row number to a value of a specific type.
  * <p>
- * The events are not fired automatically by any part of the store; they are meant
- * for situations where a couple of consumers of the same store wish to let
- * one another know about changes to the data - like when a loader loads data
- * into the store.
+ * The store can be joined to its substores (which are also stores), which means that
+ * each row of this store can have connections to 0:N rows of a specific substore.
+ * Such relation is reified as a Join. Joins can be thought of as named functions
+ * from row number to a list of row numbers of a specific target store.
  * <p>
- * Within Trurl, the stores are meant to store entities / components.
+ * Each store can also contain references to rows in the top-level
+ * store (in case of the top-level store, these are self-references). The references (reified
+ * as Reference objects) can be imagined as named functions from row number to a list of
+ * row numbers of the top-level store.
  * <p>
- * The flow is:
- *
- * <ul>
- *     <li>
- *         code creates a store instance,
- *     </li>
- *     <li>
- *         the instance is passed to Mappers, which use the StoreMetadata
- *     interface to configure types and names of the store's columns, joins
- *     and references
- *     </li>
- *     <li>
- *         the mappers are then attached to the store (i.e. get all the
- *     necessary attributes) and become its listeners
- *     </li>
- *     <li>
- *         the store configuration is used to load raw data from a file
- *     </li>
- *     <li>
- *         the loader fires underlying data changed event; the mappers
- *     handle it and use it to find out about the length of the data and
- *     to fire any required events to their relevant listeners.
- *     </li>
- * </ul>
+ * Reference and Join objects only contain meta-data, the actual data is stored in attributes
+ * (accessible, but hidden by default).
  */
 public final class Store implements StoreConfigurer, StoreInspector {
     private final Map<String, Attribute> allAttributes = new LinkedHashMap<>(40);
@@ -104,6 +87,9 @@ public final class Store implements StoreConfigurer, StoreInspector {
         return recursivelyAllDescendants().collect(Collectors.toSet());
     }
 
+    /**
+     * Erases all the data concerning a row, including child rows connected via joins
+     */
     @Override
     public void erase(int row) {
         for (Attribute attribute : visibleAttributes) {
@@ -115,6 +101,16 @@ public final class Store implements StoreConfigurer, StoreInspector {
         for (Reference reference : references.values()) {
             reference.setSize(row, 0);
         }
+    }
+
+    /**
+     * Like erase, but also returns the row to the pool of free rows (so that it can be reused).
+     * Whether child rows are also freed depends on the implementation of the specific joins
+     * and references.
+     */
+    @Override
+    public void free(int row) {
+        erase(row);
         counter.free(row);
     }
 
@@ -122,10 +118,16 @@ public final class Store implements StoreConfigurer, StoreInspector {
         allAttributes.values().forEach(a -> a.ensureCapacity(capacity));
     }
 
+
     @Override
     public boolean isEmpty(int row) {
-        for (Attribute attribute : allAttributes.values()) {
+        for (Attribute attribute : visibleAttributes) {
             if (!attribute.isEmpty(row)) {
+                return false;
+            }
+        }
+        for (Join join : joins.values()) {
+            if (join.getExactSize(row) != 0) {
                 return false;
             }
         }
@@ -163,7 +165,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addBoolean(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createBoolean(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createBoolean(name, defaultCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -171,7 +173,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addByte(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createByte(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createByte(name, defaultCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -179,7 +181,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addDouble(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createDouble(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createDouble(name, defaultCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -188,7 +190,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addIntList(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createIntList(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createIntList(name, defaultCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -196,7 +198,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public <E extends Enum<E>> void addEnum(String name, Class<E> enumType) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createStaticCategory(name, enumType));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createStaticCategory(name, enumType, defaultCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -204,7 +206,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public <E extends SoftEnum> void addSoftEnum(String name, SoftEnumManager<E> enumType) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createDynamicCategory(name, enumType));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createDynamicCategory(name, enumType, defaultCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -212,7 +214,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addFloat(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createFloat(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createFloat(name, defaultCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -220,7 +222,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addInt(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createFloat(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createInt(name, defaultCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -228,7 +230,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addShort(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createShort(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createShort(name, defaultCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -236,7 +238,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addString(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createString(name));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createString(name, defaultCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -263,7 +265,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
         return new JoinConfigurer() {
 
             public Store rangeTyped(int minimum, int margin) {
-                RandgedJoin join = new RandgedJoin(Store.this, name, minimum, margin);
+                RangedJoin join = new RangedJoin(Store.this, name, minimum, margin);
                 joins.put(name, join);
                 return getSubstore(name);
             }
@@ -281,10 +283,6 @@ public final class Store implements StoreConfigurer, StoreInspector {
         visibleAttributes.remove(allAttributes.get(name));
     }
 
-    public Store flatten() {
-        throw new UnsupportedOperationException("sadly, not at the moment, too much has changed");
-    }
-
     public String getName() {
         return name;
     }
@@ -296,7 +294,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
     public Store addSubstore(String namespace) {
         String substoreNamespace = this.name.isEmpty() ? namespace : this.name + "." + namespace;
         substores.put(namespace, new Store(attributeFactory, substoreNamespace, defaultCapacity));
-        return substores.get(name);
+        return substores.get(substoreNamespace);
     }
 
     @Override

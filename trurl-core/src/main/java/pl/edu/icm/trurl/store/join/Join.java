@@ -18,6 +18,7 @@
 
 package pl.edu.icm.trurl.store.join;
 
+import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
 import java.util.Collection;
@@ -48,7 +49,11 @@ public interface Join {
 
 
     /**
-     * Retrieves the exact number of elements for this row
+     * Retrieves the exact number of elements for this row.
+     * Depending on the implementation, this operation could be costly.
+     * The client should decide whether to use this method or call getRow in loop
+     * until the guard value is reached.
+     *
      * @param row
      * @return
      */
@@ -59,4 +64,10 @@ public interface Join {
      * @return attributes
      */
     Collection<? extends Attribute> attributes();
+
+    /**
+     * Returns the target store
+     * @return target store
+     */
+    Store getTarget();
 }

@@ -30,10 +30,6 @@ import java.util.Locale;
 public interface Mapper<T> {
     void attachStore(Store store);
     void configureStore(StoreConfigurer metadata);
-    default void configureAndAttach(Store store) {
-        configureStore(store);
-        attachStore(store);
-    }
     T create();
     boolean isPresent(int index);
     void load(Session session, T component, int index);
@@ -58,5 +54,9 @@ public interface Mapper<T> {
     void lifecycleEvent(LifecycleEvent lifecycleEvent);
     default List<Mapper> getChildMappers() {
         return Collections.emptyList();
+    }
+    default void configureAndAttach(Store store) {
+        configureStore(store);
+        attachStore(store);
     }
 }
