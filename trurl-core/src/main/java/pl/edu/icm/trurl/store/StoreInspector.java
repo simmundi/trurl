@@ -54,5 +54,7 @@ public interface StoreInspector {
 
     void erase(int i);
 
+    void free(int row);
+
     boolean isEmpty(int i);
 }

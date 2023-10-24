@@ -33,10 +33,8 @@ public class ArrayJoin implements Join {
     private IntListAttribute values;
     private final int minimum;
     private final int margin;
-    private StoreInspector store;
 
     public ArrayJoin(Store store, String name, int minimum, int margin) {
-        this.store = store;
         this.name = name;
         this.minimum = minimum;
         this.margin = margin;
@@ -60,6 +58,10 @@ public class ArrayJoin implements Join {
         int sizeWithMargin = Math.max(size + margin, minimum);
 
         int[] array = values.getInts(row);
+
+        if (size == 0 && array == null) {
+            return;
+        }
 
         if (array == null) {
             array = new int[sizeWithMargin];
@@ -85,8 +87,20 @@ public class ArrayJoin implements Join {
             Arrays.fill(array, size, sizeWithMargin, Integer.MIN_VALUE);
             for (int i = size; i < oldArray.length; i++) {
                 if (oldArray[i] != Integer.MIN_VALUE) {
-                    target.getCounter().free(oldArray[i]);
-                    store.erase(oldArray[i]);
+                    target.free(oldArray[i]);
+                }
+            }
+        } else if (array.length == sizeWithMargin) {
+            for (int i = 0; i < array.length; i++) {
+                if (i < size) {
+                    if (array[i] == Integer.MIN_VALUE) {
+                        array[i] = target.getCounter().next();
+                    }
+                } else {
+                    if (array[i] != Integer.MIN_VALUE) {
+                        target.free(array[i]);
+                        array[i] = Integer.MIN_VALUE;
+                    }
                 }
             }
         }
@@ -105,6 +119,11 @@ public class ArrayJoin implements Join {
     @Override
     public Collection<? extends Attribute> attributes() {
         return Collections.singletonList(values);
+    }
+
+    @Override
+    public Store getTarget() {
+        return target;
     }
 }
 
