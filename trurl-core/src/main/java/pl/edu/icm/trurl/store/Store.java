@@ -26,6 +26,7 @@ import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 import pl.edu.icm.trurl.store.join.ArrayJoin;
 import pl.edu.icm.trurl.store.join.Join;
 import pl.edu.icm.trurl.store.join.RangedJoin;
+import pl.edu.icm.trurl.store.join.SingleJoin;
 import pl.edu.icm.trurl.store.reference.ArrayReference;
 import pl.edu.icm.trurl.store.reference.Reference;
 import pl.edu.icm.trurl.store.reference.SingleReference;
@@ -155,12 +156,12 @@ public final class Store implements StoreConfigurer, StoreInspector {
     }
 
     @Override
-    public Reference getReference(String name) {
-        return references.get(name);
+    public<T extends Reference> T getReference(String name) {
+        return (T)references.get(name);
     }
 
-    public Join getJoin(String name) {
-        return joins.get(name);
+    public<T extends Join> T getJoin(String name) {
+        return (T) joins.get(name);
     }
 
     @Override
@@ -264,14 +265,23 @@ public final class Store implements StoreConfigurer, StoreInspector {
     public JoinConfigurer addJoin(String name) {
         return new JoinConfigurer() {
 
+            @Override
             public Store rangeTyped(int minimum, int margin) {
                 RangedJoin join = new RangedJoin(Store.this, name, minimum, margin);
                 joins.put(name, join);
                 return getSubstore(name);
             }
 
+            @Override
             public Store arrayTyped(int minimum, int margin) {
                 ArrayJoin join = new ArrayJoin(Store.this, name, minimum, margin);
+                joins.put(name, join);
+                return getSubstore(name);
+            }
+
+            @Override
+            public Store singleTyped() {
+                SingleJoin join = new SingleJoin(Store.this, name);
                 joins.put(name, join);
                 return getSubstore(name);
             }
