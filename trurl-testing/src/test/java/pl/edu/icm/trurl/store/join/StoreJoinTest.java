@@ -1,7 +1,8 @@
-package pl.edu.icm.trurl.store;
+package pl.edu.icm.trurl.store.join;
 
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.exampledata.Proficiency;
+import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.ByteAttribute;
