@@ -1,8 +1,8 @@
-package pl.edu.icm.trurl.store;
+package pl.edu.icm.trurl.store.join;
 
 import org.junit.jupiter.api.Test;
+import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.attribute.ByteAttribute;
-import pl.edu.icm.trurl.store.join.RangedJoin;
 
 import java.util.Random;
 import java.util.stream.IntStream;

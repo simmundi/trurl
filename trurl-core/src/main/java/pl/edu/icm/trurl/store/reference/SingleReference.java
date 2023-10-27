@@ -48,8 +48,9 @@ public class SingleReference implements Reference {
     public void setSize(int row, int size) {
         if (size == 0 || size == 1) {
             idAttribute.setEmpty(row);
+        } else {
+            throw new IllegalStateException("SingleReference cannot have its size set to something different than 0 or 1");
         }
-        throw new IllegalStateException("SingleReference cannot have its size set to something different than 0 or 1");
     }
 
     @Override

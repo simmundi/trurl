@@ -25,6 +25,7 @@ import pl.edu.icm.trurl.store.attribute.IntListAttribute;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 public final class ArrayReference implements Reference {
     private final String name;
@@ -64,8 +65,8 @@ public final class ArrayReference implements Reference {
 
         if (array == null) {
             array = new int[sizeWithMargin];
-            values.setInts(row, array);
             Arrays.fill(array, size, sizeWithMargin, Integer.MIN_VALUE);
+            values.setInts(row, array);
         } else if (array.length < sizeWithMargin) {
             int[] oldArray = array;
             array = Arrays.copyOf(array, sizeWithMargin);
@@ -90,7 +91,7 @@ public final class ArrayReference implements Reference {
 
     @Override
     public Collection<? extends Attribute> attributes() {
-        return null;
+        return Collections.singletonList(values);
     }
 
 }
