@@ -19,7 +19,6 @@
 package pl.edu.icm.trurl.bin;
 
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.bin.Shelf;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

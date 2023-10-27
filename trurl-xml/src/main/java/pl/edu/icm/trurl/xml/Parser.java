@@ -266,6 +266,7 @@ public class Parser {
 
         } while (level != 0);
 
+        xmlWriter.flush();
         return output.toString();
     }
 

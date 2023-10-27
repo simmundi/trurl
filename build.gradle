@@ -65,7 +65,6 @@ subprojects {
         slf4jVersion = '1.7.30'
         orcVersion = '1.7.0'
         hadoopVersion = '3.3.1'
-        tablesawVersion = '0.38.1'
 
         junitVersion = '4.12'
         mockitoVersion = '3.11.2'

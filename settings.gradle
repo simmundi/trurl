@@ -4,6 +4,6 @@ include 'trurl-core',
         'trurl-orc',
         'trurl-io',
         'trurl-xml',
-        'trurl-store-tablesaw'
-include 'trurl-util'
+        'trurl-util',
+        'trurl-testing'
 

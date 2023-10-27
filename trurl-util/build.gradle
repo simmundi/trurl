@@ -14,8 +14,6 @@ dependencies {
     implementation "net.snowyhollows.bento:bento-config:${bentoVersion}"
     implementation "com.google.guava:guava:${guavaVersion}"
     implementation "it.unimi.dsi:fastutil:${fastutilVersion}"
-    testImplementation platform('org.junit:junit-bom:5.9.1')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 test {
