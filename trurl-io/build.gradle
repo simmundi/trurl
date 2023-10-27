@@ -2,10 +2,7 @@ dependencies {
     implementation project(":trurl-core")
     implementation "org.slf4j:slf4j-api:${slf4jVersion}"
     runtimeOnly "org.slf4j:slf4j-simple:${slf4jVersion}"
-    testImplementation 'org.mockito:mockito-inline:3.11.2'
     implementation "com.univocity:univocity-parsers:${univocityVersion}"
-
-
 }
 
 publishing {
