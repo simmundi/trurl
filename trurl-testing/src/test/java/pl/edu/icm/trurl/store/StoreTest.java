@@ -15,20 +15,23 @@
  *
  *
  */
-/*
+
 package pl.edu.icm.trurl.store;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public abstract class AbstractStoreTest {
+class StoreTest {
 
-    protected abstract Store createStore();
+    Store createStore() {
+        return new Store(new ArrayAttributeFactory(), 1000);
+    }
 
     @Test
     @DisplayName("Should add substores")
@@ -37,16 +40,14 @@ public abstract class AbstractStoreTest {
         Store store = createStore();
 
         // execute
-        store.createSubstore("oranges");
+        store.addSubstore("oranges");
         Store substore = store.getSubstore("oranges");
-        substore.createSubstore("peel");
+        substore.addSubstore("peel");
         Store subSubstore = substore.getSubstore("peel");
 
         // assert
-        assertThat(substore.getRootStore()).isEqualTo(store);
-        assertThat(substore.getNamespace()).isEqualTo("oranges");
-        assertThat(subSubstore.getRootStore()).isEqualTo(store);
-        assertThat(subSubstore.getNamespace()).isEqualTo("oranges.peel");
+        assertThat(substore.getName()).isEqualTo("oranges");
+        assertThat(subSubstore.getName()).isEqualTo("oranges.peel");
     }
 
     @Test
@@ -55,43 +56,14 @@ public abstract class AbstractStoreTest {
         Store store = createStore();
 
         // execute
-        store.createSubstore("oranges");
+        store.addSubstore("oranges");
         Store substore = store.getSubstore("oranges");
-        substore.createSubstore("peel");
+        substore.addSubstore("peel");
         Store subSubstore = substore.getSubstore("peel");
 
         // assert
         assertThat(store.allDescendants()).containsExactlyInAnyOrder(substore, subSubstore);
 
-    }
-
-    @Test
-    @DisplayName("Should flatten all substores")
-    public void flatten() {
-        // given
-        Store store = createStore();
-
-        // execute
-        store.addBoolean("boolean");
-        store.addByte("byte");
-        store.createSubstore("oranges");
-        Store substore = store.getSubstore("oranges");
-        substore.addInt("oranges.number");
-        substore.addString("oranges.name");
-        substore.createSubstore("peel");
-        Store subSubstore = substore.getSubstore("peel");
-        subSubstore.addBoolean("oranges.peel.ripe");
-        subSubstore.addString("oranges.peel.color");
-
-        Store flattened = store.flatten();
-
-        // assert
-        assertThat(subSubstore.getRootStore()).isEqualTo(store);
-        assertThat(flattened.attributes().count()).isEqualTo(6);
-        assertThat(flattened.attributes().map(Attribute::name))
-                .containsExactlyInAnyOrder("boolean", "byte", "oranges.number", "oranges.name",
-                        "oranges.peel.ripe", "oranges.peel.color");
-        assertThat(flattened.getSubstores().size()).isEqualTo(0);
     }
 
     @Test
@@ -134,36 +106,6 @@ public abstract class AbstractStoreTest {
 
         // assert
         assertThat(attribute).isInstanceOf(DoubleAttribute.class);
-    }
-
-    @Test
-    @Disabled
-    @DisplayName("Should add an entity column")
-    public void addEntity() {
-        // given
-        Store store = createStore();
-
-        // execute
-        store.addEntity("entity");
-        Attribute attribute = store.get("entity");
-
-        // assert
-        assertThat(attribute).isInstanceOf(EntityAttribute.class);
-    }
-
-    @Test
-    @Disabled
-    @DisplayName("Should add an entity list column")
-    public void addEntityList() {
-        // given
-        Store store = createStore();
-
-        // execute
-        store.addEntityList("entities");
-        Attribute attribute = store.get("entities");
-
-        // assert
-        assertThat(attribute).isInstanceOf(EntityListAttribute.class);
     }
 
     @Test
@@ -236,24 +178,5 @@ public abstract class AbstractStoreTest {
         assertThat(attribute).isInstanceOf(FloatAttribute.class);
     }
 
-    @Test
-    @DisplayName("Should report count according to last event")
-    public void getCountAsNotified() {
-        // given
-        Store store = createStore();
-
-        // execute
-        store.fireUnderlyingDataChanged(0, 2567);
-
-        // assert
-        assertThat(store.getCount()).isEqualTo(2567);
-    }
-
     private enum Letters {A, B, C}
-
-    ;
-
 }
-
-
- */

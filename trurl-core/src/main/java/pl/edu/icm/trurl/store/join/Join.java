@@ -70,4 +70,11 @@ public interface Join {
      * @return target store
      */
     Store getTarget();
+
+    /**
+     * Returns true if the given row is empty
+     * @param row
+     * @return
+     */
+    boolean isEmpty(int row);
 }

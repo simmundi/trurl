@@ -29,7 +29,6 @@ import pl.edu.icm.trurl.generator.model.PropertyType;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.util.Types;
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -50,7 +49,7 @@ public class ConstructorFeature implements Feature {
                 : Stream.empty();
         Stream<FieldSpec> softEnumManagerFields = getSoftEnumProperties()
                 .map(property -> FieldSpec.builder(
-                                ParameterizedTypeName.get(CommonTypes.SOFT_ENUM_MANAGER, property.businessType), property.name + "Manager")
+                                ParameterizedTypeName.get(CommonTypes.SOFT_ENUM_MANAGER, property.unwrappedTypeName), property.name + "Manager")
                         .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                         .build());
         Stream<FieldSpec> mapperPrefix = Stream.of(FieldSpec.builder(CommonTypes.LANG_STRING, "mapperPrefix").build());
@@ -90,18 +89,18 @@ public class ConstructorFeature implements Feature {
         for (ComponentProperty property : properties) {
             EnumManagedBy managedBy = property.attribute.getAnnotation(EnumManagedBy.class);
             TypeName param = managedBy == null
-                    ? ParameterizedTypeName.get(CommonTypes.SOFT_ENUM_MANAGER, property.businessType)
+                    ? ParameterizedTypeName.get(CommonTypes.SOFT_ENUM_MANAGER, property.unwrappedTypeName)
                     : getTypeName(managedBy);
             String name = property.name + "Manager";
             constructorBuilder.addParameter(param, name);
             constructorBuilder.addStatement("this.$L = $L", name, name);
         }
-        constructorBuilder.addStatement("this.mapperPrefix = mapperPrefix");
+        constructorBuilder.addStatement("this.mapperPrefix = $S.equals(mapperPrefix) ? $S : mapperPrefix + $S", "", "", ".");
         return constructorBuilder.build();
     }
 
     private boolean usesMappers() {
-        return componentProperties.stream().anyMatch(p -> p.type.columnType == CommonTypes.MAPPER);
+        return componentProperties.stream().anyMatch(p -> p.isUsingMappers());
     }
 
     private TypeName getTypeName(EnumManagedBy managedBy) {

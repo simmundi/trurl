@@ -116,4 +116,9 @@ public final class RangedJoin implements Join {
     public Store getTarget() {
         return target;
     }
+
+    @Override
+    public boolean isEmpty(int row) {
+        return getRow(row, 0) == Integer.MIN_VALUE;
+    }
 }

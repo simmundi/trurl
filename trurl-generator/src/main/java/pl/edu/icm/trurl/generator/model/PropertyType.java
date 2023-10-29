@@ -31,13 +31,18 @@ public enum PropertyType {
     BOOLEAN_PROP(CommonTypes.BOOLEAN_COLUMN),
     ENUM_PROP(CommonTypes.CATEGORICAL_STATIC_COLUMN),
     SOFT_ENUM_PROP(CommonTypes.CATEGORICAL_DYNAMIC_COLUMN),
-    EMBEDDED_LIST(CommonTypes.MAPPER),
-    EMBEDDED_PROP(CommonTypes.MAPPER);
+    EMBEDDED_PROP(),
+    EMBEDDED_LIST_PROP(),
+    ENTITY_LIST_PROP(),
+    ENTITY_PROP();
 
     public final ClassName columnType;
+
+    PropertyType() {
+        this.columnType = null;
+    }
 
     PropertyType(ClassName columnType) {
         this.columnType = columnType;
     }
-
 }

@@ -53,23 +53,20 @@ public class ColumnarAccessFeature implements Feature {
     private Stream<ComponentProperty> propertiesForAttributeAccess() {
         return beanMetadata.getComponentProperties()
                 .stream()
-                .filter(property -> property.getterName != null
-                        && property.type != PropertyType.EMBEDDED_LIST
-                        && property.type != PropertyType.EMBEDDED_PROP);
+                .filter(property -> property.getterName != null && property.type.columnType != null);
     }
 
     private Stream<ComponentProperty> propertiesForMapperAccess() {
         return beanMetadata.getComponentProperties()
                 .stream()
-                .filter(property -> property.type == PropertyType.EMBEDDED_LIST
-                        || property.type == PropertyType.EMBEDDED_PROP);
+                .filter(property -> property.type == PropertyType.EMBEDDED_LIST_PROP || property.type == PropertyType.EMBEDDED_PROP);
     }
 
     private MethodSpec createMapperAccessor(ComponentProperty property) {
         return  MethodSpec.methodBuilder(property.getterName + "Mapper")
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(CommonTypes.MAPPER, property.businessType))
-                .addStatement("return $L", property.name)
+                .returns(ParameterizedTypeName.get(CommonTypes.MAPPER, property.unwrappedTypeName))
+                .addStatement("return $L", property.fieldName)
                 .build();
     }
 
@@ -91,31 +88,31 @@ public class ColumnarAccessFeature implements Feature {
 
         switch (property.type) {
             case INT_PROP:
-                methodSpec.addStatement("return $L.getInt(row)", property.name);
+                methodSpec.addStatement("return $L.getInt(row)", property.fieldName);
                 break;
             case BOOLEAN_PROP:
-                methodSpec.addStatement("return $L.getBoolean(row)", property.name);
+                methodSpec.addStatement("return $L.getBoolean(row)", property.fieldName);
                 break;
             case BYTE_PROP:
-                methodSpec.addStatement("return $L.getByte(row)", property.name);
+                methodSpec.addStatement("return $L.getByte(row)", property.fieldName);
                 break;
             case DOUBLE_PROP:
-                methodSpec.addStatement("return $L.getDouble(row)", property.name);
+                methodSpec.addStatement("return $L.getDouble(row)", property.fieldName);
                 break;
             case ENUM_PROP:
-                methodSpec.addStatement("return ($T)$L.getEnum(row)", property.businessType, property.name);
+                methodSpec.addStatement("return ($T)$L.getEnum(row)", property.unwrappedTypeName, property.fieldName);
                 break;
             case SOFT_ENUM_PROP:
-                methodSpec.addStatement("return ($T)$L.getEnum(row)", property.businessType, property.name);
+                methodSpec.addStatement("return ($T)$L.getEnum(row)", property.unwrappedTypeName, property.fieldName);
                 break;
             case FLOAT_PROP:
-                methodSpec.addStatement("return $L.getFloat(row)", property.name);
+                methodSpec.addStatement("return $L.getFloat(row)", property.fieldName);
                 break;
             case SHORT_PROP:
-                methodSpec.addStatement("return $L.getShort(row)", property.name);
+                methodSpec.addStatement("return $L.getShort(row)", property.fieldName);
                 break;
             case STRING_PROP:
-                methodSpec.addStatement("return $L.getString(row)", property.name);
+                methodSpec.addStatement("return $L.getString(row)", property.fieldName);
                 break;
             default:
                 throw new IllegalStateException("Unknown entity type " + property.type);

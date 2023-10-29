@@ -137,7 +137,18 @@ public class BunchOfData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BunchOfData that = (BunchOfData) o;
-        return booleanProp == that.booleanProp && byteProp == that.byteProp && Double.compare(that.doubleProp, doubleProp) == 0 && Float.compare(that.floatProp, floatProp) == 0 && intProp == that.intProp && shortProp == that.shortProp && Objects.equals(entitiesProp, that.entitiesProp) && Objects.equals(entityProp, that.entityProp) && enumProp == that.enumProp && Objects.equals(stringProp, that.stringProp) && Objects.equals(looksProp, that.looksProp) && statsProp.equals(that.statsProp);
+        return booleanProp == that.booleanProp
+                && byteProp == that.byteProp
+                && Double.compare(that.doubleProp, doubleProp) == 0
+                && Float.compare(that.floatProp, floatProp) == 0
+                && intProp == that.intProp
+                && shortProp == that.shortProp
+                && Objects.equals(entitiesProp, that.entitiesProp)
+                && Objects.equals(entityProp, that.entityProp)
+                && enumProp == that.enumProp
+                && Objects.equals(stringProp, that.stringProp)
+                && Objects.equals(looksProp, that.looksProp)
+                && statsProp.equals(that.statsProp);
     }
 
     @Override

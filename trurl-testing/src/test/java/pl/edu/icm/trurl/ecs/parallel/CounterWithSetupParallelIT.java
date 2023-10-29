@@ -15,7 +15,6 @@
  *
  *
  */
-/*
 package pl.edu.icm.trurl.ecs.parallel;
 
 import org.junit.jupiter.api.Test;
@@ -47,7 +46,7 @@ public class CounterWithSetupParallelIT {
     void test_parallel() {
         // given
         Store store = new Store(new ArrayAttributeFactory(), SIZE);
-        ParallelCounterMapper parallelMapper = new ParallelCounterMapper();
+        ParallelCounterMapper parallelMapper = new ParallelCounterMapper("");
         parallelMapper.configureAndAttach(store);
         this.prepareZeroedCounters(parallelMapper);
         parallelMapper.lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
@@ -78,7 +77,7 @@ public class CounterWithSetupParallelIT {
     void test_sequential() {
         // given
         Store store = new Store(new ArrayAttributeFactory(), SIZE);
-        CounterMapper counterMapper = new CounterMapper();
+        CounterMapper counterMapper = new CounterMapper("");
         counterMapper.configureAndAttach(store);
         prepareZeroedCounters(counterMapper);
 
@@ -107,7 +106,7 @@ public class CounterWithSetupParallelIT {
     void test_sequential_incorrect_results() {
         // given
         Store store = new Store(new ArrayAttributeFactory(), SIZE);
-        CounterMapper sequentialMapper = new CounterMapper();
+        CounterMapper sequentialMapper = new CounterMapper("");
         sequentialMapper.configureAndAttach(store);
         prepareZeroedCounters(sequentialMapper);
 
@@ -182,4 +181,3 @@ public class CounterWithSetupParallelIT {
 
 
 }
-*/

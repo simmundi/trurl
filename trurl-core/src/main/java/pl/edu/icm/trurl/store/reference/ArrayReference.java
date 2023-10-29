@@ -94,4 +94,8 @@ public final class ArrayReference implements Reference {
         return Collections.singletonList(values);
     }
 
+    @Override
+    public boolean isEmpty(int row) {
+        return getId(row, 0) == Integer.MIN_VALUE;
+    }
 }

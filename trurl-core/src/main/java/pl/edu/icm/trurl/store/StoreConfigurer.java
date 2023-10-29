@@ -48,6 +48,8 @@ public interface StoreConfigurer {
 
     void addIntList(String name);
 
+    ReferenceConfigurer addReference(String name);
+
     JoinConfigurer addJoin(String name);
 
     StoreConfigurer addSubstore(String name);

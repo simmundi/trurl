@@ -15,7 +15,6 @@
  *
  *
  */
-/*
 package pl.edu.icm.trurl.ecs;
 
 import org.junit.jupiter.api.Test;
@@ -96,6 +95,3 @@ class MapperSetTest {
         assertThat(results).containsExactly("looks", "stats");
     }
 }
-
-
- */
