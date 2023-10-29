@@ -1,8 +1,10 @@
 dependencies {
+    testAnnotationProcessor project(':trurl-generator')
     testImplementation project(':trurl-core')
     testImplementation project(':trurl-io')
     testImplementation project(':trurl-orc')
     testImplementation project(':trurl-util')
+    testImplementation project(':trurl-xml')
     testImplementation project(':trurl-xml')
     testImplementation "it.unimi.dsi:fastutil:${fastutilVersion}"
 }

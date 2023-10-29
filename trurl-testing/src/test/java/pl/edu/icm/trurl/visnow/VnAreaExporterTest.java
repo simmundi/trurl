@@ -15,12 +15,10 @@
  *
  *
  */
-/*
-
 package pl.edu.icm.trurl.visnow;
 
 import net.snowyhollows.bento.config.WorkDir;
-import org.assertj.core.api.*;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,11 +36,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.notNull;
-import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -87,7 +81,6 @@ class VnAreaExporterTest {
         // assert
         verify(areaInfoMapper).configureStore(notNull());
         verify(areaInfoMapper).attachStore(notNull());
-        verify(areaInfoMapper, times(2)).ensureCapacity(200);
         verify(areaInfoMapper).save(any(), same(areaA), eq(0));
         verify(areaInfoMapper).save(any(), same(areaB), eq(199));
         verify(areaInfoMapper).save(any(), same(areaC), eq(104));
@@ -122,6 +115,3 @@ class VnAreaExporterTest {
         );
     }
 }
-
-
- */

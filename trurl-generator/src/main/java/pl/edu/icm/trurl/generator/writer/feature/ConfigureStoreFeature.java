@@ -20,12 +20,11 @@ package pl.edu.icm.trurl.generator.writer.feature;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import pl.edu.icm.trurl.ecs.annotation.CollectionType;
 import pl.edu.icm.trurl.ecs.annotation.MappedCollection;
-import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.CommonTypes;
+import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
-import pl.edu.icm.trurl.generator.model.PropertyType;
-import pl.edu.icm.trurl.store.StoreConfigurer;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -65,46 +64,51 @@ public class ConfigureStoreFeature implements Feature {
             String name = property.qname;
             switch (property.type) {
                 case INT_PROP:
-                    methodSpec.addStatement("meta.addInt($S)", name);
+                    methodSpec.addStatement("meta.addInt(mapperPrefix + $S)", name);
                     break;
                 case BOOLEAN_PROP:
-                    methodSpec.addStatement("meta.addBoolean($S)", name);
+                    methodSpec.addStatement("meta.addBoolean(mapperPrefix + $S)", name);
                     break;
                 case BYTE_PROP:
-                    methodSpec.addStatement("meta.addByte($S)", name);
+                    methodSpec.addStatement("meta.addByte(mapperPrefix + $S)", name);
                     break;
                 case DOUBLE_PROP:
-                    methodSpec.addStatement("meta.addDouble($S)", name);
+                    methodSpec.addStatement("meta.addDouble(mapperPrefix + $S)", name);
                     break;
                 case SOFT_ENUM_PROP:
-                    methodSpec.addStatement("meta.addSoftEnum($S, $L)", name, property.name + "Manager");
+                    methodSpec.addStatement("meta.addSoftEnum(mapperPrefix + $S, $L)", name, property.name + "Manager");
                     break;
                 case ENUM_PROP:
-                    methodSpec.addStatement("meta.addEnum($S, $T.class)", name, property.businessType);
+                    methodSpec.addStatement("meta.addEnum(mapperPrefix + $S, $T.class)", name, property.unwrappedTypeName);
                     break;
                 case FLOAT_PROP:
-                    methodSpec.addStatement("meta.addFloat($S)", name);
+                    methodSpec.addStatement("meta.addFloat(mapperPrefix + $S)", name);
                     break;
                 case SHORT_PROP:
-                    methodSpec.addStatement("meta.addShort($S)", name);
+                    methodSpec.addStatement("meta.addShort(mapperPrefix + $S)", name);
                     break;
                 case STRING_PROP:
-                    methodSpec.addStatement("meta.addString($S)", name);
+                    methodSpec.addStatement("meta.addString(mapperPrefix + $S)", name);
                     break;
-                case EMBEDDED_LIST:
-                    String methodName = property.type == PropertyType.EMBEDDED_LIST ? "rangeTyped" : "arrayTyped";
+                case EMBEDDED_LIST_PROP:
                     Optional<MappedCollection> mappedCollection = Optional.ofNullable(property.attribute.getAnnotation(MappedCollection.class));
                     int sizeMin = mappedCollection.map(MappedCollection::minReservation).orElse(1);
                     int sizeMargin = mappedCollection.map(MappedCollection::margin).orElse(2);
+                    String methodName = mappedCollection.map(MappedCollection::collectionType).orElse(CollectionType.RANGE) == CollectionType.RANGE ? "rangeTyped" : "arrayTyped";
 
-                    methodSpec.addStatement("$L = mappers.create($T.class, mapperPrefix + $S)", property.name, property.businessType, ".");
-                    methodSpec.addStatement("$L.configureStore(meta.addReference($S).$L($L, $L).toSubstore())", property.name, name, methodName, sizeMin, sizeMargin);
+                    methodSpec.addStatement("$L = ($T) mappers.create($T.class, mapperPrefix + $S)", property.fieldName, property.getMapperType(), property.unwrappedTypeName, property.name);
+                    methodSpec.addStatement("$L.configureStore(meta.addJoin(mapperPrefix + $S).$L($L, $L))", property.fieldName, name, methodName, sizeMin, sizeMargin);
                     break;
                 case EMBEDDED_PROP:
-                    methodSpec.addStatement("$L = mappers.create($T.class, mapperPrefix + $S)", property.name, property.businessType, ".");
-                    methodSpec.addStatement("$L.configureStore(meta)");
+                    methodSpec.addStatement("$L = ($T) mappers.create($T.class, mapperPrefix + $S)", property.fieldName, property.getMapperType(), property.unwrappedTypeName, property.name);
+                    methodSpec.addStatement("$L.configureStore(meta)", property.fieldName);
                     break;
-
+                case ENTITY_LIST_PROP:
+                    methodSpec.addStatement("meta.addReference(mapperPrefix + $S).arrayTyped($L, $L)", name, 1, 2);
+                    break;
+                case ENTITY_PROP:
+                    methodSpec.addStatement("meta.addReference(mapperPrefix + $S).single()", name);
+                    break;
                 default:
                     throw new IllegalStateException("Unknown entity type " + property.type);
             }

@@ -15,7 +15,6 @@
  *
  *
  */
-/*
 package pl.edu.icm.trurl.ecs.query;
 
 import net.snowyhollows.bento.Bento;
@@ -198,5 +197,3 @@ class SelectorFromQueryServiceTest {
         return new Person(names[random.nextInt(names.length)]);
     }
 }
-
- */

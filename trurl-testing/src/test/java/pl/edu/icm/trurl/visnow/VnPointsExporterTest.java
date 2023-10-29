@@ -15,7 +15,6 @@
  *
  *
  */
-/*
 package pl.edu.icm.trurl.visnow;
 
 import com.google.common.io.ByteArrayDataInput;
@@ -86,6 +85,3 @@ class VnPointsExporterTest {
         );
     }
 }
-
-
- */

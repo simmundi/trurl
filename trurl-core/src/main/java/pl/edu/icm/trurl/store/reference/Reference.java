@@ -66,4 +66,10 @@ public interface Reference {
      * @return
      */
     Collection<? extends Attribute> attributes();
+
+    /**
+     * Returns information whether the reference is empty for the given row
+     * @return
+     */
+    boolean isEmpty(int row);
 }

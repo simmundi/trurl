@@ -15,8 +15,6 @@
  *
  *
  */
-/*
-
 package pl.edu.icm.trurl.util;
 
 import net.snowyhollows.bento.Bento;
@@ -89,7 +87,3 @@ class SoftEnumTableTest {
         assertThat(chessBoard.get(a, _8)).isSameAs(pieces.QUEEN);
     }
 }
-
-
-
- */

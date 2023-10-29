@@ -15,7 +15,6 @@
  *
  *
  */
-/*
 package pl.edu.icm.trurl.ecs.mapper;
 
 import net.snowyhollows.bento.Bento;
@@ -32,14 +31,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class MapperSoftEnumsIT {
 
-
-
     @Test
     @DisplayName("Should correctly map a component with a SoftEnum")
     void test() throws IOException {
         // given
         Store store = new Store(new ArrayAttributeFactory(), 1024);
-        Bento config = new Configurer().loadConfigResource("/contamination.properties").getConfig();
+        Bento config = new Configurer().loadConfigResource("/contamination.properties").setParam("mapperPrefix", "").getConfig();
         HealthMapper healthMapper = config.get(MapperOfHealthFactory.IT);
         ContaminationTypes contaminationTypes = config.get(ContaminationTypesFactory.IT);
 
@@ -69,4 +66,3 @@ public class MapperSoftEnumsIT {
         assertThat(healthMapper.createAndLoad(2).getContaminationType()).isSameAs(DELTA);
     }
 }
-*/

@@ -28,10 +28,10 @@ import javax.lang.model.element.Modifier;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class SetEmptyFeature implements Feature {
+public class EraseFeature implements Feature {
     private final BeanMetadata beanMetadata;
 
-    public SetEmptyFeature(BeanMetadata beanMetadata) {
+    public EraseFeature(BeanMetadata beanMetadata) {
         this.beanMetadata = beanMetadata;
     }
 
@@ -46,17 +46,26 @@ public class SetEmptyFeature implements Feature {
     }
 
     private MethodSpec overrideAttachStore(BeanMetadata beanMetadata) {
-        MethodSpec.Builder methodSpec = MethodSpec.methodBuilder("setEmpty")
+        MethodSpec.Builder methodSpec = MethodSpec.methodBuilder("erase")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(TypeName.INT, "row");
         List<ComponentProperty> properties = beanMetadata.getComponentProperties();
         for (ComponentProperty property : properties) {
-            if (property.synthetic) continue;
-
             switch (property.type) {
+                case EMBEDDED_LIST_PROP:
+                    methodSpec.addStatement("$LJoin.setSize(row, 0)", property.fieldName);
+                    break;
+                case EMBEDDED_PROP:
+                    methodSpec.addStatement("$L.erase(row)", property.fieldName);
+                    break;
+                case ENTITY_PROP: // fallthrough
+                case ENTITY_LIST_PROP:
+                    methodSpec.addStatement("$L.setSize(row, 0)", property.fieldName);
+                    break;
+
                 default:
-                    methodSpec.addStatement("$L.setEmpty(row)", property.name);
+                    methodSpec.addStatement("$L.setEmpty(row)", property.fieldName);
             }
         }
 

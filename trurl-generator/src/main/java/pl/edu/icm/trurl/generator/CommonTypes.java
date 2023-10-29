@@ -20,20 +20,25 @@ package pl.edu.icm.trurl.generator;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
-import net.snowyhollows.bento.soft.SoftEnum;
 import net.snowyhollows.bento.soft.SoftEnumManager;
 import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
-import pl.edu.icm.trurl.ecs.mapper.MapperListeners;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
 import pl.edu.icm.trurl.store.IntSink;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreConfigurer;
 import pl.edu.icm.trurl.store.attribute.*;
+import pl.edu.icm.trurl.store.join.ArrayJoin;
+import pl.edu.icm.trurl.store.join.RangedJoin;
+import pl.edu.icm.trurl.store.reference.ArrayReference;
+import pl.edu.icm.trurl.store.reference.SingleReference;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 public class CommonTypes {
@@ -43,11 +48,12 @@ public class CommonTypes {
     public static final ClassName INT_SINK = ClassName.get(IntSink.class);
     public static final ClassName MAPPER = ClassName.get(Mapper.class);
     public static final ClassName MAPPERS = ClassName.get(Mappers.class);
-    public static final ClassName MAPPER_LISTENERS = ClassName.get(MapperListeners.class);
+    public static final ClassName ARRAY_JOIN = ClassName.get(ArrayJoin.class);
+    public static final ClassName RANGED_JOIN = ClassName.get(RangedJoin.class);
+    public static final ClassName ARRAY_REFERENCE = ClassName.get(ArrayReference.class);
+    public static final ClassName SINGLE_REFERENCE = ClassName.get(SingleReference.class);
     public static final ClassName SESSION = ClassName.get(Session.class);
     public static final ClassName LIST = ClassName.get(List.class);
-    public static final ClassName LANG_OBJECT = ClassName.get(Object.class);
-    public static final ClassName LANG_OBJECTS = ClassName.get(Objects.class);
     public static final ClassName LANG_STRING = ClassName.get(String.class);
     public static final ClassName ARRAYS = ClassName.get(Arrays.class);
     public static final ClassName COLLECTIONS = ClassName.get(Collections.class);
@@ -66,7 +72,6 @@ public class CommonTypes {
     public static final ClassName CATEGORICAL_STATIC_COLUMN = ClassName.get(CategoricalStaticAttribute.class);
     public static final ClassName BOOLEAN_COLUMN = ClassName.get(BooleanAttribute.class);
     public static final ClassName CATEGORICAL_DYNAMIC_COLUMN = ClassName.get(CategoricalDynamicAttribute.class);
-    public static final ClassName SOFT_ENUM = ClassName.get(SoftEnum.class);
     public static final ClassName SOFT_ENUM_MANAGER = ClassName.get(SoftEnumManager.class);
 
 

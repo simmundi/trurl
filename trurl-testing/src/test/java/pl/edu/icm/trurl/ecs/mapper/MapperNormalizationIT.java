@@ -15,7 +15,7 @@
  *
  *
  */
-/*
+
 package pl.edu.icm.trurl.ecs.mapper;
 
 import org.assertj.core.api.*;
@@ -32,7 +32,7 @@ import pl.edu.icm.trurl.store.Store;
 @ExtendWith(MockitoExtension.class)
 public class MapperNormalizationIT {
     Store store = new Store(new ArrayAttributeFactory(), 1);
-    PersonMapper personMapper = new PersonMapper();
+    PersonMapper personMapper = new PersonMapper("");
 
     @BeforeEach
     public void before() {
@@ -53,4 +53,3 @@ public class MapperNormalizationIT {
         Assertions.assertThat(personMapper.getName(0)).isEqualTo("JAN KOWALSKI");
     }
 }
-*/

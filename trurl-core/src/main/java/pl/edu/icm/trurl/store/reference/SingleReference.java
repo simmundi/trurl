@@ -36,7 +36,7 @@ public class SingleReference implements Reference {
 
     @Override
     public int getId(int row, int index) {
-        return idAttribute.getInt(row);
+        return index == 0 ? idAttribute.getInt(row) : Integer.MIN_VALUE;
     }
 
     @Override
@@ -62,5 +62,10 @@ public class SingleReference implements Reference {
     @Override
     public Collection<? extends Attribute> attributes() {
         return Collections.singletonList(idAttribute);
+    }
+
+    @Override
+    public boolean isEmpty(int row) {
+        return getId(row, 0) == Integer.MIN_VALUE;
     }
 }

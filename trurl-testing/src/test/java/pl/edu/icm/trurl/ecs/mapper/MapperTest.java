@@ -15,7 +15,6 @@
  *
  *
  */
-/*
 package pl.edu.icm.trurl.ecs.mapper;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -53,9 +52,6 @@ class MapperTest {
     @Mock
     CategoricalStaticAttribute textureAttribute;
 
-    @Mock
-    MapperListener<Looks> mapperListener;
-
     Mapper<Looks> mapper;
 
     @BeforeEach
@@ -83,7 +79,6 @@ class MapperTest {
         Looks looks = new Looks();
         when(colorAttribute.getEnum(4)).thenReturn(Color.BLUE);
         when(textureAttribute.getEnum(4)).thenReturn(Texture.ROUGH);
-        mapper.ensureCapacity(100);
 
         // execute
         mapper.load(null, looks, 4);
@@ -94,17 +89,9 @@ class MapperTest {
     }
 
     @Test
-    void load__out_of_bounds() {
-        // execute & assert
-        assertThatThrownBy(() -> mapper.load(null, null, 1234))
-                .isInstanceOf(RuntimeException.class);
-    }
-
-    @Test
     void save() {
         // given
         Looks looks = new Looks(Color.BLUE, Texture.SHINY);
-        mapper.getMapperListeners().addSavingListener(mapperListener);
 
         // execute
         mapper.save(null, looks, 99);
@@ -112,39 +99,11 @@ class MapperTest {
         // assert
         verify(colorAttribute).setEnum(99, Color.BLUE);
         verify(textureAttribute).setEnum(99, Texture.SHINY);
-        verify(mapperListener).savingComponent(99, looks);
-    }
-
-    @Test
-    void setCount() {
-        // execute
-        mapper.setCount(100);
-
-        // assert
-        verify(colorAttribute).ensureCapacity(100);
-        verify(colorAttribute).ensureCapacity(100);
-    }
-
-    @Test
-    void save__no_modification() {
-        // given
-        mapper.setCount(100);
-        Looks looks = new Looks(Color.BLUE, Texture.SHINY);
-        when(colorAttribute.getEnum(99)).thenReturn(Color.BLUE);
-        when(textureAttribute.getEnum(99)).thenReturn(Texture.SHINY);
-        mapper.getMapperListeners().addSavingListener(mapperListener);
-
-        // execute
-        mapper.save(null, looks, 99);
-
-        // assert
-        verify(mapperListener, times(0)).savingComponent(anyInt(), notNull());
     }
 
     @Test
     void isPresent() {
         // given
-        mapper.ensureCapacity(100);
         IntStream.of(10, 36, 50, 99).forEach(i ->
                 lenient().when(colorAttribute.isEmpty(i)).thenReturn(true));
         IntStream.of(10, 37, 50, 98).forEach(i ->
@@ -169,4 +128,3 @@ class MapperTest {
         assertThat(looks).isNotNull();
     }
 }
-*/

@@ -15,7 +15,6 @@
  *
  *
  */
-/*
 package pl.edu.icm.trurl.ecs.mapper;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +34,7 @@ import static org.assertj.core.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 public class MapperSetupFeatureIT {
     Store store = new Store(new ArrayAttributeFactory(), 1);
-    CounterWithSetupMapper counterMapper = new CounterWithSetupMapper();
+    CounterWithSetupMapper counterMapper = new CounterWithSetupMapper("");
 
     @BeforeEach
     public void before() {
@@ -59,4 +58,3 @@ public class MapperSetupFeatureIT {
         assertThat(loaded.getValue()).isEqualTo(17f);
     }
 }
-*/

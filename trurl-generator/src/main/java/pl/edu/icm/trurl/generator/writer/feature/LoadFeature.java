@@ -18,13 +18,7 @@
 
 package pl.edu.icm.trurl.generator.writer.feature;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
-import pl.edu.icm.trurl.ecs.annotation.CollectionType;
-import pl.edu.icm.trurl.ecs.annotation.MappedCollection;
+import com.squareup.javapoet.*;
 import pl.edu.icm.trurl.generator.CommonTypes;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentFeature;
@@ -32,7 +26,6 @@ import pl.edu.icm.trurl.generator.model.ComponentProperty;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public class LoadFeature implements Feature {
@@ -124,49 +117,45 @@ public class LoadFeature implements Feature {
                 .addParameter(TypeName.INT, "row");
 
         for (ComponentProperty property : componentProperties) {
-            if (property.synthetic) continue;
-
             switch (property.type) {
                 case INT_PROP:
-                    methodSpec.addStatement("component.$L($L.getInt(row))", property.setterName, property.name);
+                    methodSpec.addStatement("component.$L($L.getInt(row))", property.setterName, property.fieldName);
                     break;
                 case BOOLEAN_PROP:
-                    methodSpec.addStatement("component.$L($L.getBoolean(row))", property.setterName, property.name);
+                    methodSpec.addStatement("component.$L($L.getBoolean(row))", property.setterName, property.fieldName);
                     break;
                 case BYTE_PROP:
-                    methodSpec.addStatement("component.$L($L.getByte(row))", property.setterName, property.name);
+                    methodSpec.addStatement("component.$L($L.getByte(row))", property.setterName, property.fieldName);
                     break;
                 case DOUBLE_PROP:
-                    methodSpec.addStatement("component.$L($L.getDouble(row))", property.setterName, property.name);
+                    methodSpec.addStatement("component.$L($L.getDouble(row))", property.setterName, property.fieldName);
                     break;
                 case ENUM_PROP:
-                    methodSpec.addStatement("component.$L(($T)$L.getEnum(row))", property.setterName, property.businessType, property.name);
+                    methodSpec.addStatement("component.$L(($T)$L.getEnum(row))", property.setterName, property.unwrappedTypeName, property.fieldName);
                     break;
                 case SOFT_ENUM_PROP:
-                    methodSpec.addStatement("component.$L(($T)$L.getEnum(row))", property.setterName, property.businessType, property.name);
+                    methodSpec.addStatement("component.$L(($T)$L.getEnum(row))", property.setterName, property.unwrappedTypeName, property.fieldName);
                     break;
                 case FLOAT_PROP:
-                    methodSpec.addStatement("component.$L($L.getFloat(row))", property.setterName, property.name);
+                    methodSpec.addStatement("component.$L($L.getFloat(row))", property.setterName, property.fieldName);
                     break;
                 case SHORT_PROP:
-                    methodSpec.addStatement("component.$L($L.getShort(row))", property.setterName, property.name);
+                    methodSpec.addStatement("component.$L($L.getShort(row))", property.setterName, property.fieldName);
                     break;
                 case STRING_PROP:
-                    methodSpec.addStatement("component.$L($L.getString(row))", property.setterName, property.name);
+                    methodSpec.addStatement("component.$L($L.getString(row))", property.setterName, property.fieldName);
                     break;
                 case EMBEDDED_PROP:
-                    String instanceName = property.name + "Instance";
-                    methodSpec.addCode(CodeBlock.builder()
-                            .beginControlFlow("if ($L.isPresent(row))", property.name)
-                            .addStatement("$T $L = ($T)$L.create()", property.businessType, instanceName, property.businessType, property.name)
-                            .addStatement("$L.load(session, $L, row)", property.name, instanceName)
-                            .addStatement("component.$L($L)", property.setterName, instanceName)
-                            .endControlFlow()
-                            .build());
-
+                    createEmbedded(methodSpec, property);
                     break;
-                case EMBEDDED_LIST:
+                case EMBEDDED_LIST_PROP:
                     createEmbeddedList(methodSpec, property);
+                    break;
+                case ENTITY_LIST_PROP:
+                    createEntityList(methodSpec, property);
+                    break;
+                case ENTITY_PROP:
+                    createEntity(methodSpec, property);
                     break;
                 default:
                     throw new IllegalStateException("Unknown entity type " + property.type);
@@ -176,48 +165,44 @@ public class LoadFeature implements Feature {
         return methodSpec.build();
     }
 
-    private void createEmbeddedList(MethodSpec.Builder methodSpec, ComponentProperty property) {
-        {
-            CollectionType collectionType = Optional.ofNullable(property.attribute.getAnnotation(MappedCollection.class))
-                    .map(MappedCollection::collectionType).orElse(CollectionType.RANGE);
-            switch (collectionType) {
-                case ARRAY_LIST:
-                    methodSpec
-                            .addCode(
-                                    CodeBlock.builder()
-                                            .beginControlFlow("if (!$L_ids.isEmpty(row))", property.name)
-                                            .addStatement("int[] ids = new int[$L_ids.getSize(row)]", property.name)
-                                            .addStatement("$L_ids.loadIds(row, (index, value) -> ids[index] = value)", property.name)
-                                            .beginControlFlow("for (int id : ids)")
-                                            .addStatement("$T element = ($T) $L.create()", property.businessType, property.businessType, property.name)
-                                            .addStatement("$L.load(session, element, id)", property.name)
-                                            .addStatement("component.$L().add(element)", property.getterName)
-                                            .endControlFlow()
-                                            .endControlFlow()
-                                            .build()
-                            );
-                    break;
-                case RANGE:
-                    methodSpec
-                            .addCode(
-                                    CodeBlock.builder()
-                                            .beginControlFlow("if (!$L_start.isEmpty(row))", property.name)
-                                            .addStatement("int length = $L_length.getByte(row)", property.name)
-                                            .addStatement("int start = $L_start.getInt(row)", property.name)
-                                            .addStatement("component.$L().clear()", property.getterName)
-                                            .beginControlFlow("for (int i = start; i < start + length; i++)")
-                                            .addStatement("if (!$L.isPresent(i)) break", property.name)
-                                            .addStatement("$T element = ($T) $L.create()", property.businessType, property.businessType, property.name)
-                                            .addStatement("$L.load(session, element, i)", property.name)
-                                            .addStatement("component.$L().add(element)", property.getterName)
-                                            .endControlFlow()
-                                            .endControlFlow()
-                                            .build()
-                            );
-                    break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + collectionType);
-            }
-        }
+    private void createEmbedded(MethodSpec.Builder methodSpec, ComponentProperty property) {
+        String instanceName = "$" + property.name + "Instance";
+        methodSpec.addCode(CodeBlock.builder()
+                .beginControlFlow("if ($L.isPresent(row))", property.fieldName)
+                .addStatement("$T $L = $L.createAndLoad(session, row)", property.unwrappedTypeName, instanceName, property.fieldName)
+                .addStatement("component.$L($L)", property.setterName, instanceName)
+                .endControlFlow()
+                .build());
     }
+
+    private void createEmbeddedList(MethodSpec.Builder methodSpec, ComponentProperty property) {
+        String instanceName = "$" + property.name + "Instance";
+        methodSpec.addCode(CodeBlock.builder()
+                .beginControlFlow("for (int idx = 0;;idx++)")
+                .addStatement("int embeddedRow = $LJoin.getRow(row, idx)", property.fieldName)
+                .addStatement("if (embeddedRow == Integer.MIN_VALUE || !$L.isPresent(embeddedRow)) break", property.fieldName)
+                .addStatement("$T $L = $L.createAndLoad(session, embeddedRow)", property.unwrappedTypeName, instanceName, property.fieldName)
+                .addStatement("component.$L().add($L)", property.getterName, instanceName)
+                .endControlFlow()
+                .build());
+    }
+
+    private void createEntity(MethodSpec.Builder methodSpec, ComponentProperty property) {
+        methodSpec.addCode(CodeBlock.builder()
+                .beginControlFlow("if (!$L.isEmpty(row))", property.fieldName)
+                .addStatement("component.$L(session.getEntity($L.getId(row, 0)))", property.setterName, property.fieldName)
+                .endControlFlow()
+                .build());
+    }
+
+    private void createEntityList(MethodSpec.Builder methodSpec, ComponentProperty property) {
+        methodSpec.addCode(CodeBlock.builder()
+                .beginControlFlow("for (int idx = 0;;idx++)")
+                .addStatement("int embeddedId = $L.getId(row, idx)", property.fieldName)
+                .addStatement("if (embeddedId == Integer.MIN_VALUE) break;")
+                .addStatement("component.$L().add(session.getEntity(embeddedId))", property.getterName)
+                .endControlFlow()
+                .build());
+    }
+
 }

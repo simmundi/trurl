@@ -20,10 +20,9 @@ package pl.edu.icm.trurl.generator.writer.feature;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
-import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.CommonTypes;
+import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
-import pl.edu.icm.trurl.generator.model.PropertyType;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -60,24 +59,23 @@ public class AttachStoreFeature implements Feature {
 
         for (ComponentProperty property : properties) {
             switch (property.type) {
-                case EMBEDDED_LIST:
-                    // if property is based on a reference (like - a list), we need to get the reference first
-                    // TODO: entity list will also go here
-                    methodSpec.addStatement("$LReference = store.getReference($S))", property.name, property.name);
-                    // fallthrough
+                case EMBEDDED_LIST_PROP:
+                    methodSpec.addStatement("$LJoin = store.getJoin(mapperPrefix + $S)", property.fieldName, property.name);
+                    methodSpec.addStatement("$L.attachStore($LJoin.getTarget())", property.fieldName, property.fieldName);
+                    break;
                 case EMBEDDED_PROP:
-                    // if the property has a substore and a mapper, we need to attach the substore
-                    methodSpec.addStatement("$L.attachStore(store.getSubstore($S))", property.name, property.name);
+                    methodSpec.addStatement("$L.attachStore(store)", property.fieldName);
+                    break;
+                case ENTITY_LIST_PROP: // fallthrough
+                case ENTITY_PROP:
+                    methodSpec.addStatement("$L = store.getReference(mapperPrefix + $S)", property.fieldName, property.qname);
                     break;
                 default:
-                    methodSpec.addStatement("$L = ($T) store.get($S)",
-                            property.name,
-                            property.type.columnType,
+                    methodSpec.addStatement("$L = store.get(mapperPrefix + $S)",
+                            property.fieldName,
                             property.qname);
             }
         }
-
-        methodSpec.addStatement("this.counter = store.getCounter()");
         return methodSpec.build();
     }
 }

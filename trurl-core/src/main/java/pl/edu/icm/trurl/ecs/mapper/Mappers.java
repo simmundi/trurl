@@ -59,30 +59,4 @@ public class Mappers {
             throw new IllegalArgumentException("Class " + clazz + " does not have a valid mapper (did you forget the @WithMapper annotation? is trurl-generator configured as an annotation processor?)", cause);
         }
     }
-
-
-    static public List<Attribute> gatherAttributes(Collection<Mapper<?>> mappers) {
-        return mappers.stream()
-                .flatMap(mapper -> Stream.concat(Stream.of(mapper), mapper.getChildMappers().stream()))
-                .flatMap(mapper -> (Stream<Attribute>) mapper.attributes().stream())
-                .collect(Collectors.toList());
-    }
-
-    public <T> Mapper<T> createAndAttach(Class<T> clazz, Store store) {
-        Mapper<T> tMapper = create(clazz);
-        tMapper.configureStore(store);
-        tMapper.attachStore(store);
-        return tMapper;
-    }
-
-    static public <T> Stream<T> stream(Mapper<T> mapper) {
-        throw new UnsupportedOperationException("mapper.getCount");
-//        return IntStream.range(0, mapper.getCount())
-//                .filter(row -> mapper.isPresent(row))
-//                .mapToObj(row -> {
-//                    T t = mapper.create();
-//                    mapper.load(null, t, row);
-//                    return t;
-//                });
-    }
 }

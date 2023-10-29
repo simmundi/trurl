@@ -65,23 +65,23 @@ public final class Store implements StoreConfigurer, StoreInspector {
     private final Map<String, Join> joins = new LinkedHashMap<>();
     private final Map<String, Reference> references = new LinkedHashMap<>();
 
-    private final int defaultCapacity;
+    private int ensuredCapacity;
     private final Counter counter;
     private final String name;
     private final AttributeFactory attributeFactory;
 
-    public Store(AttributeFactory attributeFactory, int defaultCapacity) {
-        counter = new Counter(defaultCapacity);
+    public Store(AttributeFactory attributeFactory, int ensuredCapacity) {
+        counter = new Counter(ensuredCapacity);
         this.attributeFactory = attributeFactory;
         this.name = "";
-        this.defaultCapacity = defaultCapacity;
+        this.ensuredCapacity = ensuredCapacity;
     }
 
-    private Store(AttributeFactory attributeFactory, String name, int defaultCapacity) {
-        counter = new Counter(defaultCapacity);
+    private Store(AttributeFactory attributeFactory, String name, int ensuredCapacity) {
+        counter = new Counter(ensuredCapacity);
         this.attributeFactory = attributeFactory;
         this.name = name;
-        this.defaultCapacity = defaultCapacity;
+        this.ensuredCapacity = ensuredCapacity;
     }
 
     public Collection<Store> allDescendants() {
@@ -116,6 +116,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
     }
 
     public void ensureCapacity(int capacity) {
+        this.ensuredCapacity = capacity;
         allAttributes.values().forEach(a -> a.ensureCapacity(capacity));
     }
 
@@ -166,7 +167,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addBoolean(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createBoolean(name, defaultCapacity));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createBoolean(name, ensuredCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -174,7 +175,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addByte(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createByte(name, defaultCapacity));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createByte(name, ensuredCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -182,7 +183,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addDouble(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createDouble(name, defaultCapacity));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createDouble(name, ensuredCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -191,7 +192,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addIntList(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createIntList(name, defaultCapacity));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createIntList(name, ensuredCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -199,7 +200,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public <E extends Enum<E>> void addEnum(String name, Class<E> enumType) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createStaticCategory(name, enumType, defaultCapacity));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createStaticCategory(name, enumType, ensuredCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -207,7 +208,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public <E extends SoftEnum> void addSoftEnum(String name, SoftEnumManager<E> enumType) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createDynamicCategory(name, enumType, defaultCapacity));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createDynamicCategory(name, enumType, ensuredCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -215,7 +216,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addFloat(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createFloat(name, defaultCapacity));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createFloat(name, ensuredCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -223,7 +224,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addInt(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createInt(name, defaultCapacity));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createInt(name, ensuredCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -231,7 +232,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addShort(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createShort(name, defaultCapacity));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createShort(name, ensuredCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -239,12 +240,13 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public void addString(String name) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createString(name, defaultCapacity));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createString(name, ensuredCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
     }
 
+    @Override
     public ReferenceConfigurer addReference(String name) {
         return new ReferenceConfigurer() {
             @Override
@@ -303,7 +305,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     public Store addSubstore(String namespace) {
         String substoreNamespace = this.name.isEmpty() ? namespace : this.name + "." + namespace;
-        substores.put(namespace, new Store(attributeFactory, substoreNamespace, defaultCapacity));
+        substores.put(namespace, new Store(attributeFactory, substoreNamespace, ensuredCapacity));
         return substores.get(substoreNamespace);
     }
 
@@ -316,5 +318,9 @@ public final class Store implements StoreConfigurer, StoreInspector {
         return substores.values().stream().flatMap(
                 store -> Stream.concat(Stream.of(store), store.recursivelyAllDescendants())
         );
+    }
+
+    public int getEnsuredCapacity() {
+        return ensuredCapacity;
     }
 }
