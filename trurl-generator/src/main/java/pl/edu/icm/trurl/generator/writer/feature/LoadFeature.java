@@ -71,7 +71,7 @@ public class LoadFeature implements Feature {
                             .beginControlFlow("while (true)")
                             .addStatement("int currentOwner = owners.get(row)")
                             .addStatement("if (currentOwner < 0) continue")
-                            .addStatement("if (currentOwner == 0 && !owners.compareAndSet(row, 0, currentOwner)) continue;")
+//                            .addStatement("if (currentOwner == 0 && !owners.compareAndSet(row, 0, currentOwner)) continue")
                             .add(callFetchValues())
                             .beginControlFlow("if (owners.get(row) == currentOwner)")
                             .addStatement("component.setOwnerId(currentOwner)")
