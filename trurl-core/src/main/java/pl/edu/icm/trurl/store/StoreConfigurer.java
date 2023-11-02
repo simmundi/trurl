@@ -58,6 +58,8 @@ public interface StoreConfigurer {
         Store rangeTyped(int minimumSize, int margin);
 
         Store arrayTyped(int minimumSize, int margin);
+
+        Store singleTyped();
     }
 
     interface ReferenceConfigurer {
