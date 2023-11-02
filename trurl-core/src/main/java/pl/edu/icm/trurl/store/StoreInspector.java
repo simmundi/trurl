@@ -48,9 +48,9 @@ public interface StoreInspector {
 
     Counter getCounter();
 
-    Join getJoin(String olives);
+    <T extends Join> T getJoin(String olives);
 
-    Reference getReference(String olives);
+    <T extends Reference> T getReference(String olives);
 
     void erase(int i);
 
