@@ -43,6 +43,8 @@ public class CommonFieldsFeature implements Feature {
                                 .build());
                     } else if (property.isUsingReferences()) {
                         return reference(property);
+                    } else if (property.isUsingJoin() && property.isUsingMappers()) {
+                        return join(property);
                     } else if (property.isUsingJoin()) {
                         return join(property);
                     } else if (property.isUsingMappers() && !property.isUsingJoin()) {
