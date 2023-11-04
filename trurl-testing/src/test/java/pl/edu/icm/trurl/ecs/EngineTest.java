@@ -92,18 +92,6 @@ class EngineTest {
     }
 
     @Test
-    void streamDetached() {
-        // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);
-
-        // execute
-        List<Integer> result = engine.streamDetached().map(Entity::getId).collect(Collectors.toList());
-
-        // assertThat
-        assertThat(result).isEqualTo(IntStream.range(0, 300).boxed().collect(Collectors.toList()));
-    }
-
-    @Test
     void getRootStore() {
         // given
         Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);

@@ -108,4 +108,11 @@ public final class Entity {
         }
         return (T) components[idx];
     }
+
+    public <T> T get(ComponentToken<T> token) {
+        if (components[token.index] == null && token.mapper.isPresent(id)) {
+            components[token.index] = token.mapper.createAndLoad(session, id);
+        }
+        return (T) components[token.index];
+    }
 }

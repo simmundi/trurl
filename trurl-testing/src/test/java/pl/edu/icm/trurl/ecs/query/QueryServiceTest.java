@@ -36,12 +36,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SelectorFromQueryServiceTest {
+class QueryServiceTest {
 
     EngineConfiguration engineConfiguration;
     Engine engine;
     Selectors selectors;
-    SelectorFromQueryService service;
+    QueryService service;
     Random random = new Random(0);
     String[] names = {"ANNA", "BARBARA", "CELINA", "DANUTA", "EWELINA", "FILIPINA", "GRAŻYNA", "HANNA", "IRENA", "JANINA", "KRZYSZTOFA"};
 
@@ -64,7 +64,7 @@ class SelectorFromQueryServiceTest {
             session.close();
         });
 
-        service = new SelectorFromQueryService(selectors, engineConfiguration);
+        service = new QueryService(selectors, engineConfiguration);
     }
 
     @Test

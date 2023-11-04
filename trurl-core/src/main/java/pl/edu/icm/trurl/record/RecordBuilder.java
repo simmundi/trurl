@@ -16,8 +16,20 @@
  *
  */
 
-package pl.edu.icm.trurl.store.db;
+package pl.edu.icm.trurl.record;
 
-public class RootRecordReference {
-    private long id;
+import pl.edu.icm.trurl.store.Store;
+
+public class RecordBuilder {
+
+
+    public Record build(Store store, long row) {
+        Record record = new Record();
+        store.attributes().forEach((attribute) -> {
+            //  TODO: record.put(attribute.name(), attribute.getString(row));
+        });
+
+        return record;
+    }
+
 }

@@ -16,20 +16,13 @@
  *
  */
 
-package pl.edu.icm.trurl.store.db;
+package pl.edu.icm.trurl.record;
 
-import pl.edu.icm.trurl.store.Store;
+import java.util.*;
 
-public class RecordBuilder {
-
-
-    public Record build(Store store, long row) {
-        Record record = new Record();
-        store.attributes().forEach((attribute) -> {
-            //  TODO: record.put(attribute.name(), attribute.getString(row));
-        });
-
-        return record;
-    }
-
+public class Record {
+    private Long id;
+    private final Map<String, Value> values = new LinkedHashMap<>();
+    private final Map<String, List<Record>> joins = new LinkedHashMap<>();
+    private final Map<String, RootRecordReference> references = new LinkedHashMap<>();
 }

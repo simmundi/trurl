@@ -16,13 +16,16 @@
  *
  */
 
-package pl.edu.icm.trurl.store.db;
+package pl.edu.icm.trurl.ecs;
 
-import java.util.*;
+import pl.edu.icm.trurl.ecs.mapper.Mapper;
 
-public class Record {
-    private Long id;
-    private final Map<String, Value> values = new LinkedHashMap<>();
-    private final Map<String, List<Record>> joins = new LinkedHashMap<>();
-    private final Map<String, RootRecordReference> references = new LinkedHashMap<>();
+public class ComponentToken<T> {
+    final public Mapper<T> mapper;
+    final int index;
+
+    ComponentToken(Mapper<T> mapper, int index) {
+        this.mapper = mapper;
+        this.index = index;
+    }
 }

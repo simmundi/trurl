@@ -30,7 +30,7 @@ public class StoreIO {
 
 
     public void readStoreFromFiles(File metadataFile, Store store) throws IOException {
-        Path path = metadataFile.toPath();
+        Path path = metadataFile.toPath().toAbsolutePath();
         Path parentPath = path.getParent();
         Properties properties = loadProperties(path);
         String format = properties.getProperty(METADATA_FORMAT_FIELD);
@@ -42,7 +42,7 @@ public class StoreIO {
     }
 
     public void writeStoreToFiles(File metadataFile, String baseName, Store store, String format) throws IOException {
-        Path path = metadataFile.toPath();
+        Path path = metadataFile.toPath().toAbsolutePath();
         Path parentDir = path.getParent();
         checkFileExtension(path);
 

@@ -32,7 +32,7 @@ public class EngineConfiguration {
     private volatile Engine engine;
     private ComponentAccessorCreator componentAccessorCreator;
     private List<EngineCreationListener> engineCreationListeners = new CopyOnWriteArrayList<>();
-    private List<Class<?>> componentClasses = new CopyOnWriteArrayList<>();
+    private Set<Class<?>> componentClasses = new LinkedHashSet<>();
     private final AttributeFactory attributeFactory;
     private final Bento bento;
     private final int initialCapacity;

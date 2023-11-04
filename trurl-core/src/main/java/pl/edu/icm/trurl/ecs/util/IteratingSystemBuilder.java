@@ -49,6 +49,9 @@
          @Override
          public void execute(SessionFactory initialSessionFactory) {
              SessionFactory sessionFactory = initialSessionFactory.withModeAndCount(mode, selector.estimatedChunkSize() * 8);
+             for (Visit visit : operationsArray) {
+                 visit.init();
+             }
              if (parallel) {
                  initialSessionFactory.lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
              }

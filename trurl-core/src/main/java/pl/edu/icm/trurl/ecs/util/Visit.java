@@ -27,6 +27,8 @@ import java.util.function.Consumer;
 public interface Visit<Context> {
     void perform(Context context, Session session, int idx);
 
+    default void init() {}
+
     static<Context> Visit<Context> of(BiConsumer<Context, Entity> consumer) {
         return (context, session, idx) -> consumer.accept(context, session.getEntity(idx));
     }

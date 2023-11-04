@@ -67,6 +67,14 @@ public final class Session implements ComponentOwner {
         return entity;
     }
 
+    public void removeEntity(Entity entity) {
+        if (detachedEntities) {
+            throw new IllegalStateException("Cannot remove entity from detached session");
+        }
+        entities.remove(entity.getId());
+        engine.getRootStore().free(entity.getId());
+    }
+
     public Engine getEngine() {
         return engine;
     }

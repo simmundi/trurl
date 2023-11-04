@@ -24,23 +24,21 @@ import pl.edu.icm.trurl.ecs.EntitySystem;
 import pl.edu.icm.trurl.ecs.selector.Chunk;
 import pl.edu.icm.trurl.ecs.selector.ChunkInfo;
 import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
-import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
 import pl.edu.icm.trurl.ecs.util.IteratingSystemBuilder;
 import pl.edu.icm.trurl.ecs.util.Selectors;
 import pl.edu.icm.trurl.ecs.util.Visit;
 
 import java.util.Collection;
 import java.util.Map;
-import pl.edu.icm.trurl.ecs.util.Visit;
 
-public class SelectorFromQueryService {
+public class QueryService {
 
     private final Selectors selectors;
     private final EngineConfiguration engineConfiguration;
 
     @WithFactory
-    public SelectorFromQueryService(Selectors selectors,
-                                    EngineConfiguration engineConfiguration) {
+    public QueryService(Selectors selectors,
+                        EngineConfiguration engineConfiguration) {
         this.selectors = selectors;
         this.engineConfiguration = engineConfiguration;
     }
