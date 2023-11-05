@@ -56,4 +56,8 @@ public final class MapperSet {
         return IntStream.range(0, componentCount())
                 .mapToObj(this::indexToMapper);
     }
+
+    public <T> ComponentToken<T> classToToken(Class<T> componentClass) {
+        return new ComponentToken<>(classToMapper(componentClass), classToIndex(componentClass));
+    }
 }

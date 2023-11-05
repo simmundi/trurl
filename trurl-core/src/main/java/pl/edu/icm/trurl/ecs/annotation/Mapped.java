@@ -16,9 +16,15 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.selector;
+package pl.edu.icm.trurl.ecs.annotation;
 
-public interface RandomAccessSelector extends Selector {
-    int getIdFromRatio(float random);
-    int getCount();
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.SOURCE)
+@Target(ElementType.FIELD)
+public @interface Mapped {
+    Type type() default Type.SPARSE;
 }

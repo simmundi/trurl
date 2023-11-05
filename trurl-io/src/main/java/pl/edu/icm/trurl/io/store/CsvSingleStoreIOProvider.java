@@ -1,11 +1,16 @@
 package pl.edu.icm.trurl.io.store;
 
+import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.io.csv.CsvReader;
 import pl.edu.icm.trurl.io.csv.CsvWriter;
 
 public class CsvSingleStoreIOProvider implements SingleStoreIOProvider {
     private final SingleStoreReader csvReader = new CsvReader();
     private final SingleStoreWriter csvWriter = new CsvWriter();
+
+    @WithFactory
+    public CsvSingleStoreIOProvider() {
+    }
 
     @Override
     public SingleStoreReader getReaderFor(String format) {

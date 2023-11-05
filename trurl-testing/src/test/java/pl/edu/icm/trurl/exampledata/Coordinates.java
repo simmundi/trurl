@@ -16,26 +16,36 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.util;
+package pl.edu.icm.trurl.exampledata;
 
-import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.annotation.WithMapper;
 
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+@WithMapper
+public class Coordinates {
+    private float x;
+    private float y;
 
-public interface Visit<Context> {
-    void perform(Context context, Session session, int idx);
-
-    default void init() {}
-
-    static<Context> Visit<Context> of(BiConsumer<Context, Entity> consumer) {
-        return (context, session, idx) -> consumer.accept(context, session.getEntity(idx));
+    public Coordinates() {
     }
 
-    static<Context> Visit<Context> of(Consumer<Entity> consumer) {
-        return (context, session, idx) -> consumer.accept(session.getEntity(idx));
+    public Coordinates(float x, float y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public void setY(float y) {
+        this.y = y;
     }
 }
-
-

@@ -16,8 +16,31 @@
  *
  */
 
-package pl.edu.icm.trurl.store.db;
+package pl.edu.icm.trurl.exampledata;
 
-public class RootRecordReference {
-    private long id;
+import pl.edu.icm.trurl.ecs.annotation.Mapped;
+import pl.edu.icm.trurl.ecs.annotation.Type;
+import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+
+@WithMapper
+public class Thing {
+    @Mapped(type = Type.DENSE)
+    Coordinates coordinates;
+    int index;
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public Coordinates getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(Coordinates coordinates) {
+        this.coordinates = coordinates;
+    }
 }

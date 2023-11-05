@@ -23,9 +23,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.snowyhollows.bento.soft.SoftEnum;
-import pl.edu.icm.trurl.ecs.annotation.CollectionType;
-import pl.edu.icm.trurl.ecs.annotation.MappedCollection;
-import pl.edu.icm.trurl.ecs.annotation.NotMapped;
+import pl.edu.icm.trurl.ecs.annotation.*;
 import pl.edu.icm.trurl.generator.CommonTypes;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -68,8 +66,6 @@ public class ComponentProperty {
 
     public static ComponentProperty create(ProcessingEnvironment processingEnvironment, BeanPropertyMetadata meta) {
         String methodName = meta.getter.getSimpleName().toString();
-        PropertyType type = fromColumnType(processingEnvironment, meta.getter.getReturnType());
-        ClassName businessType = findWrappedType(processingEnvironment, meta);
         String propertyName = findPropertyName(methodName);
         Optional<? extends Element> optionalAttribute = meta.getter.getEnclosingElement().getEnclosedElements().stream()
                 .filter(e -> !(e instanceof ExecutableElement))
@@ -77,12 +73,14 @@ public class ComponentProperty {
                 .filter(e -> !e.getModifiers().contains(Modifier.VOLATILE))
                 .filter(e -> e.getAnnotation(NotMapped.class) == null)
                 .findFirst();
+        PropertyType type = fromColumnType(processingEnvironment, meta.getter.getReturnType(), optionalAttribute);
+        ClassName wrappedType = findWrappedType(processingEnvironment, meta);
 
         return new ComponentProperty(propertyName,
                 meta.namespace,
                 type,
                 methodName,
-                businessType,
+                wrappedType,
                 TypeName.get(meta.getter.getReturnType()),
                 optionalAttribute);
     }
@@ -104,11 +102,11 @@ public class ComponentProperty {
     }
 
     /**
-     * In some cases, the direct type (List, Enum) is different from the business type.
+     * In some cases, the direct type (List, Enum) is different from the business type which it wraps.
      * e.g. a getMedicalRecords() method returns a list of MedicalRecord; the actual type is List, but
      * we need to create a mapper for MedicalRecord.
      * <p>
-     * This method uses case-by-case rules to establish the relevant business type.
+     * This method uses case-by-case rules to establish the relevant wrapped type.
      */
     private static ClassName findIndirectBusinessType(ProcessingEnvironment processingEnvironment, TypeMirror typeMirror) {
         TypeName typeName = TypeName.get(typeMirror);
@@ -130,7 +128,7 @@ public class ComponentProperty {
         return !typeName.isPrimitive() && processingEnvironment.getTypeUtils().asElement(typeMirror).getKind() == ElementKind.ENUM;
     }
 
-    private static PropertyType fromColumnType(ProcessingEnvironment processingEnvironment, TypeMirror typeMirror) {
+    private static PropertyType fromColumnType(ProcessingEnvironment processingEnvironment, TypeMirror typeMirror, Optional<? extends Element> optionalAttribute) {
         TypeName typeName = TypeName.get(typeMirror);
         if (typeName.equals(TypeName.DOUBLE)) {
             return PropertyType.DOUBLE_PROP;
@@ -157,6 +155,8 @@ public class ComponentProperty {
             return PropertyType.EMBEDDED_LIST_PROP;
         } else if (isSoftEnum(processingEnvironment, typeMirror)) {
             return PropertyType.SOFT_ENUM_PROP;
+        } else if (optionalAttribute.flatMap(e -> Optional.ofNullable(e.getAnnotation(Mapped.class))).map(m -> m.type() == Type.DENSE).orElse(false)) {
+            return PropertyType.EMBEDDED_DENSE_PROP;
         } else {
             return PropertyType.EMBEDDED_PROP;
         }
@@ -180,7 +180,7 @@ public class ComponentProperty {
     }
 
     public ClassName getMapperType() {
-        if (type == PropertyType.EMBEDDED_LIST_PROP || type == PropertyType.EMBEDDED_PROP) {
+        if (type == PropertyType.EMBEDDED_LIST_PROP || type == PropertyType.EMBEDDED_PROP || type == PropertyType.EMBEDDED_DENSE_PROP) {
             return ClassName.get(unwrappedTypeName.packageName(), unwrappedTypeName.simpleName() + "Mapper");
         } else {
             return null;
@@ -198,14 +198,16 @@ public class ComponentProperty {
     }
 
     public ClassName getJoinType() {
-        if (type != PropertyType.EMBEDDED_LIST_PROP) {
+        Mapped mappedAnnotation = attribute.getAnnotation(Mapped.class);
+        MappedCollection collectionAnnotation = attribute.getAnnotation(MappedCollection.class);
+        if (mappedAnnotation != null && mappedAnnotation.type() == Type.DENSE) {
+            return CommonTypes.SINGLE_JOIN;
+        } else if (type != PropertyType.EMBEDDED_LIST_PROP) {
             return null;
-        }
-        MappedCollection annotation = attribute.getAnnotation(MappedCollection.class);
-        if (annotation == null) {
+        } else if (collectionAnnotation == null) {
             return CommonTypes.RANGED_JOIN;
         } else {
-            return annotation.collectionType() == CollectionType.RANGE ? CommonTypes.RANGED_JOIN : CommonTypes.ARRAY_JOIN;
+            return collectionAnnotation.collectionType() == CollectionType.RANGE ? CommonTypes.RANGED_JOIN : CommonTypes.ARRAY_JOIN;
         }
     }
 

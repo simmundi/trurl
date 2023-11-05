@@ -16,12 +16,8 @@
  *
  */
 
-package pl.edu.icm.trurl.store.db;
+package pl.edu.icm.trurl.record;
 
-public class Value {
-    private final String stringValue;
-
-    public Value(String stringValue) {
-        this.stringValue = stringValue;
-    }
+public class RootRecordReference {
+    private long id;
 }

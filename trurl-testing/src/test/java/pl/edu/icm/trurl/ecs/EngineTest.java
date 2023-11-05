@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.store.Store;
@@ -90,18 +89,6 @@ class EngineTest {
 
         // assert
         verify(system, times(1)).execute(any());
-    }
-
-    @Test
-    void streamDetached() {
-        // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);
-
-        // execute
-        List<Integer> result = engine.streamDetached().map(Entity::getId).collect(Collectors.toList());
-
-        // assertThat
-        assertThat(result).isEqualTo(IntStream.range(0, 300).boxed().collect(Collectors.toList()));
     }
 
     @Test

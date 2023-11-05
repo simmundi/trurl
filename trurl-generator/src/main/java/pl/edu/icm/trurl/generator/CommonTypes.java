@@ -32,6 +32,7 @@ import pl.edu.icm.trurl.store.StoreConfigurer;
 import pl.edu.icm.trurl.store.attribute.*;
 import pl.edu.icm.trurl.store.join.ArrayJoin;
 import pl.edu.icm.trurl.store.join.RangedJoin;
+import pl.edu.icm.trurl.store.join.SingleJoin;
 import pl.edu.icm.trurl.store.reference.ArrayReference;
 import pl.edu.icm.trurl.store.reference.SingleReference;
 
@@ -50,6 +51,7 @@ public class CommonTypes {
     public static final ClassName MAPPERS = ClassName.get(Mappers.class);
     public static final ClassName ARRAY_JOIN = ClassName.get(ArrayJoin.class);
     public static final ClassName RANGED_JOIN = ClassName.get(RangedJoin.class);
+    public static final ClassName SINGLE_JOIN = ClassName.get(SingleJoin.class);
     public static final ClassName ARRAY_REFERENCE = ClassName.get(ArrayReference.class);
     public static final ClassName SINGLE_REFERENCE = ClassName.get(SingleReference.class);
     public static final ClassName SESSION = ClassName.get(Session.class);

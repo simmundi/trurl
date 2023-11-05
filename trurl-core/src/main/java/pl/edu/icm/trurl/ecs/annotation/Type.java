@@ -16,9 +16,9 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.selector;
+package pl.edu.icm.trurl.ecs.annotation;
 
-public interface RandomAccessSelector extends Selector {
-    int getIdFromRatio(float random);
-    int getCount();
+public enum Type {
+    SPARSE,
+    DENSE
 }

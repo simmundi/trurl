@@ -103,6 +103,10 @@ public class ConfigureStoreFeature implements Feature {
                     methodSpec.addStatement("$L = ($T) mappers.create($T.class, mapperPrefix + $S)", property.fieldName, property.getMapperType(), property.unwrappedTypeName, property.name);
                     methodSpec.addStatement("$L.configureStore(meta)", property.fieldName);
                     break;
+                case EMBEDDED_DENSE_PROP:
+                    methodSpec.addStatement("$L = ($T) mappers.create($T.class, mapperPrefix + $S)", property.fieldName, property.getMapperType(), property.unwrappedTypeName, property.name);
+                    methodSpec.addStatement("$L.configureStore(meta.addJoin(mapperPrefix + $S).singleTyped())", property.fieldName, name);
+                    break;
                 case ENTITY_LIST_PROP:
                     methodSpec.addStatement("meta.addReference(mapperPrefix + $S).arrayTyped($L, $L)", name, 1, 2);
                     break;

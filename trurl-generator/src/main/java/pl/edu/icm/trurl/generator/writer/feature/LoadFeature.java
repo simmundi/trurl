@@ -71,7 +71,7 @@ public class LoadFeature implements Feature {
                             .beginControlFlow("while (true)")
                             .addStatement("int currentOwner = owners.get(row)")
                             .addStatement("if (currentOwner < 0) continue")
-                            .addStatement("if (currentOwner == 0 && !owners.compareAndSet(row, 0, currentOwner)) continue;")
+//                            .addStatement("if (currentOwner == 0 && !owners.compareAndSet(row, 0, currentOwner)) continue")
                             .add(callFetchValues())
                             .beginControlFlow("if (owners.get(row) == currentOwner)")
                             .addStatement("component.setOwnerId(currentOwner)")
@@ -148,6 +148,9 @@ public class LoadFeature implements Feature {
                 case EMBEDDED_PROP:
                     createEmbedded(methodSpec, property);
                     break;
+                case EMBEDDED_DENSE_PROP:
+                    createEmbeddedDense(methodSpec, property);
+                    break;
                 case EMBEDDED_LIST_PROP:
                     createEmbeddedList(methodSpec, property);
                     break;
@@ -163,6 +166,18 @@ public class LoadFeature implements Feature {
         }
 
         return methodSpec.build();
+    }
+
+    private void createEmbeddedDense(MethodSpec.Builder methodSpec, ComponentProperty property) {
+        String instanceName = "$" + property.name + "Instance";
+        String targetRow = "$" + property.name + "TargetRow";
+        methodSpec.addCode(CodeBlock.builder()
+                .addStatement("int $L = $LJoin.getRow(row, 0)", targetRow, property.fieldName)
+                .beginControlFlow("if ($L != Integer.MIN_VALUE)", targetRow)
+                .addStatement("$T $L = $L.createAndLoad(session, $L)", property.unwrappedTypeName, instanceName, property.fieldName, targetRow)
+                .addStatement("component.$L($L)", property.setterName, instanceName)
+                .endControlFlow()
+                .build());
     }
 
     private void createEmbedded(MethodSpec.Builder methodSpec, ComponentProperty property) {

@@ -53,17 +53,17 @@ public class EraseFeature implements Feature {
         List<ComponentProperty> properties = beanMetadata.getComponentProperties();
         for (ComponentProperty property : properties) {
             switch (property.type) {
-                case EMBEDDED_LIST_PROP:
-                    methodSpec.addStatement("$LJoin.setSize(row, 0)", property.fieldName);
-                    break;
                 case EMBEDDED_PROP:
                     methodSpec.addStatement("$L.erase(row)", property.fieldName);
+                    break;
+                case EMBEDDED_LIST_PROP: // fallthrough
+                case EMBEDDED_DENSE_PROP:
+                    methodSpec.addStatement("$LJoin.setSize(row, 0)", property.fieldName);
                     break;
                 case ENTITY_PROP: // fallthrough
                 case ENTITY_LIST_PROP:
                     methodSpec.addStatement("$L.setSize(row, 0)", property.fieldName);
                     break;
-
                 default:
                     methodSpec.addStatement("$L.setEmpty(row)", property.fieldName);
             }

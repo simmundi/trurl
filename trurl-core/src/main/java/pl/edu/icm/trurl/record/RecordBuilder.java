@@ -16,7 +16,7 @@
  *
  */
 
-package pl.edu.icm.trurl.store.db;
+package pl.edu.icm.trurl.record;
 
 import pl.edu.icm.trurl.store.Store;
 

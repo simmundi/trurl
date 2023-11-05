@@ -19,12 +19,8 @@
 package pl.edu.icm.trurl.ecs;
 
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
-import pl.edu.icm.trurl.ecs.selector.Selector;
-import pl.edu.icm.trurl.ecs.util.Selectors;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.attribute.AttributeFactory;
-
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -33,7 +29,6 @@ public final class Engine {
     private final MapperSet mapperSet;
     private final Mapper<?>[] mappers;
     private final SessionFactory defaultSessionFactory;
-
     private int capacityHeadroom;
 
     public Engine(int initialCapacity, int capacityHeadroom, MapperSet mapperSet, boolean shared, AttributeFactory attributeFactory) {
@@ -60,17 +55,6 @@ public final class Engine {
                 .streamMappers()
                 .collect(toList())
                 .toArray(new Mapper<?>[0]);
-    }
-
-    public Selector allIds() {
-        return new Selectors(this).allEntities();
-    }
-
-    @Deprecated
-    public Stream<Entity> streamDetached() {
-        Session session = defaultSessionFactory.withModeAndCount(Session.Mode.DETACHED_ENTITIES, 0)
-                .create(getCount());
-        return allIds().chunks().flatMapToInt(chunk -> chunk.ids()).mapToObj(session::getEntity);
     }
 
     public void execute(EntitySystem system) {

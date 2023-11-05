@@ -130,6 +130,9 @@ public class SaveFeature implements Feature {
                 case EMBEDDED_PROP:
                     createEmbedded(methodSpec, property);
                     break;
+                case EMBEDDED_DENSE_PROP:
+                    createEmbeddedDense(methodSpec, property);
+                    break;
                 case EMBEDDED_LIST_PROP:
                     createEmbeddedList(methodSpec, property);
                     break;
@@ -146,6 +149,19 @@ public class SaveFeature implements Feature {
 
         return methodSpec
                 .build();
+    }
+
+    private void createEmbeddedDense(MethodSpec.Builder methodSpec, ComponentProperty property) {
+        String targetRow = "$" + property.name + "TargetRow";
+        methodSpec
+                .beginControlFlow("if (component.$L() != null)", property.getterName)
+                .addStatement("$LJoin.setSize(row, 1)", property.fieldName)
+                .addStatement("int $L = $LJoin.getRow(row, 0)", targetRow, property.fieldName)
+                .addStatement("$L.save(component.$L(), $L)", property.fieldName, property.getterName, targetRow)
+                .nextControlFlow("else")
+                .addStatement("$LJoin.setSize(row, 0)", property.fieldName)
+                .endControlFlow();
+
     }
 
     private void createEntity(MethodSpec.Builder methodSpec, ComponentProperty property) {

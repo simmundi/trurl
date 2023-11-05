@@ -74,18 +74,21 @@ public class CsvReader implements SingleStoreReader {
             attributes[i] = Optional.<Attribute>ofNullable(store.get(attributeName)).orElse(SKIP);
         }
 
-        int rowCount = 0;
+        // TODO: there is assumption here that the CSV file begins with the same
+        // row as the store, i.e. an empty store is used to load a full CSV dump.
+        // It is possible that the CSV file was created by saving only a part of the
+        // store or that the store wasn't empty; in those cases we need to offset
+        // values of references and joins.
         while (true) {
             String[] line = csvParser.parseNext();
             if (line == null) {
                 break;
             }
             try {
+                int next = store.getCounter().next();
                 for (int i = 0; i < columnCount; i++) {
-                    attributes[i].ensureCapacity(rowCount + 1);
-                    attributes[i].setString(rowCount, line[i]);
+                    attributes[i].setString(next, line[i]);
                 }
-                rowCount++;
             } catch (RuntimeException re) {
                 logger.info("wrong format in csv file: "
                         + re.getMessage()
@@ -93,7 +96,6 @@ public class CsvReader implements SingleStoreReader {
                         .replace('\r', ' '));
             }
         }
-//        store.fireUnderlyingDataChanged(0, rowCount);
     }
 }
 

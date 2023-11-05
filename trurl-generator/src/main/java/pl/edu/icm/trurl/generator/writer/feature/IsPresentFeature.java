@@ -60,7 +60,7 @@ public class IsPresentFeature implements Feature {
         method.addStatement("return $L",
                 properties.stream()
                         .map(prop -> {
-                            if (prop.type == PropertyType.EMBEDDED_PROP) {
+                            if (prop.type == PropertyType.EMBEDDED_PROP || prop.type == PropertyType.EMBEDDED_DENSE_PROP) {
                                 return CodeBlock.of("$L.isPresent(row)", prop.fieldName);
                             } else if (prop.type == PropertyType.EMBEDDED_LIST_PROP) {
                                 return CodeBlock.of("!$LJoin.isEmpty(row)", prop.fieldName);
