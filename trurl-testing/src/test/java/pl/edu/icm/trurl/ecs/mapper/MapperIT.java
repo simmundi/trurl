@@ -24,9 +24,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.MapperSet;
-import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.*;
+import pl.edu.icm.trurl.ecs.entity.Entity;
+import pl.edu.icm.trurl.ecs.entity.IdentityMapSession;
 import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
 import pl.edu.icm.trurl.exampledata.*;
 import pl.edu.icm.trurl.store.Store;
@@ -52,7 +52,7 @@ public class MapperIT {
     @Spy
     MapperSet mapperSet = new MapperSet(new DynamicComponentAccessor(Collections.emptyList()), mappers);
     @Mock
-    Session session;
+    IdentityMapSession session;
 
     Mapper<BunchOfData> mapper;
 
@@ -297,7 +297,7 @@ public class MapperIT {
     }
 
     private Entity createEntity(int id) {
-        return new Entity(mapperSet, session, id);
+        return new SessionEntity(mapperSet, session, id);
     }
 
     private BunchOfData withStats(Stats... stats) {

@@ -37,20 +37,23 @@ public class EngineConfiguration {
     private final Bento bento;
     private final int initialCapacity;
     private final int capacityHeadroom;
-    private final boolean sharedSession;
+    private final int sessionCapacity;
+    private final boolean clearByDefault;
 
     @WithFactory
     public EngineConfiguration(ComponentAccessorCreator componentAccessorCreator,
                                @ByName(value = "trurl.engine.initialCapacity", fallbackValue = "1024") int initialCapacity,
                                @ByName(value = "trurl.engine.capacityHeadroom", fallbackValue = "128") int capacityHeadroom,
-                               @ByName(value = "trurl.engine.sharedSession", fallbackValue = "false") boolean sharedSession,
+                               @ByName(value = "trurl.engine.session.clearByDefault", fallbackValue = "false") boolean clearByDefault,
+                               @ByName(value = "trurl.engine.session.capacity", fallbackValue = "100000") int sessionCapacity,
                                AttributeFactory attributeFactory,
                                Bento bento) {
         this.componentAccessorCreator = componentAccessorCreator;
         this.initialCapacity = initialCapacity;
         this.capacityHeadroom = capacityHeadroom;
-        this.sharedSession = sharedSession;
+        this.clearByDefault = clearByDefault;
         this.attributeFactory = attributeFactory;
+        this.sessionCapacity = sessionCapacity;
         this.bento = bento;
     }
 
@@ -62,7 +65,7 @@ public class EngineConfiguration {
 
     public Engine getEngine() {
         if (engine == null) {
-            engine = new Engine(initialCapacity, capacityHeadroom, getMapperSet(), sharedSession, attributeFactory);
+            engine = new Engine(initialCapacity, capacityHeadroom, getMapperSet(), attributeFactory, sessionCapacity, clearByDefault);
             for (EngineCreationListener engineCreationListener : engineCreationListeners) {
                 engineCreationListener.onEngineCreated(engine);
             }

@@ -21,6 +21,7 @@ package pl.edu.icm.trurl.ecs.util;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.ecs.selector.Chunk;
+import pl.edu.icm.trurl.ecs.selector.ManuallyChunkedArraySelector;
 
 import java.util.stream.Stream;
 

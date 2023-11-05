@@ -16,13 +16,13 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.util;
+package pl.edu.icm.trurl.ecs.system;
 
 import net.snowyhollows.bento.annotation.WithFactory;
-import pl.edu.icm.trurl.ecs.ComponentToken;
+import pl.edu.icm.trurl.ecs.entity.ComponentToken;
 import pl.edu.icm.trurl.ecs.EngineConfiguration;
-import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.entity.Entity;
+import pl.edu.icm.trurl.ecs.entity.Session;
 
 public class VisitorService {
     private final EngineConfiguration engineConfiguration;

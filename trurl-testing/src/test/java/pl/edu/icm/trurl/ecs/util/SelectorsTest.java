@@ -27,6 +27,7 @@ import pl.edu.icm.trurl.ecs.MapperSet;
 import pl.edu.icm.trurl.ecs.selector.Chunk;
 import pl.edu.icm.trurl.ecs.selector.ChunkInfo;
 import pl.edu.icm.trurl.ecs.selector.Selector;
+import pl.edu.icm.trurl.ecs.selector.Selectors;
 import pl.edu.icm.trurl.exampledata.*;
 
 import java.util.stream.IntStream;

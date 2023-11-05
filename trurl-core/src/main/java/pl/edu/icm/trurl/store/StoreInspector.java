@@ -18,7 +18,6 @@
 
 package pl.edu.icm.trurl.store;
 
-import pl.edu.icm.trurl.ecs.Counter;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.join.Join;
 import pl.edu.icm.trurl.store.reference.Reference;

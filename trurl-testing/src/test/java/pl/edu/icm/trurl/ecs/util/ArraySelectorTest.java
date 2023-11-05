@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.edu.icm.trurl.ecs.selector.ArraySelector;
 import pl.edu.icm.trurl.ecs.selector.Chunk;
 
 import java.util.List;

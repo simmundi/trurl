@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.util;
+package pl.edu.icm.trurl.ecs.system;
 
-import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.entity.Entity;
+import pl.edu.icm.trurl.ecs.entity.Session;
 import pl.edu.icm.trurl.ecs.EntitySystem;
 import pl.edu.icm.trurl.util.Status;
 

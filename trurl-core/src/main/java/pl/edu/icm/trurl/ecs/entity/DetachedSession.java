@@ -16,26 +16,29 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.util;
+package pl.edu.icm.trurl.ecs.entity;
 
-import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.Engine;
 
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+public class DetachedSession extends Session {
 
-public interface Visit<Context> {
-    void perform(Context context, Session session, int idx);
-
-    default void init() {}
-
-    static<Context> Visit<Context> of(BiConsumer<Context, Entity> consumer) {
-        return (context, session, idx) -> consumer.accept(context, session.getEntity(idx));
+    @Override
+    public Entity getEntity(int id) {
+        return new DetachedEntity(this, id);
     }
 
-    static<Context> Visit<Context> of(Consumer<Entity> consumer) {
-        return (context, session, idx) -> consumer.accept(session.getEntity(idx));
+
+    public Engine getEngine() {
+        return null;
+    }
+
+    @Override
+    public int getOwnerId() {
+        return 0;
+    }
+
+    @Override
+    public void setOwnerId(int ownerId) {
+
     }
 }
-
-

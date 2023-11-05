@@ -18,9 +18,9 @@
 
 package pl.edu.icm.trurl.ecs.query;
 
-import pl.edu.icm.trurl.ecs.Entity;
+import pl.edu.icm.trurl.ecs.entity.Entity;
 import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
-import pl.edu.icm.trurl.ecs.util.ManuallyChunkedArraySelector;
+import pl.edu.icm.trurl.ecs.selector.ManuallyChunkedArraySelector;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

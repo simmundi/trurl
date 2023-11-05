@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,24 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.mapper;
+package pl.edu.icm.trurl.ecs.entity;
 
-public interface ComponentOwner {
-    int getOwnerId();
+public class StubSession extends Session {
+
+    private int ownerId;
+
+    @Override
+    public Entity getEntity(int id) {
+        return new StubEntity(this, id);
+    }
+
+    @Override
+    public int getOwnerId() {
+        return ownerId;
+    }
+
+    @Override
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
+    }
 }

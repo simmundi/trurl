@@ -20,7 +20,6 @@ package pl.edu.icm.trurl.store;
 
 import net.snowyhollows.bento.soft.SoftEnum;
 import net.snowyhollows.bento.soft.SoftEnumManager;
-import pl.edu.icm.trurl.ecs.Counter;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 import pl.edu.icm.trurl.store.join.ArrayJoin;

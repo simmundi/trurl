@@ -16,7 +16,7 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs;
+package pl.edu.icm.trurl.store;
 
 import pl.edu.icm.trurl.util.ConcurrentIntQueue;
 

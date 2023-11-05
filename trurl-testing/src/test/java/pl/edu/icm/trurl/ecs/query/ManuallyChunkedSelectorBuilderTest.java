@@ -21,13 +21,11 @@ package pl.edu.icm.trurl.ecs.query;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.ecs.Entity;
+import pl.edu.icm.trurl.ecs.SessionEntity;
 import pl.edu.icm.trurl.ecs.selector.Selector;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ManuallyChunkedSelectorBuilderTest {
 
@@ -39,7 +37,7 @@ class ManuallyChunkedSelectorBuilderTest {
         int createCount = 10000 * 27 + 1;
         IntStream.range(0, createCount).parallel().forEach(id -> {
             String label = createLabel(id);
-            mcsb.add(new Entity(id), label);
+            mcsb.add(new SessionEntity(id), label);
         });
 
         // execute

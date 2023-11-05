@@ -18,7 +18,7 @@
 
 package pl.edu.icm.trurl.exampledata;
 
-import pl.edu.icm.trurl.ecs.Entity;
+import pl.edu.icm.trurl.ecs.entity.Entity;
 import pl.edu.icm.trurl.ecs.annotation.WithMapper;
 
 import java.util.ArrayList;

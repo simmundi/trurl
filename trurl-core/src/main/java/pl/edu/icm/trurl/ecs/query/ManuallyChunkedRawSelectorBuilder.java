@@ -19,7 +19,7 @@
 package pl.edu.icm.trurl.ecs.query;
 
 import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
-import pl.edu.icm.trurl.ecs.util.ManuallyChunkedArraySelector;
+import pl.edu.icm.trurl.ecs.selector.ManuallyChunkedArraySelector;
 import pl.edu.icm.trurl.util.SynchronizedResizableIntArray;
 
 import java.util.Map;

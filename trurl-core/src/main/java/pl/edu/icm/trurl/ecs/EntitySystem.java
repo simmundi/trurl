@@ -18,6 +18,8 @@
 
 package pl.edu.icm.trurl.ecs;
 
+import pl.edu.icm.trurl.ecs.entity.SessionFactory;
+
 public interface EntitySystem {
 
     void execute(SessionFactory sessionFactory);

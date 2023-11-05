@@ -18,48 +18,51 @@
 
 package pl.edu.icm.trurl.ecs;
 
-import pl.edu.icm.trurl.ecs.mapper.Mapper;
+import pl.edu.icm.trurl.ecs.entity.IdentityMapSession;
+import pl.edu.icm.trurl.ecs.entity.Session;
+import pl.edu.icm.trurl.ecs.entity.SessionFactory;
+import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.attribute.AttributeFactory;
-
-import static java.util.stream.Collectors.toList;
 
 public final class Engine {
     private final Store rootStore;
     private final MapperSet mapperSet;
-    private final Mapper<?>[] mappers;
-    private final SessionFactory defaultSessionFactory;
     private int capacityHeadroom;
 
-    public Engine(int initialCapacity, int capacityHeadroom, MapperSet mapperSet, boolean shared, AttributeFactory attributeFactory) {
+    public Engine(int initialCapacity, int capacityHeadroom, MapperSet mapperSet, AttributeFactory attributeFactory, int sessionCapacity, boolean clearByDefault) {
         this.rootStore = new Store(attributeFactory, initialCapacity + capacityHeadroom);
         this.capacityHeadroom = capacityHeadroom;
         this.mapperSet = mapperSet;
-        if (shared) {
-            this.defaultSessionFactory = new SessionFactory(this, Session.Mode.SHARED, initialCapacity + capacityHeadroom);
-        } else {
-            this.defaultSessionFactory = new SessionFactory(this, Session.Mode.NORMAL);
-        }
-        mappers = this.mapperSet.streamMappers().peek(mapper -> {
+        this.mapperSet.streamMappers().forEach(mapper -> {
             mapper.configureStore(rootStore);
             mapper.attachStore(rootStore);
-        }).collect(toList()).toArray(new Mapper<?>[0]);
+        });
+        this.sessionFactory = new SessionFactory() {
+            private final ThreadLocal<Session> sessionThreadLocal = ThreadLocal.withInitial(() -> new IdentityMapSession(Engine.this, sessionCapacity));
+
+            @Override
+            public Session getSession() {
+                return sessionThreadLocal.get();
+            }
+
+            @Override
+            public void lifecycleEvent(LifecycleEvent lifecycleEvent) {
+                mapperSet.streamMappers().forEach(mapper -> mapper.lifecycleEvent(lifecycleEvent));
+            }
+
+            @Override
+            public boolean shouldClearByDefault() {
+                return clearByDefault;
+            }
+        };
     }
 
-    public Engine(Store store, int capacityHeadroom, MapperSet mapperSet, boolean shared) {
-        this.rootStore = store;
-        this.capacityHeadroom = capacityHeadroom;
-        this.mapperSet = mapperSet;
-        this.defaultSessionFactory = new SessionFactory(this, shared ? Session.Mode.SHARED : Session.Mode.NORMAL);
-        mappers = this.mapperSet
-                .streamMappers()
-                .collect(toList())
-                .toArray(new Mapper<?>[0]);
-    }
+    private final SessionFactory sessionFactory;
 
     public void execute(EntitySystem system) {
         ensureHeadroom();
-        system.execute(defaultSessionFactory);
+        system.execute(sessionFactory);
     }
 
     public Store getRootStore() {

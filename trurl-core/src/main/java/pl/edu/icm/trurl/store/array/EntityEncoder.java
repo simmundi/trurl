@@ -19,8 +19,8 @@
 package pl.edu.icm.trurl.store.array;
 
 import com.google.common.base.Strings;
-import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.entity.Entity;
+import pl.edu.icm.trurl.ecs.entity.Session;
 import pl.edu.icm.trurl.store.IntSink;
 import pl.edu.icm.trurl.store.IntSource;
 

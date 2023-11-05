@@ -16,16 +16,25 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs;
+package pl.edu.icm.trurl.ecs.entity;
 
-import pl.edu.icm.trurl.ecs.mapper.Mapper;
+public abstract class Entity {
+    public static final int NULL_ID = Integer.MIN_VALUE;
 
-public class ComponentToken<T> {
-    final public Mapper<T> mapper;
-    final int index;
+    public abstract <T> T get(Class<T> componentClass);
 
-    ComponentToken(Mapper<T> mapper, int index) {
-        this.mapper = mapper;
-        this.index = index;
+    public abstract <T> T get(ComponentToken<T> token);
+
+    public abstract <T> T getOrCreate(Class<T> componentClass);
+
+    public abstract <T> T add(T component);
+
+    public abstract int getId();
+
+    public abstract Session getSession();
+
+    // Package private inheritance
+    Entity() {
+
     }
 }

@@ -18,6 +18,7 @@
 
 package pl.edu.icm.trurl.ecs;
 
+import pl.edu.icm.trurl.ecs.entity.ComponentToken;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
 

@@ -24,6 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.edu.icm.trurl.ecs.entity.Entity;
+import pl.edu.icm.trurl.ecs.entity.IdentityMapSession;
+import pl.edu.icm.trurl.ecs.entity.Session;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.exampledata.Stats;
 
@@ -65,7 +68,7 @@ class SessionTest {
     @DisplayName("Should create attached entities in NORMAL mode")
     void getEntity() {
         // given
-        Session session = new Session(engine, 10, Session.Mode.NORMAL, 1);
+        Session session = new IdentityMapSession(engine, 10, IdentityMapSession.Mode.NORMAL, 1);
 
         // execute
         Entity entity1 = session.getEntity(ID);
@@ -82,7 +85,7 @@ class SessionTest {
     @DisplayName("Should create detached entities in DETACHED mode")
     void getEntity__detached() {
         // given
-        Session session = new Session(engine, 10, Session.Mode.DETACHED_ENTITIES, OWNER_ID);
+        Session session = new IdentityMapSession(engine, 10, IdentityMapSession.Mode.DETACHED_ENTITIES, OWNER_ID);
         // execute
         Entity entity1 = session.getEntity(ID);
         Entity entity2 = session.getEntity(ID);
@@ -96,7 +99,7 @@ class SessionTest {
     @DisplayName("Should create stub entities in STUB mode")
     void getEntity__stubs() {
         // given
-        Session session = new Session(engine, 10, Session.Mode.STUB_ENTITIES, OWNER_ID);
+        Session session = new IdentityMapSession(engine, 10, IdentityMapSession.Mode.STUB_ENTITIES, OWNER_ID);
         // execute
         Entity entity1 = session.getEntity(ID);
         Entity entity2 = session.getEntity(ID);
@@ -110,7 +113,7 @@ class SessionTest {
     @DisplayName("Should persist entities using mapper")
     void persist() {
         // given
-        Session session = new Session(engine, 10, Session.Mode.NORMAL, OWNER_ID);
+        Session session = new IdentityMapSession(engine, 10, IdentityMapSession.Mode.NORMAL, OWNER_ID);
         Entity entity1 = session.getEntity(ID);
         Entity entity2 = session.getEntity(ID + 1);
         entity1.add(new Stats());
@@ -127,7 +130,7 @@ class SessionTest {
     @DisplayName("Should return the engine")
     void getEngine() {
         // given
-        Session session = new Session(engine, 10, Session.Mode.NORMAL, OWNER_ID);
+        Session session = new IdentityMapSession(engine, 10, IdentityMapSession.Mode.NORMAL, OWNER_ID);
 
         // execute
         Engine engine = session.getEngine();

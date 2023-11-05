@@ -22,21 +22,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.EntitySystem;
-import pl.edu.icm.trurl.ecs.Session;
-import pl.edu.icm.trurl.ecs.SessionFactory;
+import pl.edu.icm.trurl.ecs.entity.IdentityMapSession;
+import pl.edu.icm.trurl.ecs.entity.Session;
+import pl.edu.icm.trurl.ecs.entity.SessionFactory;
 import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
 import pl.edu.icm.trurl.ecs.selector.Chunk;
-import pl.edu.icm.trurl.ecs.selector.Selector;
+import pl.edu.icm.trurl.ecs.selector.RangeSelector;
+import pl.edu.icm.trurl.ecs.system.IteratingSystemBuilder;
+import pl.edu.icm.trurl.ecs.system.Visit;
 
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
@@ -73,7 +71,7 @@ class IteratingSystemBuilderTest {
         system.execute(sessionFactory);
 
         // assert
-        verify(sessionFactory).withModeAndCount(Session.Mode.NORMAL, 80);
+        verify(sessionFactory).withModeAndCount(IdentityMapSession.Mode.NORMAL, 80);
         verify(sessionFactory).lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
         verify(sessionFactory, times(100)).create(anyInt());
         verify(visit1, times(1000)).perform(anyString(), eq(session), anyInt());
@@ -97,7 +95,7 @@ class IteratingSystemBuilderTest {
         system.execute(sessionFactory);
 
         // assert
-        verify(sessionFactory).withModeAndCount(Session.Mode.DETACHED_ENTITIES, 80);
+        verify(sessionFactory).withModeAndCount(IdentityMapSession.Mode.DETACHED_ENTITIES, 80);
         verify(sessionFactory, never()).lifecycleEvent(any());
         verify(sessionFactory, times(100)).create(anyInt());
         verify(visit1, times(1000)).perform(anyString(), eq(session), anyInt());

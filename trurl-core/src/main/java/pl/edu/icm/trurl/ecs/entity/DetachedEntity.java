@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,20 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs;
+package pl.edu.icm.trurl.ecs.entity;
 
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 
 import java.util.Objects;
-import java.util.Optional;
 
-public final class Entity {
-    public static final int NULL_ID = Integer.MIN_VALUE;
-
-    private final MapperSet mapperSet;
-    private final Session session;
+final class DetachedEntity extends Entity {
+    private final DetachedSession session;
     private final int id;
     private final Object[] components;
 
-    /**
-     * Creates a stub entity (basically, a type-safe id wrapper)
-     */
-    public Entity(int id) {
-        this.mapperSet = null;
-        this.session = null;
-        this.components = null;
-        this.id = id;
-    }
-
-    public Entity(MapperSet mapperSet, Session session, int id) {
-        this.mapperSet = mapperSet;
+    public DetachedEntity(DetachedSession session, int id) {
         this.session = session;
-        this.components = new Object[mapperSet.componentCount()];
+        this.components = new Object[session.getEngine().getMapperSet().componentCount()];
         this.id = id;
     }
 
@@ -57,18 +42,9 @@ public final class Entity {
     }
 
     public <T> T add(T component) {
-        int idx = mapperSet.classToIndex(component.getClass());
+        int idx = session.getEngine().getMapperSet().classToIndex(component.getClass());
         components[idx] = component;
         return component;
-    }
-
-    public void persist() {
-        for (int idx = 0; idx < components.length; idx++) {
-            if (components[idx] != null) {
-                Mapper<Object> mapper = mapperSet.indexToMapper(idx);
-                mapper.save(session, components[idx], id);
-            }
-        }
     }
 
     public int getId() {
@@ -79,15 +55,11 @@ public final class Entity {
         return session;
     }
 
-    public <T> Optional<T> optional(Class<T> classToken) {
-        return Optional.ofNullable(get(classToken));
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Entity entity = (Entity) o;
+        DetachedEntity entity = (DetachedEntity) o;
         return id == entity.id;
     }
 
@@ -97,9 +69,9 @@ public final class Entity {
     }
 
     private <T> T get(Class<T> componentClass, boolean createIfDoesntExist) {
-        int idx = mapperSet.classToIndex(componentClass);
+        int idx = session.getEngine().getMapperSet().classToIndex(componentClass);
         if (components[idx] == null) {
-            Mapper<T> mapper = mapperSet.classToMapper(componentClass);
+            Mapper<T> mapper = session.getEngine().getMapperSet().classToMapper(componentClass);
             if (mapper.isPresent(id)) {
                 components[idx] = mapper.createAndLoad(session, id);
             } else if (createIfDoesntExist) {
@@ -110,9 +82,9 @@ public final class Entity {
     }
 
     public <T> T get(ComponentToken<T> token) {
-        if (components[token.index] == null && token.mapper.isPresent(id)) {
-            components[token.index] = token.mapper.createAndLoad(session, id);
+        if (components[token.cix] == null && token.mapper.isPresent(id)) {
+            components[token.cix] = token.mapper.createAndLoad(session, id);
         }
-        return (T) components[token.index];
+        return (T) components[token.cix];
     }
 }

@@ -18,8 +18,9 @@
 package pl.edu.icm.trurl.ecs.parallel;
 
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.ecs.Session;
-import pl.edu.icm.trurl.ecs.SessionFactory;
+import pl.edu.icm.trurl.ecs.entity.IdentityMapSession;
+import pl.edu.icm.trurl.ecs.entity.Session;
+import pl.edu.icm.trurl.ecs.entity.SessionFactory;
 import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.parallel.domain.Counter;
@@ -53,7 +54,7 @@ public class CounterWithSetupParallelIT {
 
         // execute
         Status status = Status.of("using counters in parallel: " + createMessage());
-        SessionFactory sessionFactory = new SessionFactory(null, Session.Mode.STUB_ENTITIES, 0);
+        SessionFactory sessionFactory = new SessionFactory(null, IdentityMapSession.Mode.STUB_ENTITIES, 0);
 
         IntStream.range(0, SIZE * CONTENTION).parallel().forEach(chunkId -> {
             int startId = ThreadLocalRandom.current().nextInt(0, SIZE);
@@ -109,7 +110,7 @@ public class CounterWithSetupParallelIT {
         CounterMapper sequentialMapper = new CounterMapper("");
         sequentialMapper.configureAndAttach(store);
         prepareZeroedCounters(sequentialMapper);
-
+0
         // execute
         Status status = Status.of("using sequential mapper in parallel (which is wrong): " + createMessage());
         IntStream.range(0, SIZE * CONTENTION).parallel().forEach(chunkId -> {
@@ -154,7 +155,7 @@ public class CounterWithSetupParallelIT {
 
     private <T> void prepareZeroedCounters(Mapper<T> mapper) {
         Status status = Status.of("creating counters");
-        SessionFactory sessionFactory = new SessionFactory(null, Session.Mode.STUB_ENTITIES);
+        SessionFactory sessionFactory = new SessionFactory(null, IdentityMapSession.Mode.STUB_ENTITIES);
         Session session = sessionFactory.create();
         T counter = mapper.create();
         for (int i = 0; i < SIZE; i++) {

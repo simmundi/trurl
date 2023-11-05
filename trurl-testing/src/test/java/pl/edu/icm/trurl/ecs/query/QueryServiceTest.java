@@ -22,9 +22,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.ecs.*;
+import pl.edu.icm.trurl.ecs.entity.Entity;
+import pl.edu.icm.trurl.ecs.entity.Session;
 import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
 import pl.edu.icm.trurl.ecs.selector.Selector;
-import pl.edu.icm.trurl.ecs.util.Selectors;
+import pl.edu.icm.trurl.ecs.selector.Selectors;
 import pl.edu.icm.trurl.exampledata.*;
 
 import java.util.HashSet;

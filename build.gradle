@@ -1,5 +1,5 @@
 group 'pl.edu.icm.em'
-version '1.2--better-stores-SNAPSHOT'
+version '1.2--better-stores-session-overhaul-SNAPSHOT'
 
 subprojects {
     apply plugin: 'java-library'

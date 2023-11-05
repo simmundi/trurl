@@ -1,6 +1,7 @@
 package pl.edu.icm.trurl.ecs;
 
 import org.junit.jupiter.api.Test;
+import pl.edu.icm.trurl.store.Counter;
 
 import java.util.Set;
 import java.util.stream.Collectors;

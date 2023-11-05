@@ -24,9 +24,9 @@ import pl.edu.icm.trurl.ecs.EntitySystem;
 import pl.edu.icm.trurl.ecs.selector.Chunk;
 import pl.edu.icm.trurl.ecs.selector.ChunkInfo;
 import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
-import pl.edu.icm.trurl.ecs.util.IteratingSystemBuilder;
-import pl.edu.icm.trurl.ecs.util.Selectors;
-import pl.edu.icm.trurl.ecs.util.Visit;
+import pl.edu.icm.trurl.ecs.system.IteratingSystemBuilder;
+import pl.edu.icm.trurl.ecs.selector.Selectors;
+import pl.edu.icm.trurl.ecs.system.Visit;
 
 import java.util.Collection;
 import java.util.Map;

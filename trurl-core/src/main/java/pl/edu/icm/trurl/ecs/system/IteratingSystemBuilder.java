@@ -1,41 +1,46 @@
  /*
-  * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
-  *
-  * Licensed under the Apache License, Version 2.0 (the "License");
-  * you may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at
-  *
-  *      http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  *
-  *
-  */
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *
+ */
 
- package pl.edu.icm.trurl.ecs.util;
+ package pl.edu.icm.trurl.ecs.system;
 
  import pl.edu.icm.trurl.ecs.EntitySystem;
- import pl.edu.icm.trurl.ecs.Session;
- import pl.edu.icm.trurl.ecs.SessionFactory;
+ import pl.edu.icm.trurl.ecs.entity.Session;
+ import pl.edu.icm.trurl.ecs.entity.SessionFactory;
  import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
  import pl.edu.icm.trurl.ecs.selector.Chunk;
  import pl.edu.icm.trurl.ecs.selector.Selector;
 
  import java.util.ArrayList;
+ import java.util.Arrays;
  import java.util.List;
  import java.util.function.Function;
 
  public class IteratingSystemBuilder {
 
+     public enum Mode {
+            SHARED, NO_PERSIST, DEFAULT
+     }
+
      private static class IteratingSystem<Context> implements PersistenceConfig, ContextConfig, FirstVisitConfig<Context>, VisitConfig<Context>, EntitySystem {
 
          private final Selector selector;
-         private Session.Mode mode = Session.Mode.NORMAL;
-         private boolean parallel = false;
+         private Mode mode = Mode.DEFAULT;
+         private boolean parallel;
          private List<Visit<Context>> visits = new ArrayList<>();
          private Object[] componentsToPersist;
          private Function contextFactory;
@@ -47,55 +52,69 @@
          }
 
          @Override
-         public void execute(SessionFactory initialSessionFactory) {
-             SessionFactory sessionFactory = initialSessionFactory.withModeAndCount(mode, selector.estimatedChunkSize() * 8);
+         public void execute(SessionFactory sessionFactory) {
              for (Visit visit : operationsArray) {
                  visit.init();
              }
              if (parallel) {
-                 initialSessionFactory.lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
+                 sessionFactory.lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
              }
              (parallel ? selector.chunks().parallel() : selector.chunks()).forEach(chunk -> {
-                 final Session session = sessionFactory.create(chunk.getChunkInfo().getChunkId() + 1);
+                 final Session session = sessionFactory.getSession();
+                 session.setOwnerId(chunk.getChunkInfo().getChunkId() + 1);
+                 if (componentsToPersist == null) {
+                     session.persistingAll();
+                 } else {
+                     session.persistingExactly(Arrays.asList(componentsToPersist).toArray(new Class[0]));
+                 }
                  Context context = (Context) contextFactory.apply(chunk);
-                 chunk.ids().forEach(id -> {
+                 chunk.ids()
+                         .forEach(id -> {
                              for (Visit visit : operationsArray) {
                                  visit.perform(context, session, id);
                              }
+                         });
+                 switch (mode) {
+                     case DEFAULT:
+                         if (sessionFactory.shouldClearByDefault()) {
+                             session.close();
+                         } else {
+                             session.persist();
                          }
-                 );
+                         break;
+                     case SHARED:
+                         session.persist();
+                         break;
+                     case NO_PERSIST:
+                         session.clear();
+                 }
                  session.close();
              });
              if (parallel) {
-                 initialSessionFactory.lifecycleEvent(LifecycleEvent.POST_PARALLEL_ITERATION);
+                 sessionFactory.lifecycleEvent(LifecycleEvent.POST_PARALLEL_ITERATION);
              }
          }
 
          @Override
          public ContextConfig sharedEntities() {
-             this.mode = Session.Mode.SHARED;
+             this.mode = Mode.SHARED;
              return this;
          }
 
          @Override
          public ContextConfig readOnlyEntities() {
-             this.mode = Session.Mode.NO_PERSIST;
-             return this;
-         }
-
-         @Override
-         public ContextConfig detachedEntities() {
-             this.mode = Session.Mode.DETACHED_ENTITIES;
+             this.mode = Mode.NO_PERSIST;
              return this;
          }
 
          @Override
          public ContextConfig persistingAll() {
+             componentsToPersist = null;
              return this;
          }
 
          @Override
-         public ContextConfig persisting(Object... components) {
+         public ContextConfig persistingOnly(Object... components) {
              componentsToPersist = components;
              return this;
          }
@@ -136,11 +155,9 @@
 
          ContextConfig readOnlyEntities();
 
-         ContextConfig detachedEntities();
-
          ContextConfig persistingAll();
 
-         ContextConfig persisting(Object... components);
+         ContextConfig persistingOnly(Object... components);
      }
 
      public interface ContextConfig {

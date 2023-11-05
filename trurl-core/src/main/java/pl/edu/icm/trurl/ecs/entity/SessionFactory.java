@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.util;
+package pl.edu.icm.trurl.ecs.entity;
 
-public class StaticSelectorConfig {
-    final Class[] components;
-    final int initialSize;
-    final int chunkSize;
+import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
 
-    StaticSelectorConfig(Class[] components, int initialSize, int chunkSize) {
-        this.components = components;
-        this.initialSize = initialSize;
-        this.chunkSize = chunkSize;
-    }
+public interface SessionFactory {
+    Session getSession();
+
+    void lifecycleEvent(LifecycleEvent lifecycleEvent);
+
+    boolean shouldClearByDefault();
 }

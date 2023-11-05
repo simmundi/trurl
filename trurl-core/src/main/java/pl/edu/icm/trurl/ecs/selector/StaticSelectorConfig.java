@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,16 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.query;
+package pl.edu.icm.trurl.ecs.selector;
 
-import pl.edu.icm.trurl.ecs.entity.Entity;
+public class StaticSelectorConfig {
+    final Class[] components;
+    final int initialSize;
+    final int chunkSize;
 
-public interface Query<T> {
-    void process(Entity entity, Query.Result<T> result, String label);
-
-    interface Result<T> {
-        default void add(Entity entity, String tag) {
-            add(entity, tag, null);
-        }
-
-        void add(Entity entity, String tag, T tagClassifier);
+    StaticSelectorConfig(Class[] components, int initialSize, int chunkSize) {
+        this.components = components;
+        this.initialSize = initialSize;
+        this.chunkSize = chunkSize;
     }
 }

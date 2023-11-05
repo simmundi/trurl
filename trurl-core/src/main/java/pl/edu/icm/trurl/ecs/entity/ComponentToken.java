@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,16 @@
  *
  */
 
-package pl.edu.icm.trurl.visnow;
+package pl.edu.icm.trurl.ecs.entity;
 
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+import pl.edu.icm.trurl.ecs.mapper.Mapper;
 
-@WithMapper
-public class AreaInfo {
-    private int countOfTrees;
+public class ComponentToken<T> {
+    final public Mapper<T> mapper;
+    final int cix;
 
-    public AreaInfo() {
-    }
-
-    public AreaInfo(int countOfTrees) {
-        this.countOfTrees = countOfTrees;
-    }
-
-    public int getCountOfTrees() {
-        return countOfTrees;
-    }
-
-    public void setCountOfTrees(int countOfTrees) {
-        this.countOfTrees = countOfTrees;
+    ComponentToken(Mapper<T> mapper, int cix) {
+        this.mapper = mapper;
+        this.cix = cix;
     }
 }

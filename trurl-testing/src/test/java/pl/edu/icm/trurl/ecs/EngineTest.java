@@ -22,13 +22,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.edu.icm.trurl.ecs.entity.Session;
+import pl.edu.icm.trurl.ecs.entity.SessionFactory;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
+import pl.edu.icm.trurl.store.Counter;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -82,7 +82,7 @@ class EngineTest {
     @Test
     void execute() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false, sessionCapacity);
 
         // execute
         engine.execute(system);
@@ -94,7 +94,7 @@ class EngineTest {
     @Test
     void getRootStore() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false, sessionCapacity);
 
         // execute
         Store result = engine.getRootStore();
@@ -106,7 +106,7 @@ class EngineTest {
     @Test
     void getMapperSet() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false, sessionCapacity);
 
         // execute
         MapperSet result = engine.getMapperSet();
@@ -118,7 +118,7 @@ class EngineTest {
     @Test
     void getCount() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false, sessionCapacity);
 
         // execute
         int count = engine.getCount();
@@ -130,7 +130,7 @@ class EngineTest {
     @Test
     void nextId() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false, sessionCapacity);
 
         // execute
         int nextId = engine.nextId();

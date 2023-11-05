@@ -23,6 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.edu.icm.trurl.ecs.entity.Entity;
+import pl.edu.icm.trurl.ecs.entity.IdentityMapEntity;
+import pl.edu.icm.trurl.ecs.entity.IdentityMapSession;
+import pl.edu.icm.trurl.ecs.entity.Session;
+import pl.edu.icm.trurl.ecs.entity.SessionEntity;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.exampledata.Looks;
 
@@ -50,7 +55,7 @@ class EntityTest {
     MapperSet mapperSet;
 
     @Mock
-    Session session;
+    IdentityMapSession session;
 
     @Mock
     Entity entity;
@@ -61,7 +66,7 @@ class EntityTest {
         lenient().when(mapperSet.indexToMapper(0)).thenReturn(mapper);
         lenient().when(mapperSet.classToIndex(Looks.class)).thenReturn(0);
         when(mapperSet.componentCount()).thenReturn(1);
-        entity = new Entity(mapperSet, session, ID);
+        entity = new IdentityMapEntity(session, ID);
     }
 
     @Test
