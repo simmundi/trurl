@@ -15,7 +15,6 @@
  *
  *
  */
-/*
 package pl.edu.icm.trurl.space;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -124,6 +123,3 @@ class SampleSpaceTest {
                 .containsExactlyInAnyOrder(Cities.KATOWICE, Cities.LUBLIN, Cities.WARSZAWA);
     }
 }
-
-
- */

@@ -21,6 +21,7 @@ package pl.edu.icm.trurl.generator.writer.feature;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
+import pl.edu.icm.trurl.generator.model.ComponentProperty;
 
 import javax.lang.model.element.Modifier;
 import java.util.stream.Stream;
@@ -35,8 +36,40 @@ public class CommonFieldsFeature implements Feature {
     @Override
     public Stream<FieldSpec> fields() {
         return beanMetadata.getComponentProperties().stream()
-                .map(property -> FieldSpec
-                        .builder(property.type.columnType, property.name, Modifier.PRIVATE)
+                .flatMap(property -> {
+                    if (property.type.columnType != null) {
+                        return Stream.of(FieldSpec
+                                .builder(property.type.columnType, property.fieldName, Modifier.PRIVATE)
+                                .build());
+                    } else if (property.isUsingReferences()) {
+                        return reference(property);
+                    } else if (property.isUsingJoin()) {
+                        return join(property);
+                    } else if (property.isUsingMappers() && !property.isUsingJoin()) {
+                        return embedded(property);
+                    } else {
+                        throw new RuntimeException("Unknown property type: " + property.type);
+                    }
+                });
+    }
+
+    private Stream<? extends FieldSpec> embedded(ComponentProperty property) {
+        return Stream.of(FieldSpec
+                .builder(property.getMapperType(), property.fieldName, Modifier.PRIVATE)
+                .build());
+    }
+
+    private Stream<FieldSpec> reference(ComponentProperty property) {
+        return Stream.of(FieldSpec
+                .builder(property.getReferenceType(), property.fieldName, Modifier.PRIVATE)
+                .build());
+    }
+
+    private Stream<FieldSpec> join(ComponentProperty property) {
+        return Stream.of(FieldSpec
+                        .builder(property.getMapperType(), property.fieldName, Modifier.PRIVATE)
+                        .build(),
+                FieldSpec.builder(property.getJoinType(), property.fieldName + "Join", Modifier.PRIVATE)
                         .build());
     }
 

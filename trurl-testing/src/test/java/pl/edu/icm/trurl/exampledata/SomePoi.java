@@ -15,7 +15,6 @@
  *
  *
  */
-/*
 package pl.edu.icm.trurl.exampledata;
 
 import pl.edu.icm.trurl.ecs.annotation.WithMapper;
@@ -98,4 +97,3 @@ public class SomePoi implements VnCoords {
         this.y = y;
     }
 }
-*/

@@ -19,26 +19,20 @@
 package pl.edu.icm.trurl.ecs.mapper;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.edu.icm.trurl.exampledata.pizza.Ingredient;
-import pl.edu.icm.trurl.exampledata.pizza.Olive;
-import pl.edu.icm.trurl.exampledata.pizza.OliveColor;
-import pl.edu.icm.trurl.exampledata.pizza.Pizza;
-import pl.edu.icm.trurl.exampledata.pizza.Topping;
+import pl.edu.icm.trurl.exampledata.pizza.*;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
 import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-@Disabled
 public class MapperCollectionsIT {
     Mapper<Pizza> mapper;
-    Store store = new Store(new ArrayAttributeFactory(), 100);
+    Store store = new Store(new ArrayAttributeFactory(), 1000);
 
     @BeforeEach
     void before() {
@@ -71,10 +65,6 @@ public class MapperCollectionsIT {
         pizzaC.getOlives().add(Olive.of(OliveColor.BLACK, 5));
 
         // assert
-        assertThatThrownBy(() -> mapper.save(pizzaC, 127))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("resizing this list over 4 is not supported");
-
         assertThat(mapper.createAndLoad(45).getOlives()).hasSize(3);
         assertThat(mapper.createAndLoad(100).getOlives()).hasSize(4);
     }
@@ -90,6 +80,7 @@ public class MapperCollectionsIT {
         // execute
         mapper.save(pizzaA, 45);
         mapper.save(pizzaB, 100);
+        mapper.save(pizzaC, 100);
 
         while (pizzaA.getToppings().size() < 10) {
             pizzaA.getToppings().add(Topping.of(Ingredient.HAM, 1));
@@ -97,17 +88,21 @@ public class MapperCollectionsIT {
         while (pizzaB.getToppings().size() < 15) {
             pizzaB.getToppings().add(Topping.of(Ingredient.CHEESE, 1));
         }
-        while (pizzaC.getToppings().size() < 15) {
+        while (pizzaC.getToppings().size() < 20) {
             pizzaC.getToppings().add(Topping.of(Ingredient.ANCHOVIS, 0.001f));
         }
         mapper.save(pizzaA, 45);
         mapper.save(pizzaB, 100);
         mapper.save(pizzaC, 255);
 
-        assertThat(mapper.createAndLoad(45).getToppings()).hasSize(10);
-        assertThat(mapper.createAndLoad(100).getToppings()).hasSize(15);
-        assertThat(mapper.createAndLoad(255).getToppings()).hasSize(15);
-        assertThat(mapper.createAndLoad(255).getOlives()).hasSize(2);
+        Pizza retrievedA = mapper.createAndLoad(45);
+        Pizza retrievedB = mapper.createAndLoad(100);
+        Pizza retrievedC = mapper.createAndLoad(255);
+
+        assertThat(retrievedA.getToppings()).hasSize(10);
+        assertThat(retrievedB.getToppings()).hasSize(15);
+        assertThat(retrievedC.getToppings()).hasSize(20);
+        assertThat(retrievedC.getOlives()).hasSize(2);
     }
 
     private Pizza twoOlivesOneTopping() {

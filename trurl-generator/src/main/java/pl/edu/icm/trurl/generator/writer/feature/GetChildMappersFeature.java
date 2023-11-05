@@ -27,7 +27,6 @@ import pl.edu.icm.trurl.generator.model.ComponentProperty;
 import pl.edu.icm.trurl.generator.model.PropertyType;
 
 import javax.lang.model.element.Modifier;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -52,7 +51,7 @@ public class GetChildMappersFeature implements Feature {
     private MethodSpec overrideGetChildMappers(BeanMetadata beanMetadata) {
         List<ComponentProperty> childMappers = beanMetadata
                 .getComponentProperties().stream()
-                .filter(p -> p.type == PropertyType.EMBEDDED_PROP || p.type == PropertyType.EMBEDDED_LIST)
+                .filter(p -> p.type == PropertyType.EMBEDDED_PROP || p.type == PropertyType.EMBEDDED_LIST_PROP)
                 .collect(Collectors.toList());
         return MethodSpec.methodBuilder("getChildMappers")
                 .returns(CommonTypes.MAPPER_LIST)
@@ -65,7 +64,7 @@ public class GetChildMappersFeature implements Feature {
     private CodeBlock listMappers(List<ComponentProperty> mapperProperties) {
         return CodeBlock.builder()
                 .addStatement("return $T.asList($L)", CommonTypes.ARRAYS, mapperProperties.stream()
-                        .map(p -> p.name)
+                        .map(p -> p.fieldName)
                         .collect(Collectors.joining(", ")))
                 .build();
     }

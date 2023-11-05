@@ -23,44 +23,40 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.snowyhollows.bento.soft.SoftEnum;
+import pl.edu.icm.trurl.ecs.annotation.CollectionType;
+import pl.edu.icm.trurl.ecs.annotation.MappedCollection;
 import pl.edu.icm.trurl.ecs.annotation.NotMapped;
 import pl.edu.icm.trurl.generator.CommonTypes;
 
-import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
-import javax.tools.Diagnostic;
 import java.util.Locale;
 import java.util.Optional;
 
 public class ComponentProperty {
     public final String name;
+    public final String fieldName;
     public final String namespace;
     public final PropertyType type;
     public final TypeName typeName;
     public final String getterName;
     public final String setterName;
-    public final ClassName businessType;
-    public final boolean synthetic;
-    public String qname;
+    public final ClassName unwrappedTypeName;
+    public final String qname;
     public final Element attribute;
 
-    public ComponentProperty(String name, String namespace, PropertyType type, String getterName, ClassName businessType, TypeName typeName, boolean synthetic, Optional<? extends Element> optionalAttribute) {
+    public ComponentProperty(String name, String namespace, PropertyType type, String getterName, ClassName unwrappedTypeName, TypeName typeName, Optional<? extends Element> optionalAttribute) {
         this.typeName = typeName;
+        this.fieldName = "$" + name;
         this.name = name;
         this.namespace = namespace;
         this.type = type;
         this.getterName = getterName;
         this.setterName = "set" + name.substring(0, 1).toUpperCase(Locale.ROOT) + name.substring(1);
-        this.businessType = businessType;
-        this.synthetic = synthetic;
+        this.unwrappedTypeName = unwrappedTypeName;
         this.qname = Strings.isNullOrEmpty(namespace) ? name : namespace + "." + name;
         this.attribute = optionalAttribute.orElse(null);
-    }
-
-    public String missingVarName() {
-        return name + "Missing";
     }
 
     public static boolean isGetter(ExecutableElement method) {
@@ -71,23 +67,29 @@ public class ComponentProperty {
     }
 
     public static ComponentProperty create(ProcessingEnvironment processingEnvironment, BeanPropertyMetadata meta) {
-        String methodName = meta.method.getSimpleName().toString();
-        PropertyType type = fromColumnType(processingEnvironment, meta.method.getReturnType());
-        ClassName businessType = findBusinessType(processingEnvironment, meta);
+        String methodName = meta.getter.getSimpleName().toString();
+        PropertyType type = fromColumnType(processingEnvironment, meta.getter.getReturnType());
+        ClassName businessType = findWrappedType(processingEnvironment, meta);
         String propertyName = findPropertyName(methodName);
-        Optional<? extends Element> optionalAttribute = meta.method.getEnclosingElement().getEnclosedElements().stream()
+        Optional<? extends Element> optionalAttribute = meta.getter.getEnclosingElement().getEnclosedElements().stream()
                 .filter(e -> !(e instanceof ExecutableElement))
                 .filter(e -> e.getSimpleName().toString().equals(propertyName))
                 .filter(e -> !e.getModifiers().contains(Modifier.VOLATILE))
                 .filter(e -> e.getAnnotation(NotMapped.class) == null)
                 .findFirst();
 
-        return new ComponentProperty(propertyName, meta.namespace, type, methodName, businessType, TypeName.get(meta.method.getReturnType()), false, optionalAttribute);
+        return new ComponentProperty(propertyName,
+                meta.namespace,
+                type,
+                methodName,
+                businessType,
+                TypeName.get(meta.getter.getReturnType()),
+                optionalAttribute);
     }
 
-    private static ClassName findBusinessType(ProcessingEnvironment processingEnvironment, BeanPropertyMetadata meta) {
-        ClassName indirectBusinessType = findIndirectBusinessType(processingEnvironment, meta.method.getReturnType());
-        TypeName returnType = ClassName.get(meta.method.getReturnType());
+    private static ClassName findWrappedType(ProcessingEnvironment processingEnvironment, BeanPropertyMetadata meta) {
+        ClassName indirectBusinessType = findIndirectBusinessType(processingEnvironment, meta.getter.getReturnType());
+        TypeName returnType = ClassName.get(meta.getter.getReturnType());
         ClassName returnClassName = returnType instanceof ClassName ? (ClassName) returnType : null;
         return Optional
                 .ofNullable(indirectBusinessType)
@@ -146,9 +148,13 @@ public class ComponentProperty {
             return PropertyType.STRING_PROP;
         } else if (isEnum(processingEnvironment, typeMirror, typeName)) {
             return PropertyType.ENUM_PROP;
+        } else if (typeName.equals(CommonTypes.ENTITY_LIST)) {
+            return PropertyType.ENTITY_LIST_PROP;
+        } else if (typeName.equals(CommonTypes.ENTITY)) {
+            return PropertyType.ENTITY_PROP;
         } else if (typeName instanceof ParameterizedTypeName
                 && ((ParameterizedTypeName) typeName).rawType.equals(CommonTypes.LIST)) {
-            return PropertyType.EMBEDDED_LIST;
+            return PropertyType.EMBEDDED_LIST_PROP;
         } else if (isSoftEnum(processingEnvironment, typeMirror)) {
             return PropertyType.SOFT_ENUM_PROP;
         } else {
@@ -163,5 +169,47 @@ public class ComponentProperty {
 
     public boolean isAttachedToAttribute() {
         return attribute != null;
+    }
+
+    public boolean isUsingMappers() {
+        return getMapperType() != null;
+    }
+
+    public boolean isUsingReferences() {
+        return getReferenceType() != null;
+    }
+
+    public ClassName getMapperType() {
+        if (type == PropertyType.EMBEDDED_LIST_PROP || type == PropertyType.EMBEDDED_PROP) {
+            return ClassName.get(unwrappedTypeName.packageName(), unwrappedTypeName.simpleName() + "Mapper");
+        } else {
+            return null;
+        }
+    }
+
+    public ClassName getReferenceType() {
+        if (type == PropertyType.ENTITY_LIST_PROP) {
+            return CommonTypes.ARRAY_REFERENCE;
+        } else if (type == PropertyType.ENTITY_PROP) {
+            return CommonTypes.SINGLE_REFERENCE;
+        } else {
+            return null;
+        }
+    }
+
+    public ClassName getJoinType() {
+        if (type != PropertyType.EMBEDDED_LIST_PROP) {
+            return null;
+        }
+        MappedCollection annotation = attribute.getAnnotation(MappedCollection.class);
+        if (annotation == null) {
+            return CommonTypes.RANGED_JOIN;
+        } else {
+            return annotation.collectionType() == CollectionType.RANGE ? CommonTypes.RANGED_JOIN : CommonTypes.ARRAY_JOIN;
+        }
+    }
+
+    public boolean isUsingJoin() {
+        return getJoinType() != null;
     }
 }

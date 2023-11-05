@@ -19,7 +19,6 @@
 package pl.edu.icm.trurl.ecs;
 
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
-import pl.edu.icm.trurl.ecs.mapper.MapperListeners;
 import pl.edu.icm.trurl.ecs.selector.Selector;
 import pl.edu.icm.trurl.ecs.util.Selectors;
 import pl.edu.icm.trurl.store.Store;
@@ -93,30 +92,6 @@ public final class Engine {
 
     int nextId() {
         return rootStore.getCounter().next();
-    }
-
-    public void onUnderlyingDataChanged(int fromInclusive, int toExclusive) {
-        Session session = defaultSessionFactory
-                .withModeAndCount(Session.Mode.STUB_ENTITIES, 0)
-                .create();
-
-        for (Mapper mapper : mappers) {
-            MapperListeners mapperListeners = mapper.getMapperListeners();
-
-            if (mapperListeners.isEmpty()) {
-                continue;
-            }
-
-            Object component = mapper.create();
-            for (int row = fromInclusive; row < toExclusive; row++) {
-                if (mapper.isPresent(row)) {
-                    mapper.load(session, component, row);
-                    mapperListeners.fireSavingComponent(component, row);
-                } else {
-                    mapperListeners.fireSavingComponent(null, row);
-                }
-            }
-        }
     }
 
     private void ensureHeadroom() {

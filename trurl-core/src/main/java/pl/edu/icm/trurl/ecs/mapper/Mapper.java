@@ -31,15 +31,14 @@ public interface Mapper<T> {
     void attachStore(Store store);
     void configureStore(StoreConfigurer metadata);
     T create();
-    boolean isPresent(int index);
+    boolean isPresent(int row);
+    void erase(int index);
     void load(Session session, T component, int index);
-    default void save(T component, int index) {
-        save(null, component, index);
+    default void save(T component, int row) {
+        save(null, component, row);
     }
-    void save(Session owner, T component, int index);
-    boolean isModified(T component, int index);
+    void save(Session owner, T component, int row);
     List<Attribute> attributes();
-    MapperListeners<T> getMapperListeners();
     default String name() {
         return this.create().getClass().getSimpleName().toLowerCase(Locale.ROOT);
     }

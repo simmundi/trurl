@@ -15,11 +15,10 @@
  *
  *
  */
-/*
+
 package pl.edu.icm.trurl.ecs.mapper;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -29,54 +28,35 @@ import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.MapperSet;
 import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
-import pl.edu.icm.trurl.exampledata.BunchOfData;
-import pl.edu.icm.trurl.exampledata.Color;
-import pl.edu.icm.trurl.exampledata.Looks;
-import pl.edu.icm.trurl.exampledata.Stats;
-import pl.edu.icm.trurl.exampledata.Texture;
+import pl.edu.icm.trurl.exampledata.*;
 import pl.edu.icm.trurl.store.Store;
-
-import pl.edu.icm.trurl.store.attribute.BooleanAttribute;
-import pl.edu.icm.trurl.store.attribute.ByteAttribute;
-import pl.edu.icm.trurl.store.attribute.DoubleAttribute;
-import pl.edu.icm.trurl.store.attribute.FloatAttribute;
-import pl.edu.icm.trurl.store.attribute.IntAttribute;
-import pl.edu.icm.trurl.store.attribute.ShortAttribute;
-import pl.edu.icm.trurl.store.attribute.StringAttribute;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
-import pl.edu.icm.trurl.store.attribute.CategoricalStaticAttribute;
+import pl.edu.icm.trurl.store.attribute.*;
+import pl.edu.icm.trurl.store.reference.Reference;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-@Disabled
 public class MapperIT {
-
     @Spy
     Mappers mappers = new Mappers();
     @Spy
     MapperSet mapperSet = new MapperSet(new DynamicComponentAccessor(Collections.emptyList()), mappers);
-
     @Mock
     Session session;
 
-    @Mock
-    MapperListener<BunchOfData> mapperListener;
-
     Mapper<BunchOfData> mapper;
 
-    Store store = new Store(new ArrayAttributeFactory(), 10);
+    Store store = new Store(new ArrayAttributeFactory(), 1000);
     private BooleanAttribute booleanAttribute;
     private ByteAttribute byteAttribute;
     private DoubleAttribute doubleAttribute;
@@ -87,6 +67,8 @@ public class MapperIT {
     private StringAttribute stringAttribute;
     private CategoricalStaticAttribute<Color> looksPropColor;
     private CategoricalStaticAttribute<Texture> looksPropTexture;
+    private Reference entityReference;
+    private Reference entitiesReference;
 
     @BeforeEach
     void before() {
@@ -103,6 +85,8 @@ public class MapperIT {
         stringAttribute = store.get("stringProp");
         looksPropColor = store.get("looksProp.color");
         looksPropTexture = store.get("looksProp.texture");
+        entityReference = store.getReference("entityProp");
+        entitiesReference = store.getReference("entitiesProp");
 
         lenient().when(session.getEntity(anyInt())).thenAnswer(call -> createEntity(call.getArgument(0, Integer.class)));
     }
@@ -111,14 +95,11 @@ public class MapperIT {
     public void save() {
         // given
         BunchOfData dto = createBunchOfData();
-        mapper.getMapperListeners().addSavingListener(mapperListener);
 
         // execute
         mapper.save(null, dto, 5);
 
         // assert
-        List<Entity> entityList = new ArrayList<>();
-
         assertThat(booleanAttribute.getBoolean(5)).isTrue();
         assertThat(byteAttribute.getByte(5)).isEqualTo((byte) 121);
         assertThat(doubleAttribute.getDouble(5)).isEqualTo(56.34);
@@ -128,10 +109,14 @@ public class MapperIT {
         assertThat(stringAttribute.getString(5)).isEqualTo("blebleble");
         assertThat(shortAttribute.getShort(5)).isEqualTo((short) 78);
 
-        List<Integer> entityIds = new ArrayList<>();
-        assertThat(entityIds).containsExactly(4, 5, 6);
-
-        verify(mapperListener).savingComponent(5, dto);
+        assertThat(entitiesReference.getExactSize(5)).isEqualTo(3);
+        assertThat(entitiesReference.getId(5, 0)).isEqualTo(4);
+        assertThat(entitiesReference.getId(5, 1)).isEqualTo(5);
+        assertThat(entitiesReference.getId(5, 2)).isEqualTo(6);
+        assertThat(entitiesReference.getId(5, 3)).isEqualTo(Integer.MIN_VALUE);
+        assertThat(entityReference.getId(5, 0)).isEqualTo(34);
+        assertThat(entityReference.getId(5, 1)).isEqualTo(Integer.MIN_VALUE);
+        assertThat(entityReference.getExactSize(5)).isEqualTo(1);
     }
 
     @Test
@@ -161,112 +146,6 @@ public class MapperIT {
 
         // assert
         assertThat(entityList).isEmpty();
-    }
-
-    @Test
-    public void save__over_last_row() {
-        // given
-        BunchOfData dto = createBunchOfData();
-
-        // execute
-        mapper.save(dto, 15);
-
-        // assert
-        assertThat(mapper.getCount()).isEqualTo(16);
-    }
-
-    @Test
-    public void isModified() {
-        // given
-        BunchOfData dto = createBunchOfData();
-        dto.setEntityProp(null);
-        dto.getEntitiesProp().clear();
-        mapper.save(dto, 8);
-
-        // execute
-        boolean isModified = mapper.isModified(dto, 8);
-
-        // assert
-        assertThat(isModified).isFalse();
-    }
-
-    @Test
-    public void isModified__embedded() {
-        // given
-        BunchOfData dto = createBunchOfData();
-        dto.setLooksProp(new Looks(Color.SILVER, Texture.SHINY));
-        mapper.save(dto, 8);
-        dto.getLooksProp().setTexture(Texture.ROUGH);
-
-        // execute
-        boolean isModified = mapper.isModified(dto, 8);
-
-        // assert
-        assertThat(isModified).isTrue();
-    }
-
-    @Test
-    public void isModified__entity() {
-        // given
-        BunchOfData original = createBunchOfData();
-        int idx = 8;
-        mapper.save(original, idx);
-
-        // execute
-        BunchOfData copy = createBunchOfData();
-        copy.setEntityProp(null);
-        boolean isModified = mapper.isModified(copy, idx);
-
-        // assert
-        assertThat(isModified).isTrue();
-    }
-
-    @Test
-    public void isModified__entities() {
-        // given
-        BunchOfData original = createBunchOfData();
-        int idx = 9;
-        mapper.save(original, idx);
-
-        // execute
-        BunchOfData copy = createBunchOfData();
-        copy.getEntitiesProp().add(createEntity(987));
-        boolean isModified = mapper.isModified(copy, idx);
-
-        // assert
-        assertThat(isModified).isTrue();
-    }
-
-    @Test
-    public void isModified__entity_original_null() {
-        // given
-        BunchOfData original = createBunchOfData();
-        int idx = 9;
-        original.setEntityProp(null);
-        mapper.save(original, idx);
-
-        // execute
-        BunchOfData copy = createBunchOfData();
-        boolean isModified = mapper.isModified(copy, idx);
-
-        // assert
-        assertThat(isModified).isTrue();
-    }
-
-    @Test
-    public void isModified__entities_original_empty() {
-        // given
-        BunchOfData original = createBunchOfData();
-        int idx = 9;
-        original.getEntitiesProp().clear();
-        mapper.save(original, idx);
-
-        // execute
-        BunchOfData copy = createBunchOfData();
-        boolean isModified = mapper.isModified(copy, idx);
-
-        // assert
-        assertThat(isModified).isTrue();
     }
 
     @Test
@@ -322,18 +201,18 @@ public class MapperIT {
     public void save__list_overwrite_shorter() {
         // given
         BunchOfData original = createBunchOfData();
-        int idx = 10;
+        int row = 10;
         original.getStatsProp().add(new Stats(15, 67, 2));
         original.getStatsProp().add(new Stats(16, 67, 1));
         original.getStatsProp().add(new Stats(17, 67, 0));
-        mapper.save(original, idx);
+        mapper.save(original, row);
         original.getStatsProp().remove(2);
         original.getStatsProp().remove(1);
-        mapper.save(original, idx);
+        mapper.save(original, row);
 
         // execute
         BunchOfData copy = mapper.create();
-        mapper.load(session, copy, idx);
+        mapper.load(session, copy, row);
 
         // assert
         assertThat(copy).isEqualTo(original);
@@ -361,13 +240,12 @@ public class MapperIT {
     @Test
     void save__multiple_items_with_embedded_lists() {
         // given
-        AtomicInteger id = new AtomicInteger();
         createBunchOfDataWithMultipleStats().forEach(bod -> {
-            mapper.save(bod, id.getAndIncrement());
+            mapper.save(bod, store.getCounter().next());
         });
 
         // execute
-        List<BunchOfData> readBack = IntStream.range(0, mapper.getCount())
+        List<BunchOfData> readBack = IntStream.range(0, store.getCounter().getCount())
                 .mapToObj(i -> {
                     BunchOfData bod = mapper.create();
                     mapper.load(session, bod, i);
@@ -429,4 +307,3 @@ public class MapperIT {
     }
 
 }
-*/

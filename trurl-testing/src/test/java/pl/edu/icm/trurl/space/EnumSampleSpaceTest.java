@@ -15,7 +15,6 @@
  *
  *
  */
-/*
 package pl.edu.icm.trurl.space;
 
 import org.assertj.core.api.*;
@@ -146,6 +145,3 @@ class EnumSampleSpaceTest {
         assertThat((double)Math.round(cities.getProbability(Cities.KATOWICE) * 10d) / 10d).isEqualTo(0.4);
     }
 }
-
-
- */
