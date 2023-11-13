@@ -4,6 +4,10 @@ include 'trurl-core',
         'trurl-orc',
         'trurl-io',
         'trurl-xml',
-        'trurl-util',
-        'trurl-testing'
+        'trurl-utils',
+        'trurl-testing',
+        'trurl-sql',
+        'trurl-all',
+        'trurl-stats',
+        'trurl-vn-export'
 

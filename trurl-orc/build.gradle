@@ -1,3 +1,9 @@
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
 dependencies {
     implementation project(":trurl-core")
     implementation project(":trurl-io")

@@ -7,6 +7,7 @@ java {
 dependencies {
     annotationProcessor "net.snowyhollows.bento:bento-generator:${bentoVersion}"
 
+    implementation project(":trurl-utils")
     implementation "org.roaringbitmap:RoaringBitmap:${roaringBitmapVersion}"
     implementation "it.unimi.dsi:fastutil:${fastutilVersion}"
     implementation "org.slf4j:slf4j-api:${slf4jVersion}"

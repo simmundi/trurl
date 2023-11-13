@@ -16,7 +16,7 @@
  *
  */
 
-package pl.edu.icm.trurl.sql;
+package pl.edu.icm.trurl.io.sql;
 
 import net.snowyhollows.bento.annotation.ByName;
 import net.snowyhollows.bento.annotation.WithFactory;

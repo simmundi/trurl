@@ -1,0 +1,30 @@
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+dependencies {
+    api project(":trurl-core")
+    api project(":trurl-generator")
+    api project(":trurl-io")
+    api project(":trurl-orc")
+    api project(":trurl-utils")
+    api project(":trurl-sql")
+    api project(":trurl-stats")
+    api project(":trurl-vn-export")
+    api project(":trurl-xml")
+}
+
+publishing {
+    publications {
+        allPublication(org.gradle.api.publish.maven.MavenPublication) {
+            from components.java
+            artifact sourceJar
+
+            groupId rootProject.getGroup()
+            artifactId project.name
+            version rootProject.getVersion()
+        }
+    }
+}

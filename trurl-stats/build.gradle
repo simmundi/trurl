@@ -5,17 +5,14 @@ java {
 }
 
 dependencies {
-    annotationProcessor "net.snowyhollows.bento:bento-generator:${bentoVersion}"
-
     implementation project(":trurl-core")
-    implementation "org.slf4j:slf4j-api:${slf4jVersion}"
-    runtimeOnly "org.slf4j:slf4j-simple:${slf4jVersion}"
-    implementation "com.univocity:univocity-parsers:${univocityVersion}"
+    implementation "it.unimi.dsi:fastutil:${fastutilVersion}"
+    implementation project(':trurl-utils')
 }
 
 publishing {
     publications {
-        ioPublication(MavenPublication) {
+        statsPublication(org.gradle.api.publish.maven.MavenPublication) {
             from components.java
             artifact sourceJar
 
@@ -25,3 +22,4 @@ publishing {
         }
     }
 }
+

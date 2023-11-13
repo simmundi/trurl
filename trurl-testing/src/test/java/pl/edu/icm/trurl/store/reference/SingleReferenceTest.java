@@ -58,7 +58,7 @@ class SingleReferenceTest {
 
         // assert
         assertThat(emptySizeA).isEqualTo(CAPACITY / 1111 + 1);
-        assertThat(emptySizeB).isEqualTo(emptySizeB);
+        assertThat(emptySizeB).isEqualTo(emptySizeA);
         assertThat(hasSizeOne + emptySizeA).isEqualTo(CAPACITY);
         IntStream.range(0, CAPACITY).parallel().filter(idx -> next.getExactSize(idx) == 1).forEach(idx -> {
             assertThat(next.getId(idx, 0)).isEqualTo((idx + 1) % CAPACITY);
