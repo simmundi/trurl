@@ -16,28 +16,32 @@
  *
  */
 
-package pl.edu.icm.trurl.util.chess;
+package pl.edu.icm.trurl.util;
 
-import net.snowyhollows.bento.Bento;
-import net.snowyhollows.bento.annotation.WithFactory;
-import net.snowyhollows.bento.category.CategoryManager;
+import net.snowyhollows.bento.category.Category;
 
-public class Boards extends CategoryManager<Board> {
-    public final Board FIRST;
-    public final Board SECOND;
-    public final Board THIRD;
+abstract public class AbstractCategory implements Category {
 
-    @WithFactory
-    public Boards(Bento bento) {
-        super(bento, "chess.board", BoardFactory.IT);
+    private final String name;
+    private final byte ordinal;
 
-        FIRST = getByName("FIRST");
-        SECOND = getByName("SECOND");
-        THIRD = getByName("THIRD");
+    public AbstractCategory(String name, int ordinal) {
+        this.name = name;
+        this.ordinal = (byte) ordinal;
     }
 
     @Override
-    public Board[] emptyArray() {
-        return new Board[0];
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public byte ordinal() {
+        return ordinal;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

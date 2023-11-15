@@ -19,8 +19,8 @@
 package pl.edu.icm.trurl.store.array;
 
 import net.snowyhollows.bento.annotation.WithFactory;
-import net.snowyhollows.bento.soft.SoftEnum;
-import net.snowyhollows.bento.soft.SoftEnumManager;
+import net.snowyhollows.bento.category.Category;
+import net.snowyhollows.bento.category.CategoryManager;
 import pl.edu.icm.trurl.store.attribute.*;
 
 public final class ArrayAttributeFactory implements AttributeFactory {
@@ -45,13 +45,13 @@ public final class ArrayAttributeFactory implements AttributeFactory {
     }
 
     @Override
-    public <E extends Enum<E>> CategoricalStaticAttribute<E> createStaticCategory(String name, Class<E> enumType, int defaultCapacity) {
-        return new CategoricalStaticArrayAttribute<>(enumType, name, defaultCapacity);
+    public <E extends Enum<E>> EnumAttribute<E> createEnum(String name, Class<E> enumType, int defaultCapacity) {
+        return new EnumArrayAttribute<>(enumType, name, defaultCapacity);
     }
 
     @Override
-    public <E extends SoftEnum> CategoricalDynamicAttribute<E> createDynamicCategory(String name, SoftEnumManager<E> enumType, int defaultCapacity) {
-        return new CategoricalDynamicArrayAttribute<>(enumType, name, defaultCapacity);
+    public <E extends Category> pl.edu.icm.trurl.store.attribute.CategoryAttribute<E> createCategory(String name, CategoryManager<E> enumType, int defaultCapacity) {
+        return new CategoryAttribute<>(enumType, name, defaultCapacity);
     }
 
     @Override

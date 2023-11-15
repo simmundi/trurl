@@ -19,11 +19,9 @@
 package pl.edu.icm.trurl.exampledata;
 
 import net.snowyhollows.bento.Bento;
-import net.snowyhollows.bento.BentoFactory;
 import net.snowyhollows.bento.annotation.WithFactory;
-import net.snowyhollows.bento.soft.SoftEnumManager;
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
-public class ContaminationTypes extends SoftEnumManager<ContaminationType> {
+import net.snowyhollows.bento.category.CategoryManager;
+public class ContaminationTypes extends CategoryManager<ContaminationType> {
 
     @WithFactory
     public ContaminationTypes(Bento bento) {

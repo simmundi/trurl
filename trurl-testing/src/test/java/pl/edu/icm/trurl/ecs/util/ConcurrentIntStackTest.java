@@ -21,73 +21,77 @@ package pl.edu.icm.trurl.ecs.util;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.util.ConcurrentIntQueue;
+import pl.edu.icm.trurl.util.ConcurrentIntStack;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class ConcurrentIntQueueTest {
+class ConcurrentIntStackTest {
 
     @Test
     @DisplayName("Push and pop should work correctly in a single-threaded environment")
     void push() {
         // given
         final int size = 10;
-        ConcurrentIntQueue concurrentIntQueue = new ConcurrentIntQueue(size);
+        ConcurrentIntStack concurrentIntStack = new ConcurrentIntStack(size);
 
         // execute
         for (int i = 0; i < size; i++) {
-            concurrentIntQueue.push(i);
+            concurrentIntStack.push(i);
         }
 
+        Set<Integer> results = new HashSet<>(size);
         // assert
         for (int i = 0; i < size; i++) {
-            assertThat(concurrentIntQueue.shift()).isEqualTo(i);
+            results.add(concurrentIntStack.shift());
         }
-        assertThat(concurrentIntQueue.shift()).isEqualTo(Integer.MIN_VALUE);
+        assertThat(concurrentIntStack.shift()).isEqualTo(Integer.MIN_VALUE);
+        assertThat(results.containsAll(Set.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9))).isTrue();
     }
 
     @Test
     @DisplayName("Overflow should just return false and ignore the value (i.e., lose data)")
     void push__overflow() {
         // given
-        ConcurrentIntQueue concurrentIntQueue = new ConcurrentIntQueue(3);
+        ConcurrentIntStack concurrentIntStack = new ConcurrentIntStack(3);
 
-        assertThat(concurrentIntQueue.push(1)).isTrue();
-        assertThat(concurrentIntQueue.push(7)).isTrue();
-        assertThat(concurrentIntQueue.push(7)).isTrue();
-        assertThat(concurrentIntQueue.push(7)).isFalse();
-        assertThat(concurrentIntQueue.push(7)).isFalse();
-        assertThat(concurrentIntQueue.push(7)).isFalse();
-        assertThat(concurrentIntQueue.push(7)).isFalse();
+        assertThat(concurrentIntStack.push(1)).isTrue();
+        assertThat(concurrentIntStack.push(7)).isTrue();
+        assertThat(concurrentIntStack.push(7)).isTrue();
+        assertThat(concurrentIntStack.push(7)).isFalse();
+        assertThat(concurrentIntStack.push(7)).isFalse();
+        assertThat(concurrentIntStack.push(7)).isFalse();
+        assertThat(concurrentIntStack.push(7)).isFalse();
 
     }
 
-    int size = 1_000_000;
+    int size = 10_000_000;
 
     @Test
     @DisplayName("Push and pop should work correctly in a multi-threaded environment, under extreme contention")
     void pop() {
         // given
-        ConcurrentIntQueue concurrentIntQueue = new ConcurrentIntQueue(size);
+        ConcurrentIntStack concurrentIntStack = new ConcurrentIntStack(size);
 
         // execute
         IntStream.range(0, size).parallel().forEach(e -> {
-            concurrentIntQueue.push(e);
+            concurrentIntStack.push(e);
             Thread.yield();
         });
-        assertThat(concurrentIntQueue.push(1)).isFalse();
+        assertThat(concurrentIntStack.push(1)).isFalse();
 
         int[] output = new int[size];
         IntStream.range(0, size).parallel().forEach(e -> {
-            output[concurrentIntQueue.shift()] = 1;
+            output[concurrentIntStack.shift()] = 1;
             Thread.yield();
         });
 
         // assert
-        assertThat(concurrentIntQueue.shift()).isEqualTo(Integer.MIN_VALUE);
+        assertThat(concurrentIntStack.shift()).isEqualTo(Integer.MIN_VALUE);
         for (int i = 0; i < size; i++) {
             assertThat(output[i]).isEqualTo(1);
         }

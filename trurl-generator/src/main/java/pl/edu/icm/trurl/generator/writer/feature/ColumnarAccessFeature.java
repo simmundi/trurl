@@ -18,10 +18,7 @@
 
 package pl.edu.icm.trurl.generator.writer.feature;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.*;
 import pl.edu.icm.trurl.generator.CommonTypes;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
@@ -47,7 +44,9 @@ public class ColumnarAccessFeature implements Feature {
     public Stream<MethodSpec> methods() {
         return Stream.of(
                 propertiesForAttributeAccess().map(this::createAttributeAccessor),
-                propertiesForMapperAccess().map(this::createMapperAccessor)).flatMap(Function.identity());
+                propertiesForMapperAccess().map(this::createMapperAccessor),
+                propertiesForSingleReferenceAccess().map(this::createSingleReferenceAccessor)
+        ).flatMap(Function.identity());
     }
 
     private Stream<ComponentProperty> propertiesForAttributeAccess() {
@@ -56,10 +55,18 @@ public class ColumnarAccessFeature implements Feature {
                 .filter(property -> property.getterName != null && property.type.columnType != null);
     }
 
+
+
     private Stream<ComponentProperty> propertiesForMapperAccess() {
         return beanMetadata.getComponentProperties()
                 .stream()
                 .filter(property -> property.type == PropertyType.EMBEDDED_LIST_PROP || property.type == PropertyType.EMBEDDED_PROP);
+    }
+
+    private Stream<ComponentProperty> propertiesForSingleReferenceAccess() {
+        return beanMetadata.getComponentProperties()
+                .stream()
+                .filter(property -> property.type == PropertyType.ENTITY_PROP);
     }
 
     private MethodSpec createMapperAccessor(ComponentProperty property) {
@@ -70,14 +77,19 @@ public class ColumnarAccessFeature implements Feature {
                 .build();
     }
 
-    private MethodSpec createEntityListAccessor(ComponentProperty property) {
-        return MethodSpec.methodBuilder(property.getterName)
+    private MethodSpec createSingleReferenceAccessor(ComponentProperty property) {
+        MethodSpec.Builder methodSpec = MethodSpec.methodBuilder(property.getterName)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.INT, "row")
-                .addParameter(CommonTypes.INT_SINK, "ids")
-                .returns(ClassName.VOID)
-                .addStatement("$L.loadIds(row, ids)", property.name)
-                .build();
+                .returns(ClassName.INT);
+
+        return methodSpec.addCode(CodeBlock.builder()
+                .beginControlFlow("if (!$L.isEmpty(row))", property.fieldName)
+                .addStatement("return $L.getId(row, 0)", property.fieldName)
+                .nextControlFlow("else")
+                .addStatement("return Integer.MIN_VALUE")
+                .endControlFlow()
+                .build()).build();
     }
 
     private MethodSpec createAttributeAccessor(ComponentProperty property) {
@@ -99,9 +111,7 @@ public class ColumnarAccessFeature implements Feature {
             case DOUBLE_PROP:
                 methodSpec.addStatement("return $L.getDouble(row)", property.fieldName);
                 break;
-            case ENUM_PROP:
-                methodSpec.addStatement("return ($T)$L.getEnum(row)", property.unwrappedTypeName, property.fieldName);
-                break;
+            case ENUM_PROP: // fallthrough
             case SOFT_ENUM_PROP:
                 methodSpec.addStatement("return ($T)$L.getEnum(row)", property.unwrappedTypeName, property.fieldName);
                 break;

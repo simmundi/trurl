@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CounterTest {
     @Test
@@ -35,13 +35,14 @@ class CounterTest {
         // assert
         assertThat(count).isEqualTo(1_000_000);
     }
+    final int FREE_LIST_SIZE = 100_000;
 
     @Test
     void free() {
         // given
-        final int FREE_LIST_SIZE = 100_000;
-
         Counter counter = new Counter(FREE_LIST_SIZE);
+
+
 
         // execute
         IntStream.range(0, 1_000_000).parallel().forEach(i -> counter.next());
@@ -51,6 +52,20 @@ class CounterTest {
         // assert
         Set<Integer> expected = IntStream.range(0, FREE_LIST_SIZE).boxed().collect(Collectors.toSet());
         assertThat(collect).isEqualTo(expected);
+    }
+    @Test
+    void free__interleaved() {
+        IntStream.range(0, FREE_LIST_SIZE * 10);
+
+        Counter counter = new Counter(FREE_LIST_SIZE);
+        IntStream.range(0, FREE_LIST_SIZE).parallel().forEach(idx -> {
+            if (idx % 2 == 0) {
+                counter.next();
+            } else {
+                counter.free(idx);
+            }
+        });
+
     }
 
     @Test
@@ -77,8 +92,8 @@ class CounterTest {
         counter.free(slabStart, 3);
 
         // assert
-        assertThat(counter.next()).isEqualTo(slabStart);
-        assertThat(counter.next()).isEqualTo(slabStart + 1);
         assertThat(counter.next()).isEqualTo(slabStart + 2);
+        assertThat(counter.next()).isEqualTo(slabStart + 1);
+        assertThat(counter.next()).isEqualTo(slabStart + 0);
     }
 }

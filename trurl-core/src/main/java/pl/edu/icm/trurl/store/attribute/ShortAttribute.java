@@ -19,6 +19,8 @@
 package pl.edu.icm.trurl.store.attribute;
 
 public interface ShortAttribute extends Attribute {
+    short NULL = Short.MIN_VALUE;
+
     short getShort(int row);
     void setShort(int row, short value);
 }

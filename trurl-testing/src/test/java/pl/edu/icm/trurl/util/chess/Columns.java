@@ -21,9 +21,9 @@ package pl.edu.icm.trurl.util.chess;
 import net.snowyhollows.bento.Bento;
 import net.snowyhollows.bento.BentoFactory;
 import net.snowyhollows.bento.annotation.WithFactory;
-import net.snowyhollows.bento.soft.SoftEnumManager;
+import net.snowyhollows.bento.category.CategoryManager;
 
-public class Columns extends SoftEnumManager<Column> {
+public class Columns extends CategoryManager<Column> {
     public final Column A;
     public final Column B;
     public final Column C;

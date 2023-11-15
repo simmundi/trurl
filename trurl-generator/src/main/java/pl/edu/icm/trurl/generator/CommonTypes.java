@@ -20,7 +20,7 @@ package pl.edu.icm.trurl.generator;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
-import net.snowyhollows.bento.soft.SoftEnumManager;
+import net.snowyhollows.bento.category.CategoryManager;
 import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
@@ -30,9 +30,7 @@ import pl.edu.icm.trurl.store.IntSink;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreConfigurer;
 import pl.edu.icm.trurl.store.attribute.*;
-import pl.edu.icm.trurl.store.join.ArrayJoin;
-import pl.edu.icm.trurl.store.join.RangedJoin;
-import pl.edu.icm.trurl.store.join.SingleJoin;
+import pl.edu.icm.trurl.store.join.*;
 import pl.edu.icm.trurl.store.reference.ArrayReference;
 import pl.edu.icm.trurl.store.reference.SingleReference;
 
@@ -52,6 +50,8 @@ public class CommonTypes {
     public static final ClassName ARRAY_JOIN = ClassName.get(ArrayJoin.class);
     public static final ClassName RANGED_JOIN = ClassName.get(RangedJoin.class);
     public static final ClassName SINGLE_JOIN = ClassName.get(SingleJoin.class);
+    public static final ClassName SINGLE_JOIN_REVERSE = ClassName.get(SingleJoinWithReverse.class);
+    public static final ClassName SINGLE_JOIN_REVERSE_ONLY = ClassName.get(SingleJoinWithReverseOnly.class);
     public static final ClassName ARRAY_REFERENCE = ClassName.get(ArrayReference.class);
     public static final ClassName SINGLE_REFERENCE = ClassName.get(SingleReference.class);
     public static final ClassName SESSION = ClassName.get(Session.class);
@@ -71,11 +71,10 @@ public class CommonTypes {
     public static final ClassName BYTE_COLUMN = ClassName.get(ByteAttribute.class);
     public static final ClassName SHORT_COLUMN = ClassName.get(ShortAttribute.class);
     public static final ClassName STRING_COLUMN = ClassName.get(StringAttribute.class);
-    public static final ClassName CATEGORICAL_STATIC_COLUMN = ClassName.get(CategoricalStaticAttribute.class);
+    public static final ClassName ENUM_COLUMN = ClassName.get(EnumAttribute.class);
     public static final ClassName BOOLEAN_COLUMN = ClassName.get(BooleanAttribute.class);
-    public static final ClassName CATEGORICAL_DYNAMIC_COLUMN = ClassName.get(CategoricalDynamicAttribute.class);
-    public static final ClassName SOFT_ENUM_MANAGER = ClassName.get(SoftEnumManager.class);
-
+    public static final ClassName CATEGORY_COLUMN = ClassName.get(CategoryAttribute.class);
+    public static final ClassName CATEGORY_MANAGER = ClassName.get(CategoryManager.class);
 
     private CommonTypes() {
     }

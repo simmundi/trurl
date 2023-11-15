@@ -6,7 +6,9 @@ import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.IntAttribute;
 
+import java.util.function.IntBinaryOperator;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -44,7 +46,7 @@ class SingleJoinTest {
         SingleJoin images = this.store.getJoin("image");
 
         // assert
-        IntStream.range(0, CAPACITY).parallel().forEach(idx -> {
+        IntStream.range(0, CAPACITY).forEach(idx -> {
             assertThat(images.getRow(idx, 0)).isEqualTo(Integer.MIN_VALUE);
             assertThat(images.getExactSize(idx)).isEqualTo(0);
         });
@@ -100,7 +102,7 @@ class SingleJoinTest {
             if (idx % 7 == 0) {
                 images.setSize(idx, 1);
                 int targetRow = images.getRow(idx, 0);
-                blobAttribute.setInt(targetRow, 1 + idx);
+                blobAttribute.setInt(targetRow, 2 + idx);
             } else {
                 images.setSize(idx, 0);
             }
@@ -109,7 +111,7 @@ class SingleJoinTest {
             if (idx % 2 == 0) {
                 images.setSize(idx, 1);
                 int targetRow = images.getRow(idx, 0);
-                blobAttribute.setInt(targetRow, 10 + idx);
+                blobAttribute.setInt(targetRow, 3 + idx);
             } else {
                 images.setSize(idx, 0);
             }
@@ -118,18 +120,18 @@ class SingleJoinTest {
             if (idx % 3 == 0) {
                 images.setSize(idx, 1);
                 int targetRow = images.getRow(idx, 0);
-                blobAttribute.setInt(targetRow, idx);
+                blobAttribute.setInt(targetRow, idx + 4);
             } else {
                 images.setSize(idx, 0);
             }
         });
 
         // assert
-        IntStream.range(0, CAPACITY).parallel().forEach(idx -> {
+        IntStream.range(0, CAPACITY).forEach(idx -> {
             if (idx % 3 == 0) {
                 int targetRow = images.getRow(idx, 0);
                 assertThat(images.getExactSize(idx)).isEqualTo(1);
-                assertThat(blobAttribute.getInt(targetRow)).isEqualTo(idx);
+                assertThat(blobAttribute.getInt(targetRow)).isEqualTo(idx + 4);
             } else {
                 assertThat(images.getExactSize(idx)).isEqualTo(0);
                 assertThat(images.getRow(idx, 0)).isEqualTo(Integer.MIN_VALUE);

@@ -19,9 +19,9 @@
 package pl.edu.icm.trurl.exampledata;
 
 import net.snowyhollows.bento.annotation.WithFactory;
-import net.snowyhollows.bento.soft.SoftEnum;
+import net.snowyhollows.bento.category.Category;
 
-public class ContaminationType implements SoftEnum {
+public class ContaminationType implements Category {
     private final byte ordinal;
     private final String name;
 

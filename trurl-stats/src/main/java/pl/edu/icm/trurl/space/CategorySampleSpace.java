@@ -18,8 +18,8 @@
 
 package pl.edu.icm.trurl.space;
 
-import net.snowyhollows.bento.soft.SoftEnum;
-import net.snowyhollows.bento.soft.SoftEnumManager;
+import net.snowyhollows.bento.category.Category;
+import net.snowyhollows.bento.category.CategoryManager;
 
 import java.util.Arrays;
 
@@ -28,19 +28,19 @@ import java.util.Arrays;
  *
  * @param <Label>
  */
-public class SoftEnumSampleSpace<Label extends SoftEnum> {
+public class CategorySampleSpace<Label extends Category> {
     private final float[] outcomes;
     private boolean normalized;
     private Label defaultOutcome;
-    private final SoftEnumManager<Label> manager;
+    private final CategoryManager<Label> manager;
 
-    public SoftEnumSampleSpace(SoftEnumManager<Label> manager) {
+    public CategorySampleSpace(CategoryManager<Label> manager) {
         this.manager = manager;
         outcomes = new float[manager.values().size()];
         normalized = false;
     }
 
-    public SoftEnumSampleSpace(Label defaultOutcome, SoftEnumManager<Label> manager) {
+    public CategorySampleSpace(Label defaultOutcome, CategoryManager<Label> manager) {
         this(manager);
         this.defaultOutcome = defaultOutcome;
 
@@ -239,7 +239,7 @@ public class SoftEnumSampleSpace<Label extends SoftEnum> {
      *
      * @param sampleSpace
      */
-    public void multiply(SoftEnumSampleSpace<Label> sampleSpace) {
+    public void multiply(CategorySampleSpace<Label> sampleSpace) {
         for (int i = 0; i < outcomes.length; i++) {
             outcomes[i] *= sampleSpace.outcomes[i];
         }

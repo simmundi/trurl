@@ -28,6 +28,11 @@ import pl.edu.icm.trurl.exampledata.Thing;
 import pl.edu.icm.trurl.exampledata.ThingMapper;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.attribute.Attribute;
+import pl.edu.icm.trurl.store.join.Join;
+import pl.edu.icm.trurl.store.join.SingleJoin;
+import pl.edu.icm.trurl.store.join.SingleJoinWithReverse;
+import pl.edu.icm.trurl.store.join.SingleJoinWithReverseOnly;
 
 import java.util.stream.IntStream;
 
@@ -45,8 +50,32 @@ public class EmbeddedDenseIT {
         thingMapper.configureAndAttach(store);
     }
 
+
     @Test
-    void test1() {
+    void init() {
+        // assert
+        assertThat((Join)store.getJoin("coordinates")).isInstanceOf(SingleJoin.class);
+        assertThat((Join)store.getJoin("coordinatesWithReverse")).isInstanceOf(SingleJoinWithReverse.class);
+        assertThat((Join)store.getJoin("coordinatesWithReverseOnly")).isInstanceOf(SingleJoinWithReverseOnly.class);
+
+        assertThat(store.getSubstores().map(Store::getName)).containsExactlyInAnyOrder("coordinates",
+                "coordinatesWithReverse",
+                "coordinatesWithReverseOnly");
+        assertThat(store.getSubstore("coordinates").attributes().map(Attribute::name)).containsExactlyInAnyOrder("coordinates.x",
+                "coordinates.y");
+        assertThat(store.getSubstore("coordinatesWithReverse").attributes().map(Attribute::name)).containsExactlyInAnyOrder("coordinatesWithReverse.x",
+                "coordinatesWithReverse.y",
+                "reverse");
+        assertThat(store.getSubstore("coordinatesWithReverseOnly").attributes().map(Attribute::name)).containsExactlyInAnyOrder("coordinatesWithReverseOnly.x",
+                "coordinatesWithReverseOnly.y",
+                "reverse");
+        assertThat(store.attributes().map(Attribute::name)).containsExactlyInAnyOrder("index",
+                "coordinatesWithReverse",
+                "coordinates");
+    }
+
+    @Test
+    void create__fetch() {
         // execute
         IntStream.range(0, 10_000).forEach(i -> {
             Thing thing = new Thing();
@@ -54,12 +83,20 @@ public class EmbeddedDenseIT {
             if (i % 50 == 0) {
                 thing.setCoordinates(new Coordinates(i, -i));
             }
+            if (i % 51 == 0) {
+                thing.setCoordinatesWithReverse(new Coordinates(i + 1, -i + 1));
+            }
+            if (i % 52 == 0) {
+                thing.setCoordinatesWithReverseOnly(new Coordinates(i + 2, -i + 2));
+            }
             thingMapper.save(thing, store.getCounter().next());
         });
 
         // assert
         assertThat(store.getCounter().getCount()).isEqualTo(SIZE);
         assertThat(store.getSubstore("coordinates").getCounter().getCount()).isEqualTo(SIZE / 50);
+        assertThat(store.getSubstore("coordinatesWithReverse").getCounter().getCount()).isEqualTo(SIZE / 51 + 1);
+        assertThat(store.getSubstore("coordinatesWithReverseOnly").getCounter().getCount()).isEqualTo(SIZE / 52 + 1);
 
         IntStream.range(0, SIZE).forEach(i -> {
             Thing thing = thingMapper.createAndLoad(i);
@@ -68,6 +105,18 @@ public class EmbeddedDenseIT {
                 assertThat(thing.getCoordinates().getY()).isEqualTo(-i);
             } else {
                 assertThat(thing.getCoordinates()).isNull();
+            }
+            if (i % 51 == 0) {
+                assertThat(thing.getCoordinatesWithReverse().getX()).isEqualTo(i + 1);
+                assertThat(thing.getCoordinatesWithReverse().getY()).isEqualTo(-i + 1);
+            } else {
+                assertThat(thing.getCoordinatesWithReverse()).isNull();
+            }
+            if (i % 52 == 0) {
+                assertThat(thing.getCoordinatesWithReverseOnly().getX()).isEqualTo(i + 2);
+                assertThat(thing.getCoordinatesWithReverseOnly().getY()).isEqualTo(-i + 2);
+            } else {
+                assertThat(thing.getCoordinatesWithReverseOnly()).isNull();
             }
         });
     }

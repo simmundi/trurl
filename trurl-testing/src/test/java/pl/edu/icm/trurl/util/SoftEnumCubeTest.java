@@ -35,7 +35,7 @@ class SoftEnumCubeTest {
         Bento bento = new Configurer().loadConfigResource("/chess.properties").getConfig();
 
         // execute
-        SoftEnumCube<Row, Column, Board, Piece> chessBoard = new SoftEnumCube<>(
+        CategoryCube<Row, Column, Board, Piece> chessBoard = new CategoryCube<>(
                 bento.get(RowsFactory.IT),
                 bento.get(ColumnsFactory.IT),
                 bento.get(BoardsFactory.IT)
@@ -57,7 +57,7 @@ class SoftEnumCubeTest {
         Columns columns = bento.get(ColumnsFactory.IT);
         Boards boards = bento.get(BoardsFactory.IT);
         Pieces pieces = bento.get(PiecesFactory.IT);
-        SoftEnumCube<Column, Row, Board, Piece> chessBoard = new SoftEnumCube<>(columns, rows, boards);
+        CategoryCube<Column, Row, Board, Piece> chessBoard = new CategoryCube<>(columns, rows, boards);
 
         // execute
         chessBoard.put(columns.D, rows._3, boards.FIRST, pieces.PAWN);

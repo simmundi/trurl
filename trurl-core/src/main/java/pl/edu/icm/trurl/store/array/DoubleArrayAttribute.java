@@ -69,7 +69,7 @@ final public class DoubleArrayAttribute implements DoubleAttribute {
 
     @Override
     public void setString(int row, String value) {
-        setDouble(row, Strings.isNullOrEmpty(value) ? Double.NaN : Double.parseDouble(value));
+        setDouble(row, Strings.isNullOrEmpty(value) ? NULL : Double.parseDouble(value));
     }
 
     @Override

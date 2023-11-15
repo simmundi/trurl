@@ -20,9 +20,9 @@ package pl.edu.icm.trurl.util.chess;
 
 import net.snowyhollows.bento.Bento;
 import net.snowyhollows.bento.annotation.WithFactory;
-import net.snowyhollows.bento.soft.SoftEnumManager;
+import net.snowyhollows.bento.category.CategoryManager;
 
-public class Rows extends SoftEnumManager<Row> {
+public class Rows extends CategoryManager<Row> {
     public final Row _1;
     public final Row _2;
     public final Row _3;

@@ -19,6 +19,8 @@
 package pl.edu.icm.trurl.store.attribute;
 
 public interface ByteAttribute extends Attribute {
+    byte NULL = Byte.MIN_VALUE;
+
     byte getByte(int row);
     void setByte(int row, byte value);
 }

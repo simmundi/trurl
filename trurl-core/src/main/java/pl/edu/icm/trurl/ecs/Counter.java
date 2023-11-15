@@ -18,35 +18,37 @@
 
 package pl.edu.icm.trurl.ecs;
 
-import pl.edu.icm.trurl.util.ConcurrentIntQueue;
+import pl.edu.icm.trurl.util.ConcurrentIntStack;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Handles used/unused slots in a contignous, zero-based range of integers.
- *
+ * <p>
  * It is meant to use by Store, to handle assigning ids to new entities and
  * to recycle ids of deleted entities.
- *
+ * <p>
  * Counters are thread-safe.
- *
+ * <p>
  * A future plans include addind a slab allocator, to help avoid fragmentation;
  * to measure performance of a bitmap-based allocator.
- *
+ * <p>
  * A short term plan is to publish the free list, so that clients can persist
  * it and reuse the counter after restart (a store, for example, should save the free list
  * as an attribute.)
  */
 final public class Counter {
     private final AtomicInteger count = new AtomicInteger();
-    private final ConcurrentIntQueue freeList;
+    private final ConcurrentIntStack freeStack;
 
     public Counter(int freeListSize) {
-        this.freeList = new ConcurrentIntQueue(freeListSize);
+        this.freeStack = new ConcurrentIntStack(freeListSize);
     }
 
+    private final Object x = new Object();
+
     public int next() {
-        int free = freeList.shift();
+        int free = freeStack.shift();
         return free == Integer.MIN_VALUE ? count.getAndIncrement() : free;
     }
 
@@ -59,12 +61,12 @@ final public class Counter {
     }
 
     public void free(int id) {
-        freeList.push(id);
+        freeStack.push(id);
     }
 
     public void free(int id, int delta) {
         for (int i = id; i < id + delta; i++) {
-            freeList.push(i);
+            freeStack.push(i);
         }
     }
 }

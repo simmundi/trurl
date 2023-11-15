@@ -18,21 +18,20 @@
 
 package pl.edu.icm.trurl.util;
 
-import net.snowyhollows.bento.soft.SoftEnum;
-import net.snowyhollows.bento.soft.SoftEnumManager;
+import net.snowyhollows.bento.category.Category;
+import net.snowyhollows.bento.category.CategoryManager;
 
-import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class SoftEnumTable<R extends SoftEnum, C extends SoftEnum, V> {
+public class CategoryTable<R extends Category, C extends Category, V> {
     private final Object[] values;
-    private final SoftEnumManager<R> rows;
-    private final SoftEnumManager<C> cols;
+    private final CategoryManager<R> rows;
+    private final CategoryManager<C> cols;
     private final int rowCount;
     private final int columnCount;
 
-    public SoftEnumTable(SoftEnumManager<R> rowManager, SoftEnumManager<C> colManager) {
+    public CategoryTable(CategoryManager<R> rowManager, CategoryManager<C> colManager) {
         rows = rowManager;
         cols = colManager;
         rowCount = rows.values().size();

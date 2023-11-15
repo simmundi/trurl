@@ -18,15 +18,12 @@
 
 package pl.edu.icm.trurl.store;
 
-import net.snowyhollows.bento.soft.SoftEnum;
-import net.snowyhollows.bento.soft.SoftEnumManager;
+import net.snowyhollows.bento.category.Category;
+import net.snowyhollows.bento.category.CategoryManager;
 import pl.edu.icm.trurl.ecs.Counter;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.AttributeFactory;
-import pl.edu.icm.trurl.store.join.ArrayJoin;
-import pl.edu.icm.trurl.store.join.Join;
-import pl.edu.icm.trurl.store.join.RangedJoin;
-import pl.edu.icm.trurl.store.join.SingleJoin;
+import pl.edu.icm.trurl.store.join.*;
 import pl.edu.icm.trurl.store.reference.ArrayReference;
 import pl.edu.icm.trurl.store.reference.Reference;
 import pl.edu.icm.trurl.store.reference.SingleReference;
@@ -200,15 +197,15 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public <E extends Enum<E>> void addEnum(String name, Class<E> enumType) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createStaticCategory(name, enumType, ensuredCapacity));
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createEnum(name, enumType, ensuredCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
     }
 
     @Override
-    public <E extends SoftEnum> void addSoftEnum(String name, SoftEnumManager<E> enumType) {
-        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createDynamicCategory(name, enumType, ensuredCapacity));
+    public <E extends Category> void addCategory(String name, CategoryManager<E> enumType) {
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createCategory(name, enumType, ensuredCapacity));
         if (former == null) {
             visibleAttributes.add(allAttributes.get(name));
         }
@@ -284,6 +281,19 @@ public final class Store implements StoreConfigurer, StoreInspector {
             @Override
             public Store singleTyped() {
                 SingleJoin join = new SingleJoin(Store.this, name);
+                joins.put(name, join);
+                return getSubstore(name);
+            }
+
+            @Override
+            public Store singleTypedWithReverse() {
+                SingleJoinWithReverse join = new SingleJoinWithReverse(Store.this, name);
+                joins.put(name, join);
+                return getSubstore(name);
+            }
+            @Override
+            public Store singleTypedWithReverseOnly() {
+                SingleJoinWithReverseOnly join = new SingleJoinWithReverseOnly(Store.this, name);
                 joins.put(name, join);
                 return getSubstore(name);
             }

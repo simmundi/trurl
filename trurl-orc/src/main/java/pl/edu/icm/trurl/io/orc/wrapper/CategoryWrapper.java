@@ -18,16 +18,16 @@
 
 package pl.edu.icm.trurl.io.orc.wrapper;
 
-import net.snowyhollows.bento.soft.SoftEnum;
+import net.snowyhollows.bento.category.Category;
 import org.apache.hadoop.hive.ql.exec.vector.LongColumnVector;
 import org.apache.orc.TypeDescription;
-import pl.edu.icm.trurl.store.attribute.CategoricalDynamicAttribute;
+import pl.edu.icm.trurl.store.attribute.CategoryAttribute;
 
-final class SoftEnumWrapper<E extends SoftEnum> extends AbstractColumnWrapper<LongColumnVector, CategoricalDynamicAttribute<E>> {
+final class CategoryWrapper<E extends Category> extends AbstractColumnWrapper<LongColumnVector, CategoryAttribute<E>> {
 
     private byte firstValue;
 
-    public SoftEnumWrapper(CategoricalDynamicAttribute<E> attribute) {
+    public CategoryWrapper(CategoryAttribute<E> attribute) {
         super(attribute);
     }
 

@@ -19,7 +19,7 @@
 package pl.edu.icm.trurl.visnow;
 
 import pl.edu.icm.trurl.store.attribute.*;
-import pl.edu.icm.trurl.store.attribute.CategoricalStaticAttribute;
+import pl.edu.icm.trurl.store.attribute.EnumAttribute;
 
 import java.io.DataOutput;
 import java.io.IOException;
@@ -125,11 +125,11 @@ public interface ColumnWrapper {
                     return attribute.name();
                 }
             };
-        } else if (attribute instanceof CategoricalStaticAttribute) {
+        } else if (attribute instanceof EnumAttribute) {
             return new ColumnWrapper() {
                 @Override
                 public void writeData(DataOutput dataOutput, int row) throws IOException {
-                    Enum datum = ((CategoricalStaticAttribute) attribute).getEnum(row);
+                    Enum datum = ((EnumAttribute) attribute).getEnum(row);
                     dataOutput.writeByte(datum == null ? Byte.MIN_VALUE : datum.ordinal());
                 }
 
@@ -137,7 +137,7 @@ public interface ColumnWrapper {
                 public String headerDefinition() {
                     return
                             String.format("component %s byte, user:\"map\";", attribute.name())
-                            + Arrays.stream(((CategoricalStaticAttribute<?>) attribute).values())
+                            + Arrays.stream(((EnumAttribute<?>) attribute).values())
                                     .map(e -> "\"" + e.ordinal() + ": " + e + "\"")
                                     .collect(Collectors.joining(";"));
                 }

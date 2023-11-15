@@ -24,57 +24,68 @@ import pl.edu.icm.trurl.store.attribute.IntAttribute;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class SingleJoin implements Join {
-    private IntAttribute rowAttribute;
+public class SingleJoinWithReverseOnly implements Join {
+    private IntAttribute reverseRowAttribute;
+    private ConcurrentHashMap<Integer, Integer> reverseMap = new ConcurrentHashMap<>();
     private Store target;
 
-    public SingleJoin(Store store, String name) {
-        store.addInt(name);
-        store.hideAttribute(name);
-        this.rowAttribute = store.get(name);
+    public SingleJoinWithReverseOnly(Store store, String name) {
         this.target = store.addSubstore(name);
+        this.target.addInt("reverse");
+        this.target.hideAttribute("reverse");
+        this.reverseRowAttribute = target.get("reverse");
     }
 
     @Override
     public int getRow(int row, int index) {
-        return rowAttribute.getInt(row);
+        if (index != 0) {
+            return Integer.MIN_VALUE;
+        }
+        return reverseMap.computeIfAbsent(row, r -> {
+            final int count = target.getCounter().getCount();
+            for (int i = 0; i < count; i++) {
+                if (reverseRowAttribute.getInt(i) == r) {
+                    return i;
+                }
+            }
+            return Integer.MIN_VALUE;
+        });
     }
 
     @Override
     public void setSize(int row, int size) {
+        int targetRow = reverseMap.getOrDefault(row, Integer.MIN_VALUE);
         if (size == 0) {
-            if (!rowAttribute.isEmpty(row)) {
-                int targetRow = rowAttribute.getInt(row);
-                rowAttribute.setEmpty(row);
+            if (targetRow != Integer.MIN_VALUE) {
                 target.free(targetRow);
             } else {
                 // do nothing
             }
         } else if (size == 1) {
-            if (rowAttribute.isEmpty(row)) {
+            if (targetRow == Integer.MIN_VALUE) {
                 // allocate a new row
-                int targetRow = target.getCounter().next();
-                rowAttribute.setInt(row, targetRow);
+                int newTargetRow = target.getCounter().next();
+                reverseRowAttribute.setInt(newTargetRow, row);
             } else {
                 // don't allocate, but erase the one that was allocated before.
-                int targetRow = rowAttribute.getInt(row);
                 target.erase(targetRow);
             }
         } else {
-            throw new IllegalStateException("SingleJoin cannot have its size set to something different than 0 or 1");
+            throw new IllegalStateException("SingleJoinWithReverseOnly cannot have its size set to something different than 0 or 1");
         }
     }
 
     @Override
     public int getExactSize(int row) {
-        return rowAttribute.isEmpty(row) ? 0 : 1;
+        return isEmpty(row) ? 0 : 1;
     }
 
 
     @Override
     public Collection<? extends Attribute> attributes() {
-        return Collections.singletonList(rowAttribute);
+        return Collections.emptyList();
     }
 
     @Override
@@ -84,6 +95,6 @@ public class SingleJoin implements Join {
 
     @Override
     public boolean isEmpty(int row) {
-        return rowAttribute.isEmpty(row);
+        return getRow(row, 0) == Integer.MIN_VALUE;
     }
 }

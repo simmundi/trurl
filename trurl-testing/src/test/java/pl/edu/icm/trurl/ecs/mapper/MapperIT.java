@@ -60,13 +60,13 @@ public class MapperIT {
     private BooleanAttribute booleanAttribute;
     private ByteAttribute byteAttribute;
     private DoubleAttribute doubleAttribute;
-    private CategoricalStaticAttribute<Color> categoricalStaticAttribute;
+    private EnumAttribute<Color> enumAttribute;
     private FloatAttribute floatAttribute;
     private IntAttribute intAttribute;
     private ShortAttribute shortAttribute;
     private StringAttribute stringAttribute;
-    private CategoricalStaticAttribute<Color> looksPropColor;
-    private CategoricalStaticAttribute<Texture> looksPropTexture;
+    private EnumAttribute<Color> looksPropColor;
+    private EnumAttribute<Texture> looksPropTexture;
     private Reference entityReference;
     private Reference entitiesReference;
 
@@ -78,7 +78,7 @@ public class MapperIT {
         booleanAttribute = store.get("booleanProp");
         byteAttribute = store.get("byteProp");
         doubleAttribute = store.get("doubleProp");
-        categoricalStaticAttribute = store.get("enumProp");
+        enumAttribute = store.get("enumProp");
         floatAttribute = store.get("floatProp");
         intAttribute = store.get("intProp");
         shortAttribute = store.get("shortProp");
@@ -103,7 +103,7 @@ public class MapperIT {
         assertThat(booleanAttribute.getBoolean(5)).isTrue();
         assertThat(byteAttribute.getByte(5)).isEqualTo((byte) 121);
         assertThat(doubleAttribute.getDouble(5)).isEqualTo(56.34);
-        assertThat(categoricalStaticAttribute.getEnum(5)).isEqualTo(Color.GOLD);
+        assertThat(enumAttribute.getEnum(5)).isEqualTo(Color.GOLD);
         assertThat(floatAttribute.getFloat(5)).isEqualTo(1.1f);
         assertThat(intAttribute.getInt(5)).isEqualTo(-10);
         assertThat(stringAttribute.getString(5)).isEqualTo("blebleble");

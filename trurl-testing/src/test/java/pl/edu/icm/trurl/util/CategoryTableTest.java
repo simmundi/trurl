@@ -19,7 +19,6 @@ package pl.edu.icm.trurl.util;
 
 import net.snowyhollows.bento.Bento;
 import net.snowyhollows.bento.config.Configurer;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.util.chess.*;
@@ -28,7 +27,7 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SoftEnumTableTest {
+class CategoryTableTest {
     @Test
     @DisplayName("Should create a table with proper size")
     void construct() throws IOException {
@@ -36,7 +35,7 @@ class SoftEnumTableTest {
         Bento bento = new Configurer().loadConfigResource("/chess.properties").getConfig();
 
         // execute
-        SoftEnumTable<Row, Column, Piece> chessBoard = new SoftEnumTable<>(
+        CategoryTable<Row, Column, Piece> chessBoard = new CategoryTable<>(
                 bento.get(RowsFactory.IT),
                 bento.get(ColumnsFactory.IT)
         );
@@ -55,7 +54,7 @@ class SoftEnumTableTest {
         Rows rows = bento.get(RowsFactory.IT);
         Columns columns = bento.get(ColumnsFactory.IT);
         Pieces pieces = bento.get(PiecesFactory.IT);
-        SoftEnumTable<Column, Row, Piece> chessBoard = new SoftEnumTable<>(columns, rows);
+        CategoryTable<Column, Row, Piece> chessBoard = new CategoryTable<>(columns, rows);
 
         // execute
         chessBoard.put(columns.D, rows._3, pieces.PAWN);

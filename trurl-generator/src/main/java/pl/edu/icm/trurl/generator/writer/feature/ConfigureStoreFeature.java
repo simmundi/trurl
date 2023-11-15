@@ -21,7 +21,9 @@ package pl.edu.icm.trurl.generator.writer.feature;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import pl.edu.icm.trurl.ecs.annotation.CollectionType;
+import pl.edu.icm.trurl.ecs.annotation.Mapped;
 import pl.edu.icm.trurl.ecs.annotation.MappedCollection;
+import pl.edu.icm.trurl.ecs.annotation.Reverse;
 import pl.edu.icm.trurl.generator.CommonTypes;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
@@ -76,7 +78,7 @@ public class ConfigureStoreFeature implements Feature {
                     methodSpec.addStatement("meta.addDouble(mapperPrefix + $S)", name);
                     break;
                 case SOFT_ENUM_PROP:
-                    methodSpec.addStatement("meta.addSoftEnum(mapperPrefix + $S, $L)", name, property.name + "Manager");
+                    methodSpec.addStatement("meta.addCategory(mapperPrefix + $S, $L)", name, property.name + "Manager");
                     break;
                 case ENUM_PROP:
                     methodSpec.addStatement("meta.addEnum(mapperPrefix + $S, $T.class)", name, property.unwrappedTypeName);
@@ -105,7 +107,21 @@ public class ConfigureStoreFeature implements Feature {
                     break;
                 case EMBEDDED_DENSE_PROP:
                     methodSpec.addStatement("$L = ($T) mappers.create($T.class, mapperPrefix + $S)", property.fieldName, property.getMapperType(), property.unwrappedTypeName, property.name);
-                    methodSpec.addStatement("$L.configureStore(meta.addJoin(mapperPrefix + $S).singleTyped())", property.fieldName, name);
+                    Reverse reverse = Optional.ofNullable(property.attribute.getAnnotation(Mapped.class)).map(Mapped::reverse).orElse(Reverse.NO_REVERSE_ATTRIBUTE);
+                    switch (reverse) {
+                        case NO_REVERSE_ATTRIBUTE:
+                            methodSpec.addStatement("$L.configureStore(meta.addJoin(mapperPrefix + $S).singleTyped())", property.fieldName, name);
+                            break;
+                        case WITH_REVERSE_ATTRIBUTE:
+                            methodSpec.addStatement("$L.configureStore(meta.addJoin(mapperPrefix + $S).singleTypedWithReverse())", property.fieldName, name);
+                            break;
+                        case ONLY_REVERSE_ATTRIBUTE:
+                            methodSpec.addStatement("$L.configureStore(meta.addJoin(mapperPrefix + $S).singleTypedWithReverseOnly())", property.fieldName, name);
+                            break;
+                        default:
+                            throw new IllegalStateException("Unknown reverse type " + reverse);
+                    }
+//                    methodSpec.addStatement("$L.configureStore(meta.addJoin(mapperPrefix + $S).singleTyped())", property.fieldName, name);
                     break;
                 case ENTITY_LIST_PROP:
                     methodSpec.addStatement("meta.addReference(mapperPrefix + $S).arrayTyped($L, $L)", name, 1, 2);

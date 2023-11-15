@@ -18,10 +18,16 @@
 
 package pl.edu.icm.trurl.store.attribute;
 
-public interface CategoricalStaticAttribute<E extends Enum<E>> extends Attribute {
+import net.snowyhollows.bento.category.Category;
+
+public interface CategoryAttribute<E extends Category> extends Attribute {
+    Category NULL = null;
+    byte NULL_ORDINAL = Byte.MIN_VALUE;
+
     E getEnum(int row);
     void setEnum(int row, E value);
     byte getOrdinal(int row);
     void setOrdinal(int row, byte value);
+
     E[] values();
 }

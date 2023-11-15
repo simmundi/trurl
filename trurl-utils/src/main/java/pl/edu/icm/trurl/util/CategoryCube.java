@@ -18,23 +18,23 @@
 
 package pl.edu.icm.trurl.util;
 
-import net.snowyhollows.bento.soft.SoftEnum;
-import net.snowyhollows.bento.soft.SoftEnumManager;
+import net.snowyhollows.bento.category.Category;
+import net.snowyhollows.bento.category.CategoryManager;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class SoftEnumCube<R extends SoftEnum, C extends SoftEnum, L extends SoftEnum, V> {
+public class CategoryCube<R extends Category, C extends Category, L extends Category, V> {
     private final Object[] values;
-    private final SoftEnumManager<R> rows;
-    private final SoftEnumManager<C> cols;
-    private final SoftEnumManager<L> layers;
+    private final CategoryManager<R> rows;
+    private final CategoryManager<C> cols;
+    private final CategoryManager<L> layers;
     private final int rowCount;
     private final int columnCount;
     private final int layerCount;
     private final int layerSize;
 
-    public SoftEnumCube(SoftEnumManager<R> rowManager, SoftEnumManager<C> colManager, SoftEnumManager<L> layers) {
+    public CategoryCube(CategoryManager<R> rowManager, CategoryManager<C> colManager, CategoryManager<L> layers) {
         rows = rowManager;
         cols = colManager;
         this.layers = layers;

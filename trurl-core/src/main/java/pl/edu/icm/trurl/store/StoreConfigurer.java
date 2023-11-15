@@ -18,8 +18,8 @@
 
 package pl.edu.icm.trurl.store;
 
-import net.snowyhollows.bento.soft.SoftEnum;
-import net.snowyhollows.bento.soft.SoftEnumManager;
+import net.snowyhollows.bento.category.Category;
+import net.snowyhollows.bento.category.CategoryManager;
 
 /**
  * This is usually used as superinterface of Store.
@@ -36,7 +36,7 @@ public interface StoreConfigurer {
 
     <E extends Enum<E>> void addEnum(String name, Class<E> enumType);
 
-    <E extends SoftEnum> void addSoftEnum(String name, SoftEnumManager<E> enumType);
+    <E extends Category> void addCategory(String name, CategoryManager<E> enumType);
 
     void addFloat(String name);
 
@@ -62,6 +62,10 @@ public interface StoreConfigurer {
         Store arrayTyped(int minimumSize, int margin);
 
         Store singleTyped();
+
+        Store singleTypedWithReverse();
+
+        Store singleTypedWithReverseOnly();
     }
 
     interface ReferenceConfigurer {

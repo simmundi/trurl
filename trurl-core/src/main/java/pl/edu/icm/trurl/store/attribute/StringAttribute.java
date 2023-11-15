@@ -19,6 +19,8 @@
 package pl.edu.icm.trurl.store.attribute;
 
 public interface StringAttribute extends Attribute {
+    String NULL = null;
+
     String getString(int row);
     void setString(int row, String value);
 }

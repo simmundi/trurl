@@ -18,7 +18,6 @@
 
 package pl.edu.icm.trurl.store;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
@@ -119,7 +118,7 @@ class StoreTest {
         Attribute attribute = store.get("enum");
 
         // assert
-        assertThat(attribute).isInstanceOf(CategoricalStaticAttribute.class);
+        assertThat(attribute).isInstanceOf(EnumAttribute.class);
     }
 
     @Test

@@ -27,4 +27,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface Mapped {
     Type type() default Type.SPARSE;
+    Reverse reverse() default Reverse.NO_REVERSE_ATTRIBUTE;
 }

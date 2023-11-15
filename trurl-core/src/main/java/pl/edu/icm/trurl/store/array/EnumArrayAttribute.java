@@ -18,26 +18,26 @@
 
 package pl.edu.icm.trurl.store.array;
 
+import com.google.common.base.Converter;
+import com.google.common.base.Enums;
 import com.google.common.base.Strings;
-import net.snowyhollows.bento.soft.SoftEnum;
-import net.snowyhollows.bento.soft.SoftEnumManager;
-import pl.edu.icm.trurl.store.attribute.CategoricalDynamicAttribute;
+import pl.edu.icm.trurl.store.attribute.EnumAttribute;
 
 import java.util.Arrays;
 
-final public class CategoricalDynamicArrayAttribute<T extends SoftEnum> implements CategoricalDynamicAttribute<T> {
+final public class EnumArrayAttribute<T extends Enum<T>> implements EnumAttribute<T> {
     private final String name;
-    private final SoftEnumManager<T> manager;
+    private final Converter<String, T> converter;
     private byte[] values;
     private static byte NULL = Byte.MIN_VALUE;
     private T[] instances;
     private int capacity;
 
-    public CategoricalDynamicArrayAttribute(SoftEnumManager<T> manager, String name, int capacity) {
+    public EnumArrayAttribute(Class<T> enumType, String name, int capacity) {
         this.name = name;
         values = new byte[0];
-        this.manager = manager;
-        instances = manager.values().toArray(manager.emptyArray());
+        converter = Enums.stringConverter(enumType);
+        instances = enumType.getEnumConstants();
         ensureCapacity(capacity);
     }
 
@@ -75,7 +75,7 @@ final public class CategoricalDynamicArrayAttribute<T extends SoftEnum> implemen
 
     @Override
     public void setString(int row, String value) {
-        values[row] = Strings.isNullOrEmpty(value) ? Byte.MIN_VALUE : manager.getByName(value).ordinal();
+        values[row] = Strings.isNullOrEmpty(value) ? Byte.MIN_VALUE : (byte) converter.convert(value).ordinal();
     }
 
     @Override
@@ -83,10 +83,9 @@ final public class CategoricalDynamicArrayAttribute<T extends SoftEnum> implemen
         byte ordinal = values[row];
         return ordinal == Byte.MIN_VALUE ? null : instances[ordinal];
     }
-
     @Override
     public void setEnum(int row, T value) {
-        setOrdinal(row, value != null ? value.ordinal() : Byte.MIN_VALUE);
+        setOrdinal(row, value != null ? (byte) value.ordinal() : Byte.MIN_VALUE);
     }
 
     @Override

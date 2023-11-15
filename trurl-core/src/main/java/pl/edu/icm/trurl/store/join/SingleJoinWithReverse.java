@@ -25,15 +25,19 @@ import pl.edu.icm.trurl.store.attribute.IntAttribute;
 import java.util.Collection;
 import java.util.Collections;
 
-public class SingleJoin implements Join {
+public class SingleJoinWithReverse implements Join {
     private IntAttribute rowAttribute;
+    private IntAttribute reverseRowAttribute;
     private Store target;
 
-    public SingleJoin(Store store, String name) {
+    public SingleJoinWithReverse(Store store, String name) {
         store.addInt(name);
         store.hideAttribute(name);
         this.rowAttribute = store.get(name);
         this.target = store.addSubstore(name);
+        this.target.addInt("reverse");
+        this.target.hideAttribute("reverse");
+        this.reverseRowAttribute = target.get("reverse");
     }
 
     @Override
@@ -56,6 +60,7 @@ public class SingleJoin implements Join {
                 // allocate a new row
                 int targetRow = target.getCounter().next();
                 rowAttribute.setInt(row, targetRow);
+                reverseRowAttribute.setInt(targetRow, row);
             } else {
                 // don't allocate, but erase the one that was allocated before.
                 int targetRow = rowAttribute.getInt(row);

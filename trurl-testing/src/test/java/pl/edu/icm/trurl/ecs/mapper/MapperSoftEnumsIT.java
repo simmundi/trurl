@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MapperSoftEnumsIT {
 
     @Test
-    @DisplayName("Should correctly map a component with a SoftEnum")
+    @DisplayName("Should correctly map a component with a Category")
     void test() throws IOException {
         // given
         Store store = new Store(new ArrayAttributeFactory(), 1024);

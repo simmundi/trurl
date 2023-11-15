@@ -26,19 +26,14 @@ import pl.edu.icm.trurl.exampledata.Color;
 import pl.edu.icm.trurl.exampledata.Looks;
 import pl.edu.icm.trurl.exampledata.Texture;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.attribute.CategoricalStaticAttribute;
+import pl.edu.icm.trurl.store.attribute.EnumAttribute;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.notNull;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MapperTest {
@@ -47,10 +42,10 @@ class MapperTest {
     Store store;
 
     @Mock
-    CategoricalStaticAttribute colorAttribute;
+    EnumAttribute colorAttribute;
 
     @Mock
-    CategoricalStaticAttribute textureAttribute;
+    EnumAttribute textureAttribute;
 
     Mapper<Looks> mapper;
 

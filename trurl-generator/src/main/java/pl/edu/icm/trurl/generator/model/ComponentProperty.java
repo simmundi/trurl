@@ -22,7 +22,7 @@ import com.google.common.base.Strings;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import net.snowyhollows.bento.soft.SoftEnum;
+import net.snowyhollows.bento.category.Category;
 import pl.edu.icm.trurl.ecs.annotation.*;
 import pl.edu.icm.trurl.generator.CommonTypes;
 
@@ -153,7 +153,7 @@ public class ComponentProperty {
         } else if (typeName instanceof ParameterizedTypeName
                 && ((ParameterizedTypeName) typeName).rawType.equals(CommonTypes.LIST)) {
             return PropertyType.EMBEDDED_LIST_PROP;
-        } else if (isSoftEnum(processingEnvironment, typeMirror)) {
+        } else if (isCategory(processingEnvironment, typeMirror)) {
             return PropertyType.SOFT_ENUM_PROP;
         } else if (optionalAttribute.flatMap(e -> Optional.ofNullable(e.getAnnotation(Mapped.class))).map(m -> m.type() == Type.DENSE).orElse(false)) {
             return PropertyType.EMBEDDED_DENSE_PROP;
@@ -162,8 +162,8 @@ public class ComponentProperty {
         }
     }
 
-    private static boolean isSoftEnum(ProcessingEnvironment processingEnvironment, TypeMirror typeMirror) {
-        TypeElement typeElement = processingEnvironment.getElementUtils().getTypeElement(SoftEnum.class.getCanonicalName());
+    private static boolean isCategory(ProcessingEnvironment processingEnvironment, TypeMirror typeMirror) {
+        TypeElement typeElement = processingEnvironment.getElementUtils().getTypeElement(Category.class.getCanonicalName());
         return processingEnvironment.getTypeUtils().isAssignable(typeMirror, typeElement.asType());
     }
 
@@ -201,7 +201,17 @@ public class ComponentProperty {
         Mapped mappedAnnotation = attribute.getAnnotation(Mapped.class);
         MappedCollection collectionAnnotation = attribute.getAnnotation(MappedCollection.class);
         if (mappedAnnotation != null && mappedAnnotation.type() == Type.DENSE) {
-            return CommonTypes.SINGLE_JOIN;
+            Reverse reverse = Optional.ofNullable(attribute.getAnnotation(Mapped.class)).map(Mapped::reverse).orElse(Reverse.NO_REVERSE_ATTRIBUTE);
+            switch (reverse) {
+                case NO_REVERSE_ATTRIBUTE:
+                    return CommonTypes.SINGLE_JOIN;
+                case WITH_REVERSE_ATTRIBUTE:
+                    return CommonTypes.SINGLE_JOIN_REVERSE;
+                case ONLY_REVERSE_ATTRIBUTE:
+                    return CommonTypes.SINGLE_JOIN_REVERSE_ONLY;
+                default:
+                    throw new IllegalStateException("Unsupported reverse type " + reverse);
+            }
         } else if (type != PropertyType.EMBEDDED_LIST_PROP) {
             return null;
         } else if (collectionAnnotation == null) {

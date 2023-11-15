@@ -19,9 +19,9 @@
 package pl.edu.icm.trurl.util.chess;
 
 import net.snowyhollows.bento.annotation.WithFactory;
-import pl.edu.icm.trurl.util.AbstractSoftEnum;
+import pl.edu.icm.trurl.util.AbstractCategory;
 
-public class Row extends AbstractSoftEnum {
+public class Row extends AbstractCategory {
     @WithFactory
     public Row(String name, int ordinal) {
         super(name, ordinal);

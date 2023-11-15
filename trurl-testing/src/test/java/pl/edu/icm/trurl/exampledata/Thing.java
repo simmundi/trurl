@@ -22,10 +22,18 @@ import pl.edu.icm.trurl.ecs.annotation.Mapped;
 import pl.edu.icm.trurl.ecs.annotation.Type;
 import pl.edu.icm.trurl.ecs.annotation.WithMapper;
 
+import static pl.edu.icm.trurl.ecs.annotation.Reverse.ONLY_REVERSE_ATTRIBUTE;
+import static pl.edu.icm.trurl.ecs.annotation.Reverse.WITH_REVERSE_ATTRIBUTE;
+
 @WithMapper
 public class Thing {
     @Mapped(type = Type.DENSE)
     Coordinates coordinates;
+
+    @Mapped(type = Type.DENSE, reverse = WITH_REVERSE_ATTRIBUTE)
+    Coordinates coordinatesWithReverse;
+    @Mapped(type = Type.DENSE, reverse = ONLY_REVERSE_ATTRIBUTE)
+    Coordinates coordinatesWithReverseOnly;
     int index;
 
     public int getIndex() {
@@ -42,5 +50,21 @@ public class Thing {
 
     public void setCoordinates(Coordinates coordinates) {
         this.coordinates = coordinates;
+    }
+
+    public Coordinates getCoordinatesWithReverse() {
+        return coordinatesWithReverse;
+    }
+
+    public void setCoordinatesWithReverse(Coordinates coordinatesWithReverse) {
+        this.coordinatesWithReverse = coordinatesWithReverse;
+    }
+
+    public Coordinates getCoordinatesWithReverseOnly() {
+        return coordinatesWithReverseOnly;
+    }
+
+    public void setCoordinatesWithReverseOnly(Coordinates coordinatesWithReverseOnly) {
+        this.coordinatesWithReverseOnly = coordinatesWithReverseOnly;
     }
 }

@@ -20,13 +20,13 @@ package pl.edu.icm.trurl.io.orc.wrapper;
 
 import org.apache.hadoop.hive.ql.exec.vector.LongColumnVector;
 import org.apache.orc.TypeDescription;
-import pl.edu.icm.trurl.store.attribute.CategoricalStaticAttribute;
+import pl.edu.icm.trurl.store.attribute.EnumAttribute;
 
-final class EnumWrapper<E extends Enum<E>> extends AbstractColumnWrapper<LongColumnVector, CategoricalStaticAttribute<E>> {
+final class EnumWrapper<E extends Enum<E>> extends AbstractColumnWrapper<LongColumnVector, EnumAttribute<E>> {
 
     private byte firstValue;
 
-    public EnumWrapper(CategoricalStaticAttribute<E> attribute) {
+    public EnumWrapper(EnumAttribute<E> attribute) {
         super(attribute);
     }
 

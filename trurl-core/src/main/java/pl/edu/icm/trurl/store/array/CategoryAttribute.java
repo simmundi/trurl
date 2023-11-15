@@ -18,26 +18,25 @@
 
 package pl.edu.icm.trurl.store.array;
 
-import com.google.common.base.Converter;
-import com.google.common.base.Enums;
 import com.google.common.base.Strings;
-import pl.edu.icm.trurl.store.attribute.CategoricalStaticAttribute;
+import net.snowyhollows.bento.category.Category;
+import net.snowyhollows.bento.category.CategoryManager;
 
 import java.util.Arrays;
 
-final public class CategoricalStaticArrayAttribute<T extends Enum<T>> implements CategoricalStaticAttribute<T> {
+final public class CategoryAttribute<T extends Category> implements pl.edu.icm.trurl.store.attribute.CategoryAttribute<T> {
     private final String name;
-    private final Converter<String, T> converter;
+    private final CategoryManager<T> manager;
     private byte[] values;
     private static byte NULL = Byte.MIN_VALUE;
     private T[] instances;
     private int capacity;
 
-    public CategoricalStaticArrayAttribute(Class<T> enumType, String name, int capacity) {
+    public CategoryAttribute(CategoryManager<T> manager, String name, int capacity) {
         this.name = name;
         values = new byte[0];
-        converter = Enums.stringConverter(enumType);
-        instances = enumType.getEnumConstants();
+        this.manager = manager;
+        instances = manager.values().toArray(manager.emptyArray());
         ensureCapacity(capacity);
     }
 
@@ -75,7 +74,7 @@ final public class CategoricalStaticArrayAttribute<T extends Enum<T>> implements
 
     @Override
     public void setString(int row, String value) {
-        values[row] = Strings.isNullOrEmpty(value) ? Byte.MIN_VALUE : (byte) converter.convert(value).ordinal();
+        values[row] = Strings.isNullOrEmpty(value) ? Byte.MIN_VALUE : manager.getByName(value).ordinal();
     }
 
     @Override
@@ -83,9 +82,10 @@ final public class CategoricalStaticArrayAttribute<T extends Enum<T>> implements
         byte ordinal = values[row];
         return ordinal == Byte.MIN_VALUE ? null : instances[ordinal];
     }
+
     @Override
     public void setEnum(int row, T value) {
-        setOrdinal(row, value != null ? (byte) value.ordinal() : Byte.MIN_VALUE);
+        setOrdinal(row, value != null ? value.ordinal() : Byte.MIN_VALUE);
     }
 
     @Override

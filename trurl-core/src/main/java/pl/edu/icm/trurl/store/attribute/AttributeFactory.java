@@ -19,8 +19,8 @@
 package pl.edu.icm.trurl.store.attribute;
 
 import net.snowyhollows.bento.annotation.ImplementationSwitch;
-import net.snowyhollows.bento.soft.SoftEnum;
-import net.snowyhollows.bento.soft.SoftEnumManager;
+import net.snowyhollows.bento.category.Category;
+import net.snowyhollows.bento.category.CategoryManager;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
 @ImplementationSwitch(configKey = "trurl.engine.attributeFactory", cases = {
@@ -33,9 +33,9 @@ public interface AttributeFactory {
 
     DoubleAttribute createDouble(String name, int capacity);
 
-    <E extends Enum<E>> CategoricalStaticAttribute<E> createStaticCategory(String name, Class<E> enumType, int capacity);
+    <E extends Enum<E>> EnumAttribute<E> createEnum(String name, Class<E> enumType, int capacity);
 
-    <E extends SoftEnum> CategoricalDynamicAttribute createDynamicCategory(String name, SoftEnumManager<E> enumType, int capacity);
+    <E extends Category> CategoryAttribute createCategory(String name, CategoryManager<E> enumType, int capacity);
 
     FloatAttribute createFloat(String name, int capacity);
 

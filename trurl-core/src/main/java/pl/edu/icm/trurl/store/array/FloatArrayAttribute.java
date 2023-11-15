@@ -70,7 +70,7 @@ final public class FloatArrayAttribute implements FloatAttribute {
 
     @Override
     public void setString(int row, String value) {
-        setFloat(row, Strings.isNullOrEmpty(value) ? Float.MIN_VALUE : Float.parseFloat(value));
+        setFloat(row, Strings.isNullOrEmpty(value) ? NULL : Float.parseFloat(value));
     }
 
     @Override

@@ -16,32 +16,10 @@
  *
  */
 
-package pl.edu.icm.trurl.util;
+package pl.edu.icm.trurl.ecs.annotation;
 
-import net.snowyhollows.bento.soft.SoftEnum;
-
-abstract public class AbstractSoftEnum implements SoftEnum {
-
-    private final String name;
-    private final byte ordinal;
-
-    public AbstractSoftEnum(String name, int ordinal) {
-        this.name = name;
-        this.ordinal = (byte) ordinal;
-    }
-
-    @Override
-    public String name() {
-        return name;
-    }
-
-    @Override
-    public byte ordinal() {
-        return ordinal;
-    }
-
-    @Override
-    public String toString() {
-        return name;
-    }
+public enum Reverse {
+    WITH_REVERSE_ATTRIBUTE,
+    NO_REVERSE_ATTRIBUTE,
+    ONLY_REVERSE_ATTRIBUTE
 }
