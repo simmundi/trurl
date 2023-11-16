@@ -1,0 +1,24 @@
+dependencies {
+    testAnnotationProcessor project(':trurl-generator')
+    testImplementation project(':trurl-core')
+    testImplementation project(':trurl-io')
+    testImplementation project(':trurl-orc')
+    testImplementation project(':trurl-utils')
+    testImplementation project(':trurl-xml')
+    testImplementation project(':trurl-stats')
+    testImplementation project(':trurl-sql')
+    testImplementation project(':trurl-vn-export')
+    testImplementation "it.unimi.dsi:fastutil:${fastutilVersion}"
+
+
+
+    testAnnotationProcessor project(':trurl-generator')
+    testAnnotationProcessor "net.snowyhollows.bento:bento-generator:${bentoVersion}"
+
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:3.11.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:3.11.2'
+    testImplementation 'org.assertj:assertj-core:3.11.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}

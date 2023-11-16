@@ -21,11 +21,9 @@ package pl.edu.icm.trurl.store.array;
 import com.google.common.base.Converter;
 import com.google.common.base.Enums;
 import com.google.common.base.Strings;
-import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 import pl.edu.icm.trurl.store.attribute.EnumAttribute;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 final public class EnumArrayAttribute<T extends Enum<T>> implements EnumAttribute<T> {
     private final String name;
@@ -85,7 +83,6 @@ final public class EnumArrayAttribute<T extends Enum<T>> implements EnumAttribut
         byte ordinal = values[row];
         return ordinal == Byte.MIN_VALUE ? null : instances[ordinal];
     }
-
     @Override
     public void setEnum(int row, T value) {
         setOrdinal(row, value != null ? (byte) value.ordinal() : Byte.MIN_VALUE);

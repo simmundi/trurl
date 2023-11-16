@@ -43,38 +43,20 @@ public class Mappers {
     }
 
     public <T> Mapper<T> create(Class<T> clazz) {
+        return create(clazz, "");
+    }
+
+
+    public <T> Mapper<T> create(Class<T> clazz, String mapperPrefix) {
         try {
-            return bento.get(
+            Bento child = bento.create();
+            child.register("mapperPrefix", mapperPrefix);
+            return child.get(
                     Class.forName(clazz.getPackage().getName() + ".MapperOf" + clazz.getSimpleName() + "Factory")
                             .getField("IT")
                             .get(null));
         } catch (ReflectiveOperationException cause) {
             throw new IllegalArgumentException("Class " + clazz + " does not have a valid mapper (did you forget the @WithMapper annotation? is trurl-generator configured as an annotation processor?)", cause);
         }
-    }
-
-
-    static public List<Attribute> gatherAttributes(Collection<Mapper<?>> mappers) {
-        return mappers.stream()
-                .flatMap(mapper -> Stream.concat(Stream.of(mapper), mapper.getChildMappers().stream()))
-                .flatMap(mapper -> (Stream<Attribute>) mapper.attributes().stream())
-                .collect(Collectors.toList());
-    }
-
-    public <T> Mapper<T> createAndAttach(Class<T> clazz, Store store) {
-        Mapper<T> tMapper = create(clazz);
-        tMapper.configureStore(store);
-        tMapper.attachStore(store);
-        return tMapper;
-    }
-
-    static public <T> Stream<T> stream(Mapper<T> mapper) {
-        return IntStream.range(0, mapper.getCount())
-                .filter(row -> mapper.isPresent(row))
-                .mapToObj(row -> {
-                    T t = mapper.create();
-                    mapper.load(null, t, row);
-                    return t;
-                });
     }
 }

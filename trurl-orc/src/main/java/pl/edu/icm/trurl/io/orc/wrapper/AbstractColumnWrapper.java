@@ -107,14 +107,12 @@ public abstract class AbstractColumnWrapper<T extends ColumnVector, A extends At
             return new ByteWrapper((ByteAttribute) attribute);
         } else if (attribute instanceof StringAttribute) {
             return new StringWrapper((StringAttribute) attribute);
-        } else if (attribute instanceof EntityListAttribute) {
-            return new EntityListWrapper((EntityListAttribute) attribute);
-        } else if (attribute instanceof EntityAttribute) {
-            return new EntityWrapper((EntityAttribute) attribute);
+        } else if (attribute instanceof IntListAttribute) {
+            return new IntListWrapper((IntListAttribute) attribute);
         } else if (attribute instanceof EnumAttribute) {
             return new EnumWrapper((EnumAttribute<?>) attribute);
-        } else if (attribute instanceof SoftEnumAttribute) {
-            return new SoftEnumWrapper((SoftEnumAttribute<?>) attribute);
+        } else if (attribute instanceof CategoryAttribute) {
+            return new CategoryWrapper((CategoryAttribute<?>) attribute);
         } else {
             throw new IllegalArgumentException("Not supported attribute type: " + attribute);
         }

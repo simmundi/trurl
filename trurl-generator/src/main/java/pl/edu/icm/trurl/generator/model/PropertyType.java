@@ -19,14 +19,7 @@
 package pl.edu.icm.trurl.generator.model;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import pl.edu.icm.trurl.generator.CommonTypes;
-
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Types;
 
 public enum PropertyType {
     STRING_PROP(CommonTypes.STRING_COLUMN),
@@ -37,17 +30,20 @@ public enum PropertyType {
     SHORT_PROP(CommonTypes.SHORT_COLUMN),
     BOOLEAN_PROP(CommonTypes.BOOLEAN_COLUMN),
     ENUM_PROP(CommonTypes.ENUM_COLUMN),
-    SOFT_ENUM_PROP(CommonTypes.SOFT_ENUM_COLUMN),
-    ENTITY_LIST_PROP(CommonTypes.ENTITY_LIST_COLUMN),
-    ENTITY_PROP(CommonTypes.ENTITY_COLUMN),
-    VALUE_OBJECT_LIST_PROP(CommonTypes.VALUE_OBJECT_LIST_COLUMN),
-    EMBEDDED_LIST(CommonTypes.MAPPER),
-    EMBEDDED_PROP(CommonTypes.MAPPER);
+    SOFT_ENUM_PROP(CommonTypes.CATEGORY_COLUMN),
+    EMBEDDED_DENSE_PROP(),
+    EMBEDDED_PROP(),
+    EMBEDDED_LIST_PROP(),
+    ENTITY_LIST_PROP(),
+    ENTITY_PROP();
 
     public final ClassName columnType;
+
+    PropertyType() {
+        this.columnType = null;
+    }
 
     PropertyType(ClassName columnType) {
         this.columnType = columnType;
     }
-
 }

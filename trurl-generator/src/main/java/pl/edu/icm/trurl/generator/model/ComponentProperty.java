@@ -22,45 +22,39 @@ import com.google.common.base.Strings;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import net.snowyhollows.bento.soft.SoftEnum;
-import pl.edu.icm.trurl.ecs.annotation.NotMapped;
+import net.snowyhollows.bento.category.Category;
+import pl.edu.icm.trurl.ecs.annotation.*;
 import pl.edu.icm.trurl.generator.CommonTypes;
 
-import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeMirror;
-import javax.tools.Diagnostic;
 import java.util.Locale;
 import java.util.Optional;
 
 public class ComponentProperty {
     public final String name;
+    public final String fieldName;
     public final String namespace;
     public final PropertyType type;
     public final TypeName typeName;
     public final String getterName;
     public final String setterName;
-    public final ClassName businessType;
-    public final boolean synthetic;
-    public String qname;
+    public final ClassName unwrappedTypeName;
+    public final String qname;
     public final Element attribute;
 
-    public ComponentProperty(String name, String namespace, PropertyType type, String getterName, ClassName businessType, TypeName typeName, boolean synthetic, Optional<? extends Element> optionalAttribute) {
+    public ComponentProperty(String name, String namespace, PropertyType type, String getterName, ClassName unwrappedTypeName, TypeName typeName, Optional<? extends Element> optionalAttribute) {
         this.typeName = typeName;
+        this.fieldName = "$" + name;
         this.name = name;
         this.namespace = namespace;
         this.type = type;
         this.getterName = getterName;
         this.setterName = "set" + name.substring(0, 1).toUpperCase(Locale.ROOT) + name.substring(1);
-        this.businessType = businessType;
-        this.synthetic = synthetic;
+        this.unwrappedTypeName = unwrappedTypeName;
         this.qname = Strings.isNullOrEmpty(namespace) ? name : namespace + "." + name;
         this.attribute = optionalAttribute.orElse(null);
-    }
-
-    public String missingVarName() {
-        return name + "Missing";
     }
 
     public static boolean isGetter(ExecutableElement method) {
@@ -71,23 +65,29 @@ public class ComponentProperty {
     }
 
     public static ComponentProperty create(ProcessingEnvironment processingEnvironment, BeanPropertyMetadata meta) {
-        String methodName = meta.method.getSimpleName().toString();
-        PropertyType type = fromColumnType(processingEnvironment, meta.method.getReturnType());
-        ClassName businessType = findBusinessType(processingEnvironment, meta);
+        String methodName = meta.getter.getSimpleName().toString();
         String propertyName = findPropertyName(methodName);
-        Optional<? extends Element> optionalAttribute = meta.method.getEnclosingElement().getEnclosedElements().stream()
+        Optional<? extends Element> optionalAttribute = meta.getter.getEnclosingElement().getEnclosedElements().stream()
                 .filter(e -> !(e instanceof ExecutableElement))
                 .filter(e -> e.getSimpleName().toString().equals(propertyName))
                 .filter(e -> !e.getModifiers().contains(Modifier.VOLATILE))
                 .filter(e -> e.getAnnotation(NotMapped.class) == null)
                 .findFirst();
+        PropertyType type = fromColumnType(processingEnvironment, meta.getter.getReturnType(), optionalAttribute);
+        ClassName wrappedType = findWrappedType(processingEnvironment, meta);
 
-        return new ComponentProperty(propertyName, meta.namespace, type, methodName, businessType, TypeName.get(meta.method.getReturnType()), false, optionalAttribute);
+        return new ComponentProperty(propertyName,
+                meta.namespace,
+                type,
+                methodName,
+                wrappedType,
+                TypeName.get(meta.getter.getReturnType()),
+                optionalAttribute);
     }
 
-    private static ClassName findBusinessType(ProcessingEnvironment processingEnvironment, BeanPropertyMetadata meta) {
-        ClassName indirectBusinessType = findIndirectBusinessType(processingEnvironment, meta.method.getReturnType());
-        TypeName returnType = ClassName.get(meta.method.getReturnType());
+    private static ClassName findWrappedType(ProcessingEnvironment processingEnvironment, BeanPropertyMetadata meta) {
+        ClassName indirectBusinessType = findIndirectBusinessType(processingEnvironment, meta.getter.getReturnType());
+        TypeName returnType = ClassName.get(meta.getter.getReturnType());
         ClassName returnClassName = returnType instanceof ClassName ? (ClassName) returnType : null;
         return Optional
                 .ofNullable(indirectBusinessType)
@@ -102,11 +102,11 @@ public class ComponentProperty {
     }
 
     /**
-     * In some cases, the direct type (List, Enum) is different from the business type.
+     * In some cases, the direct type (List, Enum) is different from the business type which it wraps.
      * e.g. a getMedicalRecords() method returns a list of MedicalRecord; the actual type is List, but
      * we need to create a mapper for MedicalRecord.
      * <p>
-     * This method uses case-by-case rules to establish the relevant business type.
+     * This method uses case-by-case rules to establish the relevant wrapped type.
      */
     private static ClassName findIndirectBusinessType(ProcessingEnvironment processingEnvironment, TypeMirror typeMirror) {
         TypeName typeName = TypeName.get(typeMirror);
@@ -128,7 +128,7 @@ public class ComponentProperty {
         return !typeName.isPrimitive() && processingEnvironment.getTypeUtils().asElement(typeMirror).getKind() == ElementKind.ENUM;
     }
 
-    private static PropertyType fromColumnType(ProcessingEnvironment processingEnvironment, TypeMirror typeMirror) {
+    private static PropertyType fromColumnType(ProcessingEnvironment processingEnvironment, TypeMirror typeMirror, Optional<? extends Element> optionalAttribute) {
         TypeName typeName = TypeName.get(typeMirror);
         if (typeName.equals(TypeName.DOUBLE)) {
             return PropertyType.DOUBLE_PROP;
@@ -152,20 +152,76 @@ public class ComponentProperty {
             return PropertyType.ENTITY_PROP;
         } else if (typeName instanceof ParameterizedTypeName
                 && ((ParameterizedTypeName) typeName).rawType.equals(CommonTypes.LIST)) {
-            return PropertyType.EMBEDDED_LIST;
-        } else if (isSoftEnum(processingEnvironment, typeMirror)) {
+            return PropertyType.EMBEDDED_LIST_PROP;
+        } else if (isCategory(processingEnvironment, typeMirror)) {
             return PropertyType.SOFT_ENUM_PROP;
+        } else if (optionalAttribute.flatMap(e -> Optional.ofNullable(e.getAnnotation(Mapped.class))).map(m -> m.type() == Type.DENSE).orElse(false)) {
+            return PropertyType.EMBEDDED_DENSE_PROP;
         } else {
             return PropertyType.EMBEDDED_PROP;
         }
     }
 
-    private static boolean isSoftEnum(ProcessingEnvironment processingEnvironment, TypeMirror typeMirror) {
-        TypeElement typeElement = processingEnvironment.getElementUtils().getTypeElement(SoftEnum.class.getCanonicalName());
+    private static boolean isCategory(ProcessingEnvironment processingEnvironment, TypeMirror typeMirror) {
+        TypeElement typeElement = processingEnvironment.getElementUtils().getTypeElement(Category.class.getCanonicalName());
         return processingEnvironment.getTypeUtils().isAssignable(typeMirror, typeElement.asType());
     }
 
     public boolean isAttachedToAttribute() {
         return attribute != null;
+    }
+
+    public boolean isUsingMappers() {
+        return getMapperType() != null;
+    }
+
+    public boolean isUsingReferences() {
+        return getReferenceType() != null;
+    }
+
+    public ClassName getMapperType() {
+        if (type == PropertyType.EMBEDDED_LIST_PROP || type == PropertyType.EMBEDDED_PROP || type == PropertyType.EMBEDDED_DENSE_PROP) {
+            return ClassName.get(unwrappedTypeName.packageName(), unwrappedTypeName.simpleName() + "Mapper");
+        } else {
+            return null;
+        }
+    }
+
+    public ClassName getReferenceType() {
+        if (type == PropertyType.ENTITY_LIST_PROP) {
+            return CommonTypes.ARRAY_REFERENCE;
+        } else if (type == PropertyType.ENTITY_PROP) {
+            return CommonTypes.SINGLE_REFERENCE;
+        } else {
+            return null;
+        }
+    }
+
+    public ClassName getJoinType() {
+        Mapped mappedAnnotation = attribute.getAnnotation(Mapped.class);
+        MappedCollection collectionAnnotation = attribute.getAnnotation(MappedCollection.class);
+        if (mappedAnnotation != null && mappedAnnotation.type() == Type.DENSE) {
+            Reverse reverse = Optional.ofNullable(attribute.getAnnotation(Mapped.class)).map(Mapped::reverse).orElse(Reverse.NO_REVERSE_ATTRIBUTE);
+            switch (reverse) {
+                case NO_REVERSE_ATTRIBUTE:
+                    return CommonTypes.SINGLE_JOIN;
+                case WITH_REVERSE_ATTRIBUTE:
+                    return CommonTypes.SINGLE_JOIN_REVERSE;
+                case ONLY_REVERSE_ATTRIBUTE:
+                    return CommonTypes.SINGLE_JOIN_REVERSE_ONLY;
+                default:
+                    throw new IllegalStateException("Unsupported reverse type " + reverse);
+            }
+        } else if (type != PropertyType.EMBEDDED_LIST_PROP) {
+            return null;
+        } else if (collectionAnnotation == null) {
+            return CommonTypes.RANGED_JOIN;
+        } else {
+            return collectionAnnotation.collectionType() == CollectionType.RANGE ? CommonTypes.RANGED_JOIN : CommonTypes.ARRAY_JOIN;
+        }
+    }
+
+    public boolean isUsingJoin() {
+        return getJoinType() != null;
     }
 }

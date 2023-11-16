@@ -28,28 +28,17 @@ import java.util.List;
 import java.util.Locale;
 
 public interface Mapper<T> {
-
     void attachStore(Store store);
     void configureStore(StoreConfigurer metadata);
-    default void configureAndAttach(Store store) {
-        configureStore(store);
-        attachStore(store);
-    }
     T create();
-    boolean isPresent(int index);
+    boolean isPresent(int row);
+    void erase(int index);
     void load(Session session, T component, int index);
-    default void save(T component, int index) {
-        save(null, component, index);
+    default void save(T component, int row) {
+        save(null, component, row);
     }
-    void save(Session owner, T component, int index);
-    boolean isModified(T component, int index);
-    void ensureCapacity(int row);
+    void save(Session owner, T component, int row);
     List<Attribute> attributes();
-    MapperListeners<T> getMapperListeners();
-    int getCount();
-    void setCount(int count);
-    int getAndUpdateCount(int delta);
-    void setEmpty(int row);
     default String name() {
         return this.create().getClass().getSimpleName().toLowerCase(Locale.ROOT);
     }
@@ -62,10 +51,11 @@ public interface Mapper<T> {
         return created;
     }
     void lifecycleEvent(LifecycleEvent lifecycleEvent);
-    default void ensureCapacityHeadroom(int headroom) {
-        this.ensureCapacity(getCount() + headroom);
-    }
     default List<Mapper> getChildMappers() {
         return Collections.emptyList();
+    }
+    default void configureAndAttach(Store store) {
+        configureStore(store);
+        attachStore(store);
     }
 }

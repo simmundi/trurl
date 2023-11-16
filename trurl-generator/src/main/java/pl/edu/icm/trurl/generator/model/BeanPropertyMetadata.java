@@ -21,11 +21,11 @@ package pl.edu.icm.trurl.generator.model;
 import javax.lang.model.element.ExecutableElement;
 
 final class BeanPropertyMetadata {
-    public final ExecutableElement method;
+    public final ExecutableElement getter;
     public final String namespace;
 
-    public BeanPropertyMetadata(ExecutableElement method, String namespace) {
-        this.method = method;
+    public BeanPropertyMetadata(ExecutableElement getter, String namespace) {
+        this.getter = getter;
         this.namespace = namespace;
     }
 }

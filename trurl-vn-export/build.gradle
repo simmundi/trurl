@@ -1,0 +1,23 @@
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+dependencies {
+    implementation project(":trurl-core")
+}
+
+publishing {
+    publications {
+        vnExportPublication(org.gradle.api.publish.maven.MavenPublication) {
+            from components.java
+            artifact sourceJar
+
+            groupId rootProject.getGroup()
+            artifactId project.name
+            version rootProject.getVersion()
+        }
+    }
+}
+

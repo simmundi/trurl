@@ -1,5 +1,12 @@
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
 dependencies {
     implementation project(":trurl-core")
+    implementation project(":trurl-io")
     implementation "org.apache.orc:orc-core:${orcVersion}"
     implementation ("org.apache.hadoop:hadoop-client:${hadoopVersion}") {
         exclude (group: "org.slf4j")

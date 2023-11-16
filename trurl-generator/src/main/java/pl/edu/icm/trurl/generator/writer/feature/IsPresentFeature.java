@@ -18,6 +18,7 @@
 
 package pl.edu.icm.trurl.generator.writer.feature;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
@@ -56,14 +57,17 @@ public class IsPresentFeature implements Feature {
                 .addAnnotation(Override.class)
                 .returns(TypeName.BOOLEAN);
 
-
         method.addStatement("return $L",
                 properties.stream()
-                        .filter(prop -> (prop.type != PropertyType.EMBEDDED_PROP && prop.type != PropertyType.EMBEDDED_LIST) || !prop.synthetic)
-                        .map(prop ->
-                                prop.type != PropertyType.EMBEDDED_PROP && prop.type != PropertyType.EMBEDDED_LIST ?
-                                        "!" + prop.name + ".isEmpty(row)" : prop.name + ".isPresent(row)")
-                        .collect(Collectors.joining(" || ")));
+                        .map(prop -> {
+                            if (prop.type == PropertyType.EMBEDDED_PROP || prop.type == PropertyType.EMBEDDED_DENSE_PROP) {
+                                return CodeBlock.of("$L.isPresent(row)", prop.fieldName);
+                            } else if (prop.type == PropertyType.EMBEDDED_LIST_PROP) {
+                                return CodeBlock.of("!$LJoin.isEmpty(row)", prop.fieldName);
+                            } else {
+                                return CodeBlock.of("!$L.isEmpty(row)", prop.fieldName);
+                            }
+                        }).collect(CodeBlock.joining(" || ")));
 
         return method.build();
     }

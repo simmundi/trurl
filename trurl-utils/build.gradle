@@ -1,0 +1,26 @@
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+dependencies {
+    implementation "net.snowyhollows.bento:bento-config:${bentoVersion}"
+    implementation "net.snowyhollows.bento:bento-core:${bentoVersion}"
+    implementation "com.google.guava:guava:${guavaVersion}"
+    implementation "it.unimi.dsi:fastutil:${fastutilVersion}"
+}
+
+publishing {
+    publications {
+        utilPublication(org.gradle.api.publish.maven.MavenPublication) {
+            from components.java
+            artifact sourceJar
+
+            groupId rootProject.getGroup()
+            artifactId project.name
+            version rootProject.getVersion()
+        }
+    }
+}
+

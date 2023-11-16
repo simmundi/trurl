@@ -18,7 +18,10 @@
 
 package pl.edu.icm.trurl.store;
 
+import pl.edu.icm.trurl.ecs.Counter;
 import pl.edu.icm.trurl.store.attribute.Attribute;
+import pl.edu.icm.trurl.store.join.Join;
+import pl.edu.icm.trurl.store.reference.Reference;
 
 import java.util.stream.Stream;
 
@@ -33,26 +36,25 @@ public interface StoreInspector {
     <T extends Attribute> T get(String name);
 
     /**
-     * Part of the cooperative event system - calling this method notifies
-     * all the storeListeners.
-     *
-     * @param fromInclusive
-     * @param toExclusive
-     * @param excludedListeners list of listeners to ignore while sending the event
-     */
-    void fireUnderlyingDataChanged(int fromInclusive, int toExclusive, StoreListener... excludedListeners);
-
-    /**
      * returns stream of all the attributes.
      *
      * @return attributes
      */
     Stream<Attribute> attributes();
 
-    /**
-     * Returns the max value passed to fireUnderlyingDataChanged event
-     * as toExclusive.
-     */
-    int getCount();
+    Stream<Attribute> visibleAttributes();
 
+    Store getSubstore(String name);
+
+    Counter getCounter();
+
+    <T extends Join> T getJoin(String olives);
+
+    <T extends Reference> T getReference(String olives);
+
+    void erase(int i);
+
+    void free(int row);
+
+    boolean isEmpty(int i);
 }

@@ -18,8 +18,6 @@
 
 package pl.edu.icm.trurl.ecs.annotation;
 
-import net.snowyhollows.bento.soft.SoftEnumManager;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

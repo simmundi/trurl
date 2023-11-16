@@ -18,10 +18,7 @@
 
 package pl.edu.icm.trurl.generator.writer.feature;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.*;
 import pl.edu.icm.trurl.generator.CommonTypes;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
@@ -47,50 +44,52 @@ public class ColumnarAccessFeature implements Feature {
     public Stream<MethodSpec> methods() {
         return Stream.of(
                 propertiesForAttributeAccess().map(this::createAttributeAccessor),
-                propertiesForEntityListAccess().map(this::createEntityListAccessor),
-                propertiesForMapperAccess().map(this::createMapperAccessor)).flatMap(Function.identity());
+                propertiesForMapperAccess().map(this::createMapperAccessor),
+                propertiesForSingleReferenceAccess().map(this::createSingleReferenceAccessor)
+        ).flatMap(Function.identity());
     }
 
     private Stream<ComponentProperty> propertiesForAttributeAccess() {
         return beanMetadata.getComponentProperties()
                 .stream()
-                .filter(property -> property.getterName != null
-                        && property.type != PropertyType.EMBEDDED_LIST
-                        && property.type != PropertyType.EMBEDDED_PROP
-                        && property.type != PropertyType.ENTITY_PROP
-                        && property.type != PropertyType.ENTITY_LIST_PROP
-                        && property.type != PropertyType.VALUE_OBJECT_LIST_PROP);
+                .filter(property -> property.getterName != null && property.type.columnType != null);
     }
+
+
 
     private Stream<ComponentProperty> propertiesForMapperAccess() {
         return beanMetadata.getComponentProperties()
                 .stream()
-                .filter(property -> property.type == PropertyType.EMBEDDED_LIST
-                        || property.type == PropertyType.EMBEDDED_PROP);
+                .filter(property -> property.type == PropertyType.EMBEDDED_LIST_PROP || property.type == PropertyType.EMBEDDED_PROP);
     }
 
-    private Stream<ComponentProperty> propertiesForEntityListAccess() {
+    private Stream<ComponentProperty> propertiesForSingleReferenceAccess() {
         return beanMetadata.getComponentProperties()
                 .stream()
-                .filter(property -> property.type == PropertyType.ENTITY_LIST_PROP);
+                .filter(property -> property.type == PropertyType.ENTITY_PROP);
     }
 
     private MethodSpec createMapperAccessor(ComponentProperty property) {
         return  MethodSpec.methodBuilder(property.getterName + "Mapper")
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(CommonTypes.MAPPER, property.businessType))
-                .addStatement("return $L", property.name)
+                .returns(ParameterizedTypeName.get(CommonTypes.MAPPER, property.unwrappedTypeName))
+                .addStatement("return $L", property.fieldName)
                 .build();
     }
 
-    private MethodSpec createEntityListAccessor(ComponentProperty property) {
-        return MethodSpec.methodBuilder(property.getterName)
+    private MethodSpec createSingleReferenceAccessor(ComponentProperty property) {
+        MethodSpec.Builder methodSpec = MethodSpec.methodBuilder(property.getterName)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.INT, "row")
-                .addParameter(CommonTypes.INT_SINK, "ids")
-                .returns(ClassName.VOID)
-                .addStatement("$L.loadIds(row, ids)", property.name)
-                .build();
+                .returns(ClassName.INT);
+
+        return methodSpec.addCode(CodeBlock.builder()
+                .beginControlFlow("if (!$L.isEmpty(row))", property.fieldName)
+                .addStatement("return $L.getId(row, 0)", property.fieldName)
+                .nextControlFlow("else")
+                .addStatement("return Integer.MIN_VALUE")
+                .endControlFlow()
+                .build()).build();
     }
 
     private MethodSpec createAttributeAccessor(ComponentProperty property) {
@@ -101,31 +100,29 @@ public class ColumnarAccessFeature implements Feature {
 
         switch (property.type) {
             case INT_PROP:
-                methodSpec.addStatement("return $L.getInt(row)", property.name);
+                methodSpec.addStatement("return $L.getInt(row)", property.fieldName);
                 break;
             case BOOLEAN_PROP:
-                methodSpec.addStatement("return $L.getBoolean(row)", property.name);
+                methodSpec.addStatement("return $L.getBoolean(row)", property.fieldName);
                 break;
             case BYTE_PROP:
-                methodSpec.addStatement("return $L.getByte(row)", property.name);
+                methodSpec.addStatement("return $L.getByte(row)", property.fieldName);
                 break;
             case DOUBLE_PROP:
-                methodSpec.addStatement("return $L.getDouble(row)", property.name);
+                methodSpec.addStatement("return $L.getDouble(row)", property.fieldName);
                 break;
-            case ENUM_PROP:
-                methodSpec.addStatement("return ($T)$L.getEnum(row)", property.businessType, property.name);
-                break;
+            case ENUM_PROP: // fallthrough
             case SOFT_ENUM_PROP:
-                methodSpec.addStatement("return ($T)$L.getEnum(row)", property.businessType, property.name);
+                methodSpec.addStatement("return ($T)$L.getEnum(row)", property.unwrappedTypeName, property.fieldName);
                 break;
             case FLOAT_PROP:
-                methodSpec.addStatement("return $L.getFloat(row)", property.name);
+                methodSpec.addStatement("return $L.getFloat(row)", property.fieldName);
                 break;
             case SHORT_PROP:
-                methodSpec.addStatement("return $L.getShort(row)", property.name);
+                methodSpec.addStatement("return $L.getShort(row)", property.fieldName);
                 break;
             case STRING_PROP:
-                methodSpec.addStatement("return $L.getString(row)", property.name);
+                methodSpec.addStatement("return $L.getString(row)", property.fieldName);
                 break;
             default:
                 throw new IllegalStateException("Unknown entity type " + property.type);

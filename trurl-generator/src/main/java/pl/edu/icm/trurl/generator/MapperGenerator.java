@@ -59,10 +59,9 @@ public class MapperGenerator extends AbstractProcessor {
         try {
             BeanFinder beanFinder = new BeanFinder();
             MapperWriter mapperWriter = new MapperWriter();
-            SyntheticPropertiesSynthesizer syntheticPropertiesSynthesizer = new SyntheticPropertiesSynthesizer();
 
             beanFinder
-                    .findBeans(processingEnvironment, roundEnv, syntheticPropertiesSynthesizer)
+                    .findBeans(processingEnvironment, roundEnv)
                     .forEach(beanMetadata -> mapperWriter.writeMapper(processingEnvironment, beanMetadata));
 
 

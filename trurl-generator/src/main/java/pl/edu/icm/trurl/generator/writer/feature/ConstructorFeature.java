@@ -44,18 +44,22 @@ public class ConstructorFeature implements Feature {
 
     @Override
     public Stream<FieldSpec> fields() {
-        return Stream.concat(
-                getSoftEnumProperties()
-                        .map(property -> FieldSpec.builder(
-                                        ParameterizedTypeName.get(CommonTypes.SOFT_ENUM_MANAGER, property.businessType), property.name + "Manager")
-                                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                                .build()),
-                usesMappers()
-                    ? Stream.of(FieldSpec.builder(CommonTypes.MAPPERS, "mappers", Modifier.FINAL).build())
-                    : Stream.empty());
+        Stream<FieldSpec> mappersField = usesMappers()
+                ? Stream.of(FieldSpec.builder(CommonTypes.MAPPERS, "mappers", Modifier.FINAL).build())
+                : Stream.empty();
+        Stream<FieldSpec> categoryManagerFields = getCategoryProperties()
+                .map(property -> FieldSpec.builder(
+                                ParameterizedTypeName.get(CommonTypes.CATEGORY_MANAGER, property.unwrappedTypeName), property.name + "Manager")
+                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                        .build());
+        Stream<FieldSpec> mapperPrefix = Stream.of(FieldSpec.builder(CommonTypes.LANG_STRING, "mapperPrefix").build());
+        return Stream.of(
+                categoryManagerFields,
+                mappersField,
+                mapperPrefix).flatMap(s -> s);
     }
 
-    private Stream<ComponentProperty> getSoftEnumProperties() {
+    private Stream<ComponentProperty> getCategoryProperties() {
         return beanMetadata.getComponentProperties().stream()
                 .filter(property -> property.type == PropertyType.SOFT_ENUM_PROP);
     }
@@ -66,7 +70,7 @@ public class ConstructorFeature implements Feature {
     }
 
     private MethodSpec constructor(BeanMetadata beanMetadata) {
-        List<ComponentProperty> properties = getSoftEnumProperties().collect(Collectors.toList());
+        List<ComponentProperty> properties = getCategoryProperties().collect(Collectors.toList());
 
         AnnotationSpec withFactory = AnnotationSpec.builder(WithFactory.class)
                 .addMember("exactName", "$S", "MapperOf" + beanMetadata.componentName.simpleName() + "Factory").build();
@@ -80,20 +84,23 @@ public class ConstructorFeature implements Feature {
             constructorBuilder.addStatement("this.mappers = mappers");
         }
 
+        constructorBuilder.addParameter(CommonTypes.LANG_STRING, "mapperPrefix");
+
         for (ComponentProperty property : properties) {
             EnumManagedBy managedBy = property.attribute.getAnnotation(EnumManagedBy.class);
             TypeName param = managedBy == null
-                    ? ParameterizedTypeName.get(CommonTypes.SOFT_ENUM_MANAGER, property.businessType)
+                    ? ParameterizedTypeName.get(CommonTypes.CATEGORY_MANAGER, property.unwrappedTypeName)
                     : getTypeName(managedBy);
             String name = property.name + "Manager";
             constructorBuilder.addParameter(param, name);
             constructorBuilder.addStatement("this.$L = $L", name, name);
         }
+        constructorBuilder.addStatement("this.mapperPrefix = $S.equals(mapperPrefix) ? $S : mapperPrefix + $S", "", "", ".");
         return constructorBuilder.build();
     }
 
     private boolean usesMappers() {
-        return componentProperties.stream().anyMatch(p -> p.type.columnType == CommonTypes.MAPPER);
+        return componentProperties.stream().anyMatch(p -> p.isUsingMappers());
     }
 
     private TypeName getTypeName(EnumManagedBy managedBy) {

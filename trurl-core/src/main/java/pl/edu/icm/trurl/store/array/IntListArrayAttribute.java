@@ -96,7 +96,7 @@ public class IntListArrayAttribute implements IntListAttribute {
     @Override
     public int getSize(int row) {
         int[] result = values[row];
-        return result == null ? -1 : result.length;
+        return result == null ? 0 : result.length;
     }
 
     @Override
@@ -119,6 +119,15 @@ public class IntListArrayAttribute implements IntListAttribute {
         for (int i = 0; i < result.length; i++) {
             result[i] = ints.getInt(i);
         }
+    }
+
+    @Override
+    public int[] getInts(int row) {
+        return values[row];
+    }
+
+    public void setInts(int row, int[] values) {
+        this.values[row] = values;
     }
 
     @Override

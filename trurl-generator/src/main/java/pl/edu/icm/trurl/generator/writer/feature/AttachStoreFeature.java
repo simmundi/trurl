@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,9 @@ package pl.edu.icm.trurl.generator.writer.feature;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
-import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.CommonTypes;
+import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
-import pl.edu.icm.trurl.generator.model.PropertyType;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;
@@ -60,23 +59,24 @@ public class AttachStoreFeature implements Feature {
 
         for (ComponentProperty property : properties) {
             switch (property.type) {
-                case EMBEDDED_PROP:
-                    methodSpec.addStatement("$L.attachStore($T.wrap(store, $S))",
-                            property.name, CommonTypes.PREFIXED_STORE, property.name);
+                case EMBEDDED_LIST_PROP:
+                case EMBEDDED_DENSE_PROP:
+                    methodSpec.addStatement("$LJoin = store.getJoin(mapperPrefix + $S)", property.fieldName, property.name);
+                    methodSpec.addStatement("$L.attachStore($LJoin.getTarget())", property.fieldName, property.fieldName);
                     break;
-                case EMBEDDED_LIST:
-                    methodSpec.addStatement("$L.attachStore($T.wrap(store, $S))",
-                            property.name, CommonTypes.PREFIXED_STORE, property.name);
+                case EMBEDDED_PROP:
+                    methodSpec.addStatement("$L.attachStore(store)", property.fieldName);
+                    break;
+                case ENTITY_LIST_PROP: // fallthrough
+                case ENTITY_PROP:
+                    methodSpec.addStatement("$L = store.getReference(mapperPrefix + $S)", property.fieldName, property.qname);
                     break;
                 default:
-                    methodSpec.addStatement("$L = ($T) store.get($S)",
-                            property.name,
-                            property.type.columnType,
+                    methodSpec.addStatement("$L = store.get(mapperPrefix + $S)",
+                            property.fieldName,
                             property.qname);
             }
         }
-
-        methodSpec.addStatement("this.setCount(store.getCount())");
         return methodSpec.build();
     }
 }

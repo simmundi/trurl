@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,36 +20,42 @@ package pl.edu.icm.trurl.generator;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
-import net.snowyhollows.bento.soft.SoftEnum;
-import net.snowyhollows.bento.soft.SoftEnumManager;
+import net.snowyhollows.bento.category.CategoryManager;
 import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
-import pl.edu.icm.trurl.ecs.mapper.MapperListeners;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
 import pl.edu.icm.trurl.store.IntSink;
-import pl.edu.icm.trurl.store.PrefixedStore;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreConfigurer;
 import pl.edu.icm.trurl.store.attribute.*;
+import pl.edu.icm.trurl.store.join.*;
+import pl.edu.icm.trurl.store.reference.ArrayReference;
+import pl.edu.icm.trurl.store.reference.SingleReference;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 public class CommonTypes {
     public static final ClassName COMPONENT_STORE_METADATA = ClassName.get(StoreConfigurer.class);
     public static final ClassName STORE = ClassName.get(Store.class);
-    public static final ClassName PREFIXED_STORE = ClassName.get(PrefixedStore.class);
     public static final ClassName LIFECYCLE_EVENT = ClassName.get(LifecycleEvent.class);
     public static final ClassName INT_SINK = ClassName.get(IntSink.class);
     public static final ClassName MAPPER = ClassName.get(Mapper.class);
     public static final ClassName MAPPERS = ClassName.get(Mappers.class);
-    public static final ClassName MAPPER_LISTENERS = ClassName.get(MapperListeners.class);
+    public static final ClassName ARRAY_JOIN = ClassName.get(ArrayJoin.class);
+    public static final ClassName RANGED_JOIN = ClassName.get(RangedJoin.class);
+    public static final ClassName SINGLE_JOIN = ClassName.get(SingleJoin.class);
+    public static final ClassName SINGLE_JOIN_REVERSE = ClassName.get(SingleJoinWithReverse.class);
+    public static final ClassName SINGLE_JOIN_REVERSE_ONLY = ClassName.get(SingleJoinWithReverseOnly.class);
+    public static final ClassName ARRAY_REFERENCE = ClassName.get(ArrayReference.class);
+    public static final ClassName SINGLE_REFERENCE = ClassName.get(SingleReference.class);
     public static final ClassName SESSION = ClassName.get(Session.class);
     public static final ClassName LIST = ClassName.get(List.class);
-    public static final ClassName LANG_OBJECT = ClassName.get(Object.class);
-    public static final ClassName LANG_OBJECTS = ClassName.get(Objects.class);
     public static final ClassName LANG_STRING = ClassName.get(String.class);
     public static final ClassName ARRAYS = ClassName.get(Arrays.class);
     public static final ClassName COLLECTIONS = ClassName.get(Collections.class);
@@ -67,13 +73,8 @@ public class CommonTypes {
     public static final ClassName STRING_COLUMN = ClassName.get(StringAttribute.class);
     public static final ClassName ENUM_COLUMN = ClassName.get(EnumAttribute.class);
     public static final ClassName BOOLEAN_COLUMN = ClassName.get(BooleanAttribute.class);
-    public static final ClassName ENTITY_LIST_COLUMN = ClassName.get(EntityListAttribute.class);
-    public static final ClassName VALUE_OBJECT_LIST_COLUMN = ClassName.get(ValueObjectListAttribute.class);
-    public static final ClassName SOFT_ENUM_COLUMN = ClassName.get(SoftEnumAttribute.class);
-    public static final ClassName ENTITY_COLUMN = ClassName.get(EntityAttribute.class);
-    public static final ClassName SOFT_ENUM = ClassName.get(SoftEnum.class);
-    public static final ClassName SOFT_ENUM_MANAGER = ClassName.get(SoftEnumManager.class);
-
+    public static final ClassName CATEGORY_COLUMN = ClassName.get(CategoryAttribute.class);
+    public static final ClassName CATEGORY_MANAGER = ClassName.get(CategoryManager.class);
 
     private CommonTypes() {
     }

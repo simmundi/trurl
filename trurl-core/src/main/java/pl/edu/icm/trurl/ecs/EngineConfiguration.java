@@ -20,14 +20,10 @@ package pl.edu.icm.trurl.ecs;
 
 import com.google.common.base.Preconditions;
 import net.snowyhollows.bento.Bento;
-import net.snowyhollows.bento.Bento;
-import net.snowyhollows.bento.annotation.ByFactory;
 import net.snowyhollows.bento.annotation.ByName;
 import net.snowyhollows.bento.annotation.WithFactory;
-import pl.edu.icm.trurl.ecs.mapper.Mappers;
 import pl.edu.icm.trurl.ecs.mapper.MappersFactory;
-import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
-import pl.edu.icm.trurl.store.StoreFactory;
+import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -36,25 +32,25 @@ public class EngineConfiguration {
     private volatile Engine engine;
     private ComponentAccessorCreator componentAccessorCreator;
     private List<EngineCreationListener> engineCreationListeners = new CopyOnWriteArrayList<>();
-    private List<Class<?>> componentClasses = new CopyOnWriteArrayList<>();
+    private Set<Class<?>> componentClasses = new LinkedHashSet<>();
+    private final AttributeFactory attributeFactory;
     private final Bento bento;
-    private final StoreFactory storeFactory;
     private final int initialCapacity;
     private final int capacityHeadroom;
     private final boolean sharedSession;
 
     @WithFactory
     public EngineConfiguration(ComponentAccessorCreator componentAccessorCreator,
-                               StoreFactory storeFactory,
                                @ByName(value = "trurl.engine.initial-capacity", fallbackValue = "1024") int initialCapacity,
                                @ByName(value = "trurl.engine.capacity-headroom", fallbackValue = "128") int capacityHeadroom,
                                @ByName(value = "trurl.engine.shared-session", fallbackValue = "false") boolean sharedSession,
+                               AttributeFactory attributeFactory,
                                Bento bento) {
         this.componentAccessorCreator = componentAccessorCreator;
-        this.storeFactory = storeFactory;
         this.initialCapacity = initialCapacity;
         this.capacityHeadroom = capacityHeadroom;
         this.sharedSession = sharedSession;
+        this.attributeFactory = attributeFactory;
         this.bento = bento;
     }
 
@@ -66,7 +62,7 @@ public class EngineConfiguration {
 
     public Engine getEngine() {
         if (engine == null) {
-            engine = new Engine(storeFactory, initialCapacity, capacityHeadroom, getMapperSet(), sharedSession);
+            engine = new Engine(initialCapacity, capacityHeadroom, getMapperSet(), sharedSession, attributeFactory);
             for (EngineCreationListener engineCreationListener : engineCreationListeners) {
                 engineCreationListener.onEngineCreated(engine);
             }

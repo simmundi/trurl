@@ -19,6 +19,8 @@
 package pl.edu.icm.trurl.store.attribute;
 
 public interface EnumAttribute<E extends Enum<E>> extends Attribute {
+    Enum<?> NULL = null;
+
     E getEnum(int row);
     void setEnum(int row, E value);
     byte getOrdinal(int row);
