@@ -29,6 +29,7 @@ public final class Session implements ComponentOwner {
     private final boolean detachedEntities;
     private final boolean createStubEntities;
     private final boolean persist;
+    private final boolean clearOnClose;
 
     private final int ownerId;
 
@@ -37,6 +38,7 @@ public final class Session implements ComponentOwner {
         this.createStubEntities = mode == Mode.STUB_ENTITIES;
         this.detachedEntities = mode == Mode.DETACHED_ENTITIES;
         this.persist = (mode == Mode.NORMAL || mode == Mode.SHARED);
+        this.clearOnClose = (mode == Mode.SHARED);
         this.entities = (detachedEntities || expectedEntityCount == 0) ? null : new Int2ObjectOpenHashMap<>(expectedEntityCount);
         this.ownerId = ownerId;
     }
@@ -44,6 +46,9 @@ public final class Session implements ComponentOwner {
     public void close() {
         if (persist) {
             entities.values().stream().forEach(Entity::persist);
+        }
+        if (clearOnClose) {
+            entities.clear();
         }
     }
 
