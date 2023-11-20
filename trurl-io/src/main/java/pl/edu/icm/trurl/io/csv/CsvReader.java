@@ -60,6 +60,10 @@ public class CsvReader implements SingleStoreReader {
 
 
     private void load(InputStream stream, StoreInspector store, Map<String, String> mappings, String... columns) {
+        int storeCount = store.getCounter().getCount();
+        if (storeCount > 0) {
+            throw new IllegalStateException("Loading available only for empty stores (store count is: " + storeCount + ")");
+        }
         CsvParserSettings settings = new CsvParserSettings();
         settings.detectFormatAutomatically(',', '\t');
         settings.setSkipEmptyLines(false);

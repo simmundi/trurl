@@ -23,12 +23,14 @@ import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.Attribute;
+import pl.edu.icm.trurl.store.attribute.IntAttribute;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CsvReaderTest {
 
@@ -44,14 +46,10 @@ class CsvReaderTest {
         Store store = new Store(new ArrayAttributeFactory(), 1000);
         store.addInt("age");
         store.addEnum("letter", Letter.class);
-        // todo uncomment
-        // store.addEntityList("entities");
         store.addByte("bytes");
         store.addFloat("number");
         store.addString("name");
         store.addBoolean("bool");
-        // todo uncomment
-        // store.addEntity("entity");
         store.addShort("short");
 
         // execute
@@ -66,6 +64,19 @@ class CsvReaderTest {
         assertThat(lettersAttribute.getString(0)).isEqualTo("A");
         assertThat(lettersAttribute.getString(1)).isEqualTo("B");
         assertThat(lettersAttribute.getString(2)).isEqualTo("C");
+    }
+
+    @Test
+    @DisplayName("Should not allow to load file to non empty store")
+    public void loadToNonEmpty() {
+        //given
+        CsvReader csvReader = new CsvReader();
+        Store store = new Store(new ArrayAttributeFactory(), 10);
+        store.addInt("age");
+        IntAttribute ageAttribute = store.get("age");
+        ageAttribute.setInt(store.getCounter().next(), 10);
+        // execute && assert
+        assertThrows(IllegalStateException.class, () -> csvReader.read(new File(Objects.requireNonNull(CsvReader.class.getResource("/data1.csv")).getFile()), store));
     }
 
 }
