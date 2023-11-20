@@ -34,6 +34,10 @@ public class OrcReader implements SingleStoreReader {
 
     @Override
     public void read(File file, StoreInspector store) throws IOException {
+        int storeCount = store.getCounter().getCount();
+        if (storeCount > 0) {
+            throw new IllegalStateException("Loading available only for empty stores (store count is: " + storeCount + ")");
+        }
         TypeDescription schema;
         VectorizedRowBatch batch;
         RecordReader rows;
@@ -60,15 +64,13 @@ public class OrcReader implements SingleStoreReader {
             logger.warn("ignoring columns: " + unusedFieldNames);
         }
 
-        int targetRow = 0;
         while (rows.nextBatch(batch)) {
+            int targetRow = store.getCounter().getCount();
+            int batchSize = batch.size;
+            store.getCounter().next(batchSize);
             for (AbstractColumnWrapper wrapper : wrappers) {
-                wrapper.readFromColumnVector(targetRow, batch.size);
+                wrapper.readFromColumnVector(targetRow, batchSize);
             }
-            targetRow += batch.size;
         }
-
-        // TODO
-//        store.fireUnderlyingDataChanged(0, targetRow);
     }
 }

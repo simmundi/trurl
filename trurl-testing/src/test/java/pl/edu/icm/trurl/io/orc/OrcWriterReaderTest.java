@@ -18,7 +18,6 @@
 
 package pl.edu.icm.trurl.io.orc;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import pl.edu.icm.trurl.io.csv.CsvReader;
@@ -40,13 +39,12 @@ class OrcWriterReaderTest {
     File tempDir;
 
     @Test
-    @Disabled
     public void writeThenRead() throws IOException {
         // given
         File file = new File(tempDir, "dump.orc");
-        Store storeToWrite = new Store(new ArrayAttributeFactory(), 1024);
+        Store storeToWrite = new Store(new ArrayAttributeFactory(), 2418);
         configureStore(storeToWrite);
-        Store storeToRead = new Store(new ArrayAttributeFactory(), 1024);
+        Store storeToRead = new Store(new ArrayAttributeFactory(), 2418);
         configureStore(storeToRead);
         loadFromCsvResource(storeToWrite, "/store.csv");
         OrcWriter orcWriter = new OrcWriter(new OrcImplementationsService());
@@ -54,8 +52,8 @@ class OrcWriterReaderTest {
         int writeCount = storeToWrite.getCounter().getCount();
 
         // execute
-        orcWriter.write(file,storeToWrite);
-        orcStoreReader.read(file,storeToRead);
+        orcWriter.write(file, storeToWrite);
+        orcStoreReader.read(file, storeToRead);
         int readCount = storeToRead.getCounter().getCount();
 
         // assert
@@ -82,9 +80,6 @@ class OrcWriterReaderTest {
         store.addBoolean("bools");
         store.addByte("bytes");
         store.addDouble("doubles");
-//        todo uncomment
-//        store.addEntity("entities");
-//        store.addEntityList("entityLists");
         store.addEnum("enums", Shape.class);
         store.addFloat("floats");
         store.addInt("ints");
