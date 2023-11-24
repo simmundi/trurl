@@ -32,7 +32,7 @@ final class BooleanWrapper extends AbstractColumnWrapper<LongColumnVector, Boole
 
     @Override
     public TypeDescription getTypeDescription() {
-        return TypeDescription.createByte();
+        return TypeDescription.createBoolean();
     }
 
     @Override

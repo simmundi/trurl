@@ -36,7 +36,7 @@ public class OrcReader implements SingleStoreReader {
     public void read(File file, StoreInspector store) throws IOException {
         int storeCount = store.getCounter().getCount();
         if (storeCount > 0) {
-            throw new IllegalStateException("Loading available only for empty stores (store count is: " + storeCount + ")");
+            logger.warn(String.format("Loading from file to non-empty store (store count is: %d). New rows will be appended.", storeCount));
         }
         TypeDescription schema;
         VectorizedRowBatch batch;

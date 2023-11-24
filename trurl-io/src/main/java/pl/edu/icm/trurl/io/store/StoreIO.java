@@ -30,6 +30,7 @@ public class StoreIO {
 
 
     public void readStoreFromFiles(File metadataFile, Store store) throws IOException {
+        assertEmpty(store);
         Path path = metadataFile.toPath().toAbsolutePath();
         Path parentPath = path.getParent();
         Properties properties = loadProperties(path);
@@ -70,6 +71,7 @@ public class StoreIO {
         List<String> substoreNames = new ArrayList<>(asList(substores.split(",")));
         singleStoreReader.read(getFile(parentDir, baseName, format), store);
         for (Store substore : store.allDescendants()) {
+            assertEmpty(substore);
             String namespace = substore.getName();
             if (!substoreNames.contains(namespace)) {
                 throw new IllegalStateException(String.format("No loading candidate found for substore: %s", namespace));
@@ -110,6 +112,14 @@ public class StoreIO {
     private static void checkFileExtension(Path path) {
         if (!getExtensionFromPath(path).endsWith(PROPERTIES_EXTENSION)) {
             throw new IllegalArgumentException(".properties file should be provided");
+        }
+    }
+
+    private static void assertEmpty(Store store) {
+        int storeCount = store.getCounter().getCount();
+        if (storeCount > 0) {
+            String name = store.getName();
+            throw new IllegalStateException("Loading available only for empty stores (store" + (name.isEmpty() ? "" : "<" + name + ">") + " count is: " + storeCount + ")");
         }
     }
 }

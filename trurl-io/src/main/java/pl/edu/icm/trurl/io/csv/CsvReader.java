@@ -62,7 +62,7 @@ public class CsvReader implements SingleStoreReader {
     private void load(InputStream stream, StoreInspector store, Map<String, String> mappings, String... columns) {
         int storeCount = store.getCounter().getCount();
         if (storeCount > 0) {
-            throw new IllegalStateException("Loading available only for empty stores (store count is: " + storeCount + ")");
+            logger.warn(String.format("Loading from file to non-empty store (store count is: %d). New rows will be appended.", storeCount));
         }
         CsvParserSettings settings = new CsvParserSettings();
         settings.detectFormatAutomatically(',', '\t');
@@ -78,11 +78,6 @@ public class CsvReader implements SingleStoreReader {
             attributes[i] = Optional.<Attribute>ofNullable(store.get(attributeName)).orElse(SKIP);
         }
 
-        // TODO: there is assumption here that the CSV file begins with the same
-        // row as the store, i.e. an empty store is used to load a full CSV dump.
-        // It is possible that the CSV file was created by saving only a part of the
-        // store or that the store wasn't empty; in those cases we need to offset
-        // values of references and joins.
         while (true) {
             String[] line = csvParser.parseNext();
             if (line == null) {

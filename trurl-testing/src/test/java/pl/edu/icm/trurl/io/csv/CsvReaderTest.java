@@ -23,14 +23,13 @@ import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.Attribute;
-import pl.edu.icm.trurl.store.attribute.IntAttribute;
+import pl.edu.icm.trurl.store.attribute.ByteAttribute;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CsvReaderTest {
 
@@ -44,13 +43,7 @@ class CsvReaderTest {
         // given
         CsvReader csvReader = new CsvReader();
         Store store = new Store(new ArrayAttributeFactory(), 1000);
-        store.addInt("age");
-        store.addEnum("letter", Letter.class);
-        store.addByte("bytes");
-        store.addFloat("number");
-        store.addString("name");
-        store.addBoolean("bool");
-        store.addShort("short");
+        configureStore(store);
 
         // execute
         csvReader.read(new File(Objects.requireNonNull(CsvReaderTest.class.getResource("/data1.csv")).getFile()), store);
@@ -67,16 +60,41 @@ class CsvReaderTest {
     }
 
     @Test
-    @DisplayName("Should not allow to load file to non empty store")
-    public void loadToNonEmpty() {
-        //given
+    @DisplayName("Should append to non empty store")
+    public void loadToNonEmpty() throws IOException {
+        // given
         CsvReader csvReader = new CsvReader();
-        Store store = new Store(new ArrayAttributeFactory(), 10);
+        Store store = new Store(new ArrayAttributeFactory(), 1000);
+        configureStore(store);
+        ByteAttribute bytes = store.get("bytes");
+        bytes.setByte(store.getCounter().next(), (byte) 10);
+        store.get("name").setString(store.getCounter().next(), "some string");
+
+        int preLoadCount = store.getCounter().getCount();
+        // execute
+        final int CSV_ROWS = 3;
+        csvReader.read(new File(Objects.requireNonNull(CsvReaderTest.class.getResource("/data1.csv")).getFile()), store);
+
+        // assert
+        assertThat(store.getCounter().getCount()).isEqualTo(preLoadCount + CSV_ROWS);
+        Attribute namesAttribute = store.get("name");
+        Attribute lettersAttribute = store.get("letter");
+        assertThat(namesAttribute.getString(preLoadCount + 0)).isEqualTo("Jan");
+        assertThat(namesAttribute.getString(preLoadCount + 1)).isEqualTo("Filip");
+        assertThat(namesAttribute.getString(preLoadCount + 2)).isEqualTo("Adam");
+        assertThat(lettersAttribute.getString(preLoadCount + 0)).isEqualTo("A");
+        assertThat(lettersAttribute.getString(preLoadCount + 1)).isEqualTo("B");
+        assertThat(lettersAttribute.getString(preLoadCount + 2)).isEqualTo("C");
+    }
+
+    private static void configureStore(Store store) {
         store.addInt("age");
-        IntAttribute ageAttribute = store.get("age");
-        ageAttribute.setInt(store.getCounter().next(), 10);
-        // execute && assert
-        assertThrows(IllegalStateException.class, () -> csvReader.read(new File(Objects.requireNonNull(CsvReader.class.getResource("/data1.csv")).getFile()), store));
+        store.addEnum("letter", Letter.class);
+        store.addByte("bytes");
+        store.addFloat("number");
+        store.addString("name");
+        store.addBoolean("bool");
+        store.addShort("short");
     }
 
 }
