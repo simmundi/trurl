@@ -7,7 +7,7 @@ import pl.edu.icm.trurl.store.attribute.Attribute;
 
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ArrayReferenceTest {
 
@@ -17,12 +17,12 @@ public class ArrayReferenceTest {
     @Test
     public void init() {
         // execute
-        store.addReference("next").single();
+        store.addReference("next").arrayTyped(2,3);
         store.addString("name");
         Reference next = store.getReference("next");
 
         // assert
-        assertThat(next).isInstanceOf(SingleReference.class);
+        assertThat(next).isInstanceOf(ArrayReference.class);
         assertThat(next.attributes().stream().map(Attribute::name)).containsExactly("next");
         assertThat(store.visibleAttributes().map(Attribute::name)).containsExactly("name");
         assertThat(store.attributes().map(Attribute::name)).containsExactly("next", "name");
