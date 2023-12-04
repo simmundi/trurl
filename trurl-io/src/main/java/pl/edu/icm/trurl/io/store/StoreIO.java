@@ -29,6 +29,18 @@ public class StoreIO {
     }
 
 
+    /**
+     * Reads and loads data into the provided Store from the information specified in a properties file.
+     * <p>
+     * Currently,
+     * this method loads data into empty stores and substores only
+     * (i.e., those that satisfy store.getCounter().getCount() == 0),
+     * as loading into non-empty stores could disrupt references and joins.
+     *
+     * @param metadataFile A File object representing the properties file containing metadata information.
+     * @param store        The Store object where the data is to be loaded.
+     * @throws IOException If an I/O error occurs while reading the properties file or loading data into the store.
+     */
     public void readStoreFromFiles(File metadataFile, Store store) throws IOException {
         assertEmpty(store);
         Path path = metadataFile.toPath().toAbsolutePath();
@@ -42,6 +54,18 @@ public class StoreIO {
         loadFiles(store, singleStoreReader, parentPath, format, baseName, substores);
     }
 
+    /**
+     * Writes the data from the provided Store to multiple files, along with a properties file
+     * containing metadata information.
+     *
+     * @param metadataFile   A File object representing the properties file to be created with metadata information.
+     * @param baseName       The base name for the files to be created.
+     * @param store          The Store object from which the data is to be written.
+     * @param format         The format in which the data should be written to the files.
+     *                       The format should have its single store writer implementation
+     *                       registered in singleStoreIOProvider
+     * @throws IOException  If an I/O error occurs while writing files.
+     */
     public void writeStoreToFiles(File metadataFile, String baseName, Store store, String format) throws IOException {
         Path path = metadataFile.toPath().toAbsolutePath();
         Path parentDir = path.getParent();

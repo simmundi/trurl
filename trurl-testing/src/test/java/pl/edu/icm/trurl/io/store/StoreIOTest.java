@@ -56,7 +56,7 @@ class StoreIOTest {
         store.addByte("byte_column");
         ByteArrayAttribute byteColumn = store.get("byte_column");
         byteColumn.setByte(1, (byte) 8);
-//        store.fireUnderlyingDataChanged(0, 2);
+
         store.addSubstore("oranges");
         Store substore = store.getSubstore("oranges");
         substore.addSubstore("peel");
