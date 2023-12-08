@@ -61,7 +61,7 @@ public class AttachStoreFeature implements Feature {
             switch (property.type) {
                 case EMBEDDED_LIST_PROP:
                 case EMBEDDED_DENSE_PROP:
-                    methodSpec.addStatement("$LJoin = store.getJoin(mapperPrefix + $S)", property.fieldName, property.name);
+                    methodSpec.addStatement("$LJoin = store.getJoin(mapperPrefix + $S)", property.fieldName, property.qname);
                     methodSpec.addStatement("$L.attachStore($LJoin.getTarget())", property.fieldName, property.fieldName);
                     break;
                 case EMBEDDED_PROP:
