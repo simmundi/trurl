@@ -110,7 +110,7 @@ class EnumSampleSpaceTest {
         assertThat(cities.isNormalized()).isEqualTo(true);
         assertThat((double)Math.round(cities.getProbability(Cities.LUBLIN) * 10d) / 10d).isEqualTo(0.3);
         assertThat((double)Math.round(cities.getProbability(Cities.WARSZAWA) * 10d) / 10d).isEqualTo(0.5);
-        assertThat((double)Math.round(cities.getProbability(Cities.KATOWICE) * 10d) / 10d).isEqualTo(0.2);;
+        assertThat((double)Math.round(cities.getProbability(Cities.KATOWICE) * 10d) / 10d).isEqualTo(0.2);
     }
 
     @Test

@@ -1,103 +1,134 @@
-/*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- *
- */
-
 package pl.edu.icm.trurl.ecs;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import pl.edu.icm.trurl.ecs.mapper.ComponentOwner;
+import pl.edu.icm.trurl.util.IntMap;
 
-public final class Session implements ComponentOwner {
+public class Session {
+    private final IntMap<Entity> idToEntity;
+    private final DaoManager daoManager;
     private final Engine engine;
-    private final Int2ObjectMap<Entity> entities;
+    private final Object[][] components;
+    private final Entity[] entities;
+    private final int[] ids;
+    private int ownerId;
+    private int counter;
 
-    private final boolean detachedEntities;
-    private final boolean createStubEntities;
-    private final boolean persist;
-    private final boolean clearOnClose;
-
-    private final int ownerId;
-
-    Session(Engine engine, int expectedEntityCount, Mode mode, int ownerId) {
+    Session(Engine engine, int capacity) {
+        idToEntity = new IntMap<>(capacity);
+        this.daoManager = engine.getDaoManager();
+        int componentCount = daoManager.componentCount();
+        components = new Object[componentCount][capacity];
+        ids = new int[capacity];
+        entities = new Entity[capacity];
         this.engine = engine;
-        this.createStubEntities = mode == Mode.STUB_ENTITIES;
-        this.detachedEntities = mode == Mode.DETACHED_ENTITIES;
-        this.persist = (mode == Mode.NORMAL || mode == Mode.SHARED);
-        this.clearOnClose = (mode == Mode.SHARED);
-        this.entities = (detachedEntities || expectedEntityCount == 0) ? null : new Int2ObjectOpenHashMap<>(expectedEntityCount);
-        this.ownerId = ownerId;
+        this.counter = 0;
+    }
+
+    public void clear() {
+        idToEntity.clear();
+        for (int i = 0; i < components.length; i++) {
+            Object[] component = components[i];
+            for (int j = 0; j < component.length; j++) {
+                component[j] = null;
+            }
+        }
+        for (int i = 0; i < entities.length; i++) {
+            entities[i] = null;
+        }
+        counter = 0;
+    }
+
+    public void flush() {
+        flush(daoManager.allTokens());
     }
 
     public void close() {
-        if (persist) {
-            entities.values().stream().forEach(Entity::persist);
+        flush();
+        clear();
+    }
+
+    public void flush(ComponentToken<?>... tokens) {
+        for (ComponentToken token : tokens) {
+            for (int i = 0; i < counter; i++) {
+                if (components[token.index][i] != null) {
+                    token.dao.save(this, components[token.index][i], ids[i]);
+                }
+            }
         }
-        if (clearOnClose) {
-            entities.clear();
+    }
+
+    <T> T get(Class<T> componentClass, int sessionIndex) {
+        return get(daoManager.classToToken(componentClass), sessionIndex, false);
+    }
+
+    <T> T getOrCreate(Class<T> componentClass, int sessionIndex) {
+        return get(daoManager.classToToken(componentClass), sessionIndex, true);
+    }
+
+    <T> T add(T component, int sessionIndex) {
+        return add((ComponentToken<T>) daoManager.classToToken(component.getClass()), component, sessionIndex);
+    }
+
+    <T> T add(ComponentToken<T> token, T component, int sessionIndex) {
+        components[token.index][sessionIndex] = component;
+        return component;
+    }
+
+    int getId(int sessionIndex) {
+        return ids[sessionIndex];
+    }
+
+    <T> T get(ComponentToken<T> token, int sessionIndex, boolean createIfDoesntExist) {
+        T existing = (T) components[token.index][sessionIndex];
+        if (existing != null) {
+            return existing;
+        } else {
+            int id = ids[sessionIndex];
+            if (token.dao.isPresent(id)) {
+                T component = token.dao.createAndLoad(this, id);
+                components[token.index][sessionIndex] = component;
+                return component;
+            } else if (createIfDoesntExist) {
+                T component = token.dao.create();
+                components[token.index][sessionIndex] = component;
+                return component;
+            } else {
+                return null;
+            }
         }
     }
 
     public Entity getEntity(int id) {
-        if (createStubEntities) {
-            return new Entity(id);
-        } else if (detachedEntities) {
-            return new Entity(engine.getMapperSet(), this, id);
-        } else {
-            return entities
-                    .computeIfAbsent(id, newId ->
-                            new Entity(engine.getMapperSet(), this, newId));
-        }
+        Entity entity  = idToEntity.get(id);
+        return entity != null ? entity : createEmptyEntity(id);
+    }
+
+    private Entity createEmptyEntity(int id) {
+        int newIndex = counter++;
+        ids[newIndex] = id;
+        Entity entity = new Entity(this, newIndex);
+        idToEntity.put(id, entity);
+        entities[newIndex] = entity;
+        return entity;
     }
 
     public Entity createEntity(Object... components) {
-        Entity entity = getEntity(engine.nextId());
+        int id = engine.allocateNextId();
+        Entity entity = createEmptyEntity(id);
         for (Object component : components) {
             entity.add(component);
         }
         return entity;
     }
 
-    public void removeEntity(Entity entity) {
-        if (detachedEntities) {
-            throw new IllegalStateException("Cannot remove entity from detached session");
-        }
-        entities.remove(entity.getId());
-        engine.getRootStore().free(entity.getId());
-    }
-
-    public Engine getEngine() {
-        return engine;
-    }
-
-    public int getCount() {
-        return entities == null ? 0 : entities.size();
-    }
-
-    @Override
     public int getOwnerId() {
         return ownerId;
     }
 
-    public enum Mode {
-        NORMAL,
-        STUB_ENTITIES,
-        DETACHED_ENTITIES,
-        NO_PERSIST,
-        SHARED
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public Engine getEngine() {
+        return engine;
     }
 }

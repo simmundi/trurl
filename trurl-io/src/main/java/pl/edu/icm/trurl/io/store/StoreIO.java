@@ -1,16 +1,17 @@
 package pl.edu.icm.trurl.io.store;
 
+import net.snowyhollows.bento.annotation.GwtIncompatible;
 import net.snowyhollows.bento.annotation.WithFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pl.edu.icm.trurl.io.ReaderProvider;
+import pl.edu.icm.trurl.io.WriterProvider;
+import pl.edu.icm.trurl.io.parser.Parser;
 import pl.edu.icm.trurl.store.Store;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.Writer;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -20,35 +21,41 @@ public class StoreIO {
     private static final String METADATA_FORMAT_FIELD = "format";
     private static final String METADATA_BASE_NAME_FIELD = "base-name";
     private static final String METADATA_SUBSTORES_FIELD = "substores";
-    private final Logger logger = LoggerFactory.getLogger(StoreIO.class);
     private final SingleStoreIOProvider singleStoreIOProvider;
+    private final ReaderProvider readerProvider;
+    private final WriterProvider writerProvider;
 
     @WithFactory
-    public StoreIO(SingleStoreIOProvider singleStoreIOProvider) {
+    public StoreIO(SingleStoreIOProvider singleStoreIOProvider, ReaderProvider readerProvider, WriterProvider writerProvider) {
         this.singleStoreIOProvider = singleStoreIOProvider;
+        this.readerProvider = readerProvider;
+        this.writerProvider = writerProvider;
     }
 
+    public void readStoreFromFiles(String metadataFile, Store store) throws IOException {
+        Map<String, String> properties = loadProperties(metadataFile);
+        String parentPath = getParentPath(metadataFile);
 
-    public void readStoreFromFiles(File metadataFile, Store store) throws IOException {
-        Path path = metadataFile.toPath().toAbsolutePath();
-        Path parentPath = path.getParent();
-        Properties properties = loadProperties(path);
-        String format = properties.getProperty(METADATA_FORMAT_FIELD);
-        String baseName = properties.getProperty(METADATA_BASE_NAME_FIELD);
-        String substores = properties.getProperty(METADATA_SUBSTORES_FIELD);
+        String format = properties.get(METADATA_FORMAT_FIELD);
+        String baseName = properties.get(METADATA_BASE_NAME_FIELD);
+        String substores = properties.get(METADATA_SUBSTORES_FIELD);
 
         SingleStoreReader singleStoreReader = singleStoreIOProvider.getReaderFor(format);
         loadFiles(store, singleStoreReader, parentPath, format, baseName, substores);
     }
 
-    public void writeStoreToFiles(File metadataFile, String baseName, Store store, String format) throws IOException {
-        Path path = metadataFile.toPath().toAbsolutePath();
-        Path parentDir = path.getParent();
-        checkFileExtension(path);
+    private static String getParentPath(String metadataFile) {
+        String separator = File.separator;
+        return metadataFile.contains(separator) ? metadataFile.substring(0, metadataFile.lastIndexOf(separator)) : ".";
+    }
 
-        Properties properties = new Properties();
-        properties.setProperty(METADATA_BASE_NAME_FIELD, baseName);
-        properties.setProperty(METADATA_FORMAT_FIELD, format);
+    public void writeStoreToFiles(String metadataFile, String baseName, Store store, String format) throws IOException {
+        String parentDir = getParent(metadataFile);
+        checkFileExtension(metadataFile);
+
+        Map<String, String> properties = new HashMap<>();
+        properties.put(METADATA_BASE_NAME_FIELD, baseName);
+        properties.put(METADATA_FORMAT_FIELD, format);
 
         SingleStoreWriter singleStoreWriter = singleStoreIOProvider.getWriterFor(format);
         singleStoreWriter.write(getFile(parentDir, baseName, format), store);
@@ -60,54 +67,68 @@ public class StoreIO {
             singleStoreWriter.write(getFile(parentDir, baseName + "." + namespace, format), substore);
         }
 
-        properties.setProperty(METADATA_SUBSTORES_FIELD, String.join(",", substoresNamespaces));
-        try (OutputStream outputStream = Files.newOutputStream(path)) {
-            properties.store(outputStream, "Metadata for Store");
+        properties.put(METADATA_SUBSTORES_FIELD, String.join(",", substoresNamespaces));
+        try (Writer writer = writerProvider.writerForFile(metadataFile, 1024)) {
+            writer.write("# Metadata for Store\n");
+            writer.write("# " + new Date() + "\n");
+            for (Map.Entry<String, String> entry : properties.entrySet()) {
+                writer.write(entry.getKey() + "=" + entry.getValue() + "\n");
+            }
         }
     }
 
-    private void loadFiles(Store store, SingleStoreReader singleStoreReader, Path parentDir, String format, String baseName, String substores) throws IOException {
+    private String getParent(String metadataFile) {
+        return getParentPath(metadataFile);
+    }
+
+    private void loadFiles(Store store, SingleStoreReader singleStoreReader, String parentDir, String format, String baseName, String substores) throws IOException {
         List<String> substoreNames = new ArrayList<>(asList(substores.split(",")));
         singleStoreReader.read(getFile(parentDir, baseName, format), store);
         for (Store substore : store.allDescendants()) {
             String namespace = substore.getName();
             if (!substoreNames.contains(namespace)) {
-                throw new IllegalStateException(String.format("No loading candidate found for substore: %s", namespace));
+                throw new IllegalStateException("No loading candidate found for substore: " + namespace);
             }
             singleStoreReader.read(getFile(parentDir, baseName + "." + namespace, format), substore);
             substoreNames.remove(namespace);
         }
         if (!substoreNames.isEmpty()) {
-            logger.warn(String.format("Some substores are available to load, but were not loaded. Omitted substores: %s", String.join(", ", substoreNames)));
+            System.out.println("Some substores are available to load, but were not loaded. Omitted substores: " + String.join(", ", substoreNames));
         }
     }
 
-    private static Properties loadProperties(Path path) throws IOException {
+    private Map<String, String> loadProperties(String path) throws IOException {
         checkFileExtension(path);
-        Properties properties = new Properties();
-        try (InputStream inStream = Files.newInputStream(path)) {
-            properties.load(inStream);
+        Map<String, String> properties = new HashMap<>();
+        Parser propertiesParser = new Parser(readerProvider.readerForFile(path));
+        while (propertiesParser.hasMore()) {
+            propertiesParser.nextPropertiesLine(properties);
+            propertiesParser.nextLine();
         }
         return properties;
     }
 
-    private static File getFile(Path parentDir, String name, String format) {
-        if (!Files.isDirectory(parentDir)) {
+    @GwtIncompatible
+    private static String getFile(String parentDir, String name, String format) {
+        if (!Files.isDirectory(Paths.get(parentDir))) {
             throw new IllegalArgumentException("parentDir must point to a directory");
         }
-        return new File(parentDir.toFile(), name + "." + format);
+        return new File(parentDir, name + "." + format).getAbsolutePath();
     }
 
-    private static String getExtensionFromPath(Path path) {
+    private static String getFile(Object parentDir, String name, String format) {
+       return parentDir + "/" + name + "." + format;
+    }
+
+
+    private static String getExtensionFromPath(String path) {
         return Optional.ofNullable(path)
-                .map(Path::getFileName)
-                .map(Path::toString)
                 .filter(name -> name.contains("."))
                 .map(name -> name.substring(name.lastIndexOf(".") + 1))
                 .orElseThrow(() -> new IllegalArgumentException("The path is invalid or the file has no extension."));
     }
 
-    private static void checkFileExtension(Path path) {
+    private static void checkFileExtension(String path) {
         if (!getExtensionFromPath(path).endsWith(PROPERTIES_EXTENSION)) {
             throw new IllegalArgumentException(".properties file should be provided");
         }

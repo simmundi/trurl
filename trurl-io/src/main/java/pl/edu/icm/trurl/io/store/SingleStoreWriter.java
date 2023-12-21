@@ -7,6 +7,6 @@ import java.io.File;
 import java.io.IOException;
 @ImplementationSwitch
 public interface SingleStoreWriter {
-    void write(File file, StoreInspector store) throws IOException;
+    void write(String file, StoreInspector store) throws IOException;
 
 }

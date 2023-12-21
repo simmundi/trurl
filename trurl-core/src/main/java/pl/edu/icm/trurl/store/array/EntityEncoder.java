@@ -18,7 +18,6 @@
 
 package pl.edu.icm.trurl.store.array;
 
-import com.google.common.base.Strings;
 import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.store.IntSink;
@@ -71,7 +70,7 @@ final class EntityEncoder {
     }
 
     static Entity decode(String id, Session session) {
-        return Strings.isNullOrEmpty(id) ? null : session.getEntity(Integer.parseInt(id, 36));
+        return isNullOrEmpty(id) ? null : session.getEntity(Integer.parseInt(id, 36));
     }
 
     static String encode(int id) {
@@ -79,9 +78,12 @@ final class EntityEncoder {
     }
 
     static int decode(String id) {
-        return Strings.isNullOrEmpty(id) ? Entity.NULL_ID : Integer.parseInt(id, 36);
+        return isNullOrEmpty(id) ? Entity.NULL_ID : Integer.parseInt(id, 36);
     }
 
+    static int decode(String id, int from, int to) {
+        return isNullOrEmpty(id) ? Entity.NULL_ID : Integer.parseInt(id, 36);
+    }
 
     public static int parseInt(CharSequence s, int beginIndex, int endIndex) {
         int result = 0;
@@ -90,5 +92,9 @@ final class EntityEncoder {
             result += Character.digit(s.charAt(i), 36);
         }
         return result;
+    }
+
+    private static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 }

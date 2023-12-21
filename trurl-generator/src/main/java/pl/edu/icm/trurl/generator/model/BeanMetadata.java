@@ -19,7 +19,7 @@
 package pl.edu.icm.trurl.generator.model;
 
 import com.squareup.javapoet.ClassName;
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
@@ -60,7 +60,7 @@ public final class BeanMetadata {
                 if (ComponentProperty.isGetter(method)) {
                     ComponentProperty property = ComponentProperty.create(processingEnvironment, new BeanPropertyMetadata(
                             method,
-                            componentClass.getAnnotation(WithMapper.class).namespace()
+                            componentClass.getAnnotation(WithDao.class).namespace()
                     ));
                     if (property.isAttachedToAttribute()) {
                         properties.add(property);

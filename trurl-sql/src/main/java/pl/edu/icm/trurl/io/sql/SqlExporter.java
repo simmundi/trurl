@@ -21,7 +21,7 @@ package pl.edu.icm.trurl.sql;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.mapper.Mapper;
+import pl.edu.icm.trurl.ecs.dao.Dao;
 import pl.edu.icm.trurl.store.attribute.*;
 import pl.edu.icm.trurl.store.attribute.CategoricalStaticAttribute;
 import pl.edu.icm.trurl.util.Status;
@@ -47,11 +47,11 @@ public class SqlExporter {
         this.batchSize = batchSize;
     }
 
-    public void export(String name, Mapper<?> mapper) throws SQLException {
+    public void export(String name, Dao<?> dao) throws SQLException {
         Connection connection = databaseConnectionService.getConnection();
 
-        List<Attribute> attributes = mapper.attributes();
-        int count = mapper.getCounter().getCount();
+        List<Attribute> attributes = dao.attributes();
+        int count = dao.getCounter().getCount();
 
         if (attributes.stream().anyMatch(a -> !(a instanceof EntityListAttribute))) {
             String ddl = "create table if not exists " + name + " (\n"
@@ -80,7 +80,7 @@ public class SqlExporter {
 
             Status status = Status.of("inserting " + name, 1000000);
             for (int i = 0; i < count; i++) {
-                if (!mapper.isPresent(i)) {
+                if (!dao.isPresent(i)) {
                     continue;
                 }
 
@@ -131,7 +131,7 @@ public class SqlExporter {
 
             Status status = Status.of("inserting " + tableName, 1000000);
             for (int i = 0; i < count; i++) {
-                if (!mapper.isPresent(i)) {
+                if (!dao.isPresent(i)) {
                     continue;
                 }
                 ((EntityListAttribute) attribute).loadIds(i, ints::add);

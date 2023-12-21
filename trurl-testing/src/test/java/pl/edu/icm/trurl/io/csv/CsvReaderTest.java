@@ -20,6 +20,7 @@ package pl.edu.icm.trurl.io.csv;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import pl.edu.icm.trurl.io.ReaderProvider;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.Attribute;
@@ -40,7 +41,7 @@ class CsvReaderTest {
     @DisplayName("Should load all data from a csv file, no matter how the columns are ordered")
     public void load() throws IOException {
         // given
-        CsvReader csvReader = new CsvReader();
+        CsvReader csvReader = new CsvReader(new ReaderProvider());
         Store store = new Store(new ArrayAttributeFactory(), 1000);
         store.addInt("age");
         store.addEnum("letter", Letter.class);
@@ -55,7 +56,7 @@ class CsvReaderTest {
         store.addShort("short");
 
         // execute
-        csvReader.read(new File(Objects.requireNonNull(CsvReaderTest.class.getResource("/data1.csv")).getFile()), store);
+        csvReader.read(new File(Objects.requireNonNull(CsvReaderTest.class.getResource("/data1.csv")).getFile()).getAbsolutePath(), store);
 
         // assert
         Attribute namesAttribute = store.get("name");

@@ -23,7 +23,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.snowyhollows.bento.category.Category;
-import pl.edu.icm.trurl.ecs.annotation.*;
+import pl.edu.icm.trurl.ecs.dao.annotation.*;
 import pl.edu.icm.trurl.generator.CommonTypes;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -104,7 +104,7 @@ public class ComponentProperty {
     /**
      * In some cases, the direct type (List, Enum) is different from the business type which it wraps.
      * e.g. a getMedicalRecords() method returns a list of MedicalRecord; the actual type is List, but
-     * we need to create a mapper for MedicalRecord.
+     * we need to create a dao for MedicalRecord.
      * <p>
      * This method uses case-by-case rules to establish the relevant wrapped type.
      */
@@ -181,7 +181,7 @@ public class ComponentProperty {
 
     public ClassName getMapperType() {
         if (type == PropertyType.EMBEDDED_LIST_PROP || type == PropertyType.EMBEDDED_PROP || type == PropertyType.EMBEDDED_DENSE_PROP) {
-            return ClassName.get(unwrappedTypeName.packageName(), unwrappedTypeName.simpleName() + "Mapper");
+            return ClassName.get(unwrappedTypeName.packageName(), unwrappedTypeName.simpleName() + "Dao");
         } else {
             return null;
         }
@@ -201,8 +201,8 @@ public class ComponentProperty {
         Mapped mappedAnnotation = attribute.getAnnotation(Mapped.class);
         MappedCollection collectionAnnotation = attribute.getAnnotation(MappedCollection.class);
         if (mappedAnnotation != null && mappedAnnotation.type() == Type.DENSE) {
-            Reverse reverse = Optional.ofNullable(attribute.getAnnotation(Mapped.class)).map(Mapped::reverse).orElse(Reverse.NO_REVERSE_ATTRIBUTE);
-            switch (reverse) {
+            ReverseReference reverseReference = Optional.ofNullable(attribute.getAnnotation(Mapped.class)).map(Mapped::reverse).orElse(ReverseReference.NO_REVERSE_ATTRIBUTE);
+            switch (reverseReference) {
                 case NO_REVERSE_ATTRIBUTE:
                     return CommonTypes.SINGLE_JOIN;
                 case WITH_REVERSE_ATTRIBUTE:
@@ -210,7 +210,7 @@ public class ComponentProperty {
                 case ONLY_REVERSE_ATTRIBUTE:
                     return CommonTypes.SINGLE_JOIN_REVERSE_ONLY;
                 default:
-                    throw new IllegalStateException("Unsupported reverse type " + reverse);
+                    throw new IllegalStateException("Unsupported reverseReference type " + reverseReference);
             }
         } else if (type != PropertyType.EMBEDDED_LIST_PROP) {
             return null;

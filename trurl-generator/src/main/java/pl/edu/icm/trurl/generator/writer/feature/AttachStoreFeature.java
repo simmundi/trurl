@@ -54,14 +54,13 @@ public class AttachStoreFeature implements Feature {
                 .addAnnotation(Override.class)
                 .addParameter(CommonTypes.STORE, "store");
 
-
         methodSpec.addStatement("this.store = store");
 
         for (ComponentProperty property : properties) {
             switch (property.type) {
                 case EMBEDDED_LIST_PROP:
                 case EMBEDDED_DENSE_PROP:
-                    methodSpec.addStatement("$LJoin = store.getJoin(mapperPrefix + $S)", property.fieldName, property.qname);
+                    methodSpec.addStatement("$LJoin = store.getJoin(daoPrefix + $S)", property.fieldName, property.qname);
                     methodSpec.addStatement("$L.attachStore($LJoin.getTarget())", property.fieldName, property.fieldName);
                     break;
                 case EMBEDDED_PROP:
@@ -69,10 +68,10 @@ public class AttachStoreFeature implements Feature {
                     break;
                 case ENTITY_LIST_PROP: // fallthrough
                 case ENTITY_PROP:
-                    methodSpec.addStatement("$L = store.getReference(mapperPrefix + $S)", property.fieldName, property.qname);
+                    methodSpec.addStatement("$L = store.getReference(daoPrefix + $S)", property.fieldName, property.qname);
                     break;
                 default:
-                    methodSpec.addStatement("$L = store.get(mapperPrefix + $S)",
+                    methodSpec.addStatement("$L = store.get(daoPrefix + $S)",
                             property.fieldName,
                             property.qname);
             }

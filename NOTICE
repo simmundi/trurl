@@ -5,3 +5,5 @@ Copyright (c) 2022 ICM Epidemiological Model Team
 The source distribution of the Work contains Gradle Wrapper,
 developed by original Gradle authors and distributed under Apache 2.0 License.
 
+Contains code for IntArray, IntMap and ObjectSet,
+developed by Nathan Sweet and Tommy Ettinger and distributed under Apache 2.0 License.

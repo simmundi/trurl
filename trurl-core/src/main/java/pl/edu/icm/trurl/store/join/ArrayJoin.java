@@ -29,8 +29,8 @@ import java.util.Collections;
 
 public class ArrayJoin implements Join {
     private final String name;
-    private Store target;
-    private IntListAttribute values;
+    private final Store target;
+    private final IntListAttribute values;
     private final int minimum;
     private final int margin;
 

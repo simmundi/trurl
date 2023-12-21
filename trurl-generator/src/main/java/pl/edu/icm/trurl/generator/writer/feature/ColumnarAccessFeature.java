@@ -70,9 +70,9 @@ public class ColumnarAccessFeature implements Feature {
     }
 
     private MethodSpec createMapperAccessor(ComponentProperty property) {
-        return  MethodSpec.methodBuilder(property.getterName + "Mapper")
+        return  MethodSpec.methodBuilder(property.getterName + "Dao")
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(CommonTypes.MAPPER, property.unwrappedTypeName))
+                .returns(ParameterizedTypeName.get(CommonTypes.DAO, property.unwrappedTypeName))
                 .addStatement("return $L", property.fieldName)
                 .build();
     }

@@ -27,8 +27,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.edu.icm.trurl.ecs.mapper.Mapper;
-import pl.edu.icm.trurl.ecs.mapper.Mappers;
+import pl.edu.icm.trurl.ecs.dao.Dao;
+import pl.edu.icm.trurl.ecs.dao.Daos;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -46,7 +46,7 @@ class VnAreaExporterTest {
     WorkDir workDir;
 
     @Spy
-    Mapper<AreaInfo> areaInfoMapper = new Mappers().create(AreaInfo.class);
+    Dao<AreaInfo> areaInfoDao = new Daos().createDao(AreaInfo.class);
 
     VnAreaExporter<AreaInfo> vnAreaExporter;
 
@@ -65,7 +65,7 @@ class VnAreaExporterTest {
         // given
         vnAreaExporter = VnAreaExporter.create(
                 workDir,
-                areaInfoMapper,
+                areaInfoDao,
                 "trees",
                 10, 10, 1000, 20);
 
@@ -79,11 +79,11 @@ class VnAreaExporterTest {
         vnAreaExporter.append(14, 1010, areaC);
 
         // assert
-        verify(areaInfoMapper).configureStore(notNull());
-        verify(areaInfoMapper).attachStore(notNull());
-        verify(areaInfoMapper).save(any(), same(areaA), eq(0));
-        verify(areaInfoMapper).save(any(), same(areaB), eq(199));
-        verify(areaInfoMapper).save(any(), same(areaC), eq(104));
+        verify(areaInfoDao).configureStore(notNull());
+        verify(areaInfoDao).attachStore(notNull());
+        verify(areaInfoDao).save(any(), same(areaA), eq(0));
+        verify(areaInfoDao).save(any(), same(areaB), eq(199));
+        verify(areaInfoDao).save(any(), same(areaC), eq(104));
     }
 
     @Test
@@ -95,7 +95,7 @@ class VnAreaExporterTest {
         Mockito.when(workDir.openForWriting(new File("trees.vnf"))).thenReturn(vnf);
         vnAreaExporter = VnAreaExporter.create(
                 workDir,
-                areaInfoMapper,
+                areaInfoDao,
                 "trees",
                 10, 10, 1000, 20);
 

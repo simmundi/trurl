@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 package pl.edu.icm.trurl.util;
 
-import com.google.common.base.Preconditions;
+import pl.edu.icm.trurl.ecs.EntitySystem;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,14 +27,16 @@ public class Status {
     private final String text;
     private final int skip;
     private int counter;
-    private long startTime;
+    private final long startTime;
     public static StatusListener statusListener;
     public final ConcurrentHashMap<String, Integer> problems = new ConcurrentHashMap<>();
 
     public Status(String text, int skip) {
         this.text = text;
         this.skip = skip;
-        Preconditions.checkState(skip > 0, "skip must be 1 or more");
+        if (skip <= 0) {
+            throw new IllegalArgumentException("skip must be 1 or more");
+        }
         startTime = System.currentTimeMillis();
         System.out.print(text + ": ");
     }
@@ -58,7 +60,7 @@ public class Status {
     public void done(String comment, Object... args) {
         double now = System.currentTimeMillis();
         double duration = now - startTime;
-        System.out.print(String.format(" [OK] (in %f seconds)", duration / 1000.0));
+        System.out.printf(" [OK] (in %f seconds)", duration / 1000.0);
         if (comment != null) {
             System.out.print(" -> " + String.format(comment, args));
         }
@@ -70,7 +72,7 @@ public class Status {
             if (statusListener != null) {
                 statusListener.problem(problem.getKey(), problem.getValue());
             }
-            System.out.println(String.format(" [PROBLEM] %s (%d time(s))", problem.getKey(), problem.getValue()));
+            System.out.printf(" [PROBLEM] %s (%d time(s))%n", problem.getKey(), problem.getValue());
         }
     }
 
@@ -80,5 +82,13 @@ public class Status {
 
     public static Status of(String message, int skip) {
         return new Status(message, skip);
+    }
+
+    public static EntitySystem of(EntitySystem system, String message) {
+        return sessionFactory -> {
+            Status status = Status.of(message);
+            system.execute(sessionFactory);
+            status.done();
+        };
     }
 }

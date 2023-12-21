@@ -5,11 +5,13 @@ import pl.edu.icm.trurl.io.csv.CsvReader;
 import pl.edu.icm.trurl.io.csv.CsvWriter;
 
 public class CsvSingleStoreIOProvider implements SingleStoreIOProvider {
-    private final SingleStoreReader csvReader = new CsvReader();
-    private final SingleStoreWriter csvWriter = new CsvWriter();
+    private final CsvReader csvReader;
+    private final CsvWriter csvWriter;
 
     @WithFactory
-    public CsvSingleStoreIOProvider() {
+    public CsvSingleStoreIOProvider(CsvReader csvReader, CsvWriter csvWriter) {
+        this.csvReader = csvReader;
+        this.csvWriter = csvWriter;
     }
 
     @Override

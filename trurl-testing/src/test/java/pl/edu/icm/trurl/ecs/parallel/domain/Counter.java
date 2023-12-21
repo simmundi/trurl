@@ -18,9 +18,9 @@
 
 package pl.edu.icm.trurl.ecs.parallel.domain;
 
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 
-@WithMapper
+@WithDao
 public class Counter implements HasAAndB {
     private int a;
     private int b;

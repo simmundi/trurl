@@ -18,7 +18,6 @@
 
 package pl.edu.icm.trurl.store.array;
 
-import com.google.common.base.Strings;
 import pl.edu.icm.trurl.store.attribute.ShortAttribute;
 
 import java.util.Arrays;
@@ -68,7 +67,7 @@ final public class ShortArrayAttribute implements ShortAttribute {
 
     @Override
     public void setString(int row, String value) {
-        setShort(row, Strings.isNullOrEmpty(value) ? Short.MIN_VALUE : Short.parseShort(value));
+        setShort(row, isNullOrEmpty(value) ? Short.MIN_VALUE : Short.parseShort(value));
     }
 
     @Override
@@ -79,5 +78,9 @@ final public class ShortArrayAttribute implements ShortAttribute {
     @Override
     public void setShort(int row, short value) {
         values[row] = value;
+    }
+
+    private static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 }

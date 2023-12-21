@@ -17,7 +17,7 @@ public class ArrayJoinTest extends AbstractJoinTest<ArrayJoin>{
 
     @Override
     ArrayJoin getJoin() {
-        return (ArrayJoin) store.getJoin("hobby");
+        return store.getJoin("hobby");
     }
 
     @Test
