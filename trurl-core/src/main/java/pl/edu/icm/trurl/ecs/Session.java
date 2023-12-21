@@ -22,7 +22,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import pl.edu.icm.trurl.ecs.mapper.ComponentOwner;
 
-public final class Session implements ComponentOwner {
+public final class Session extends AbstractSession implements ComponentOwner {
     private final Engine engine;
     private final Int2ObjectMap<Entity> entities;
 
@@ -43,6 +43,7 @@ public final class Session implements ComponentOwner {
         this.ownerId = ownerId;
     }
 
+    @Override
     public void close() {
         if (persist) {
             entities.values().stream().forEach(Entity::persist);
@@ -52,6 +53,7 @@ public final class Session implements ComponentOwner {
         }
     }
 
+    @Override
     public Entity getEntity(int id) {
         if (createStubEntities) {
             return new Entity(id);
@@ -64,6 +66,7 @@ public final class Session implements ComponentOwner {
         }
     }
 
+    @Override
     public Entity createEntity(Object... components) {
         Entity entity = getEntity(engine.nextId());
         for (Object component : components) {
@@ -72,7 +75,8 @@ public final class Session implements ComponentOwner {
         return entity;
     }
 
-    public void removeEntity(Entity entity) {
+    @Override
+    public void deleteEntity(Entity entity) {
         if (detachedEntities) {
             throw new IllegalStateException("Cannot remove entity from detached session");
         }
@@ -80,10 +84,12 @@ public final class Session implements ComponentOwner {
         engine.getRootStore().free(entity.getId());
     }
 
+    @Override
     public Engine getEngine() {
         return engine;
     }
 
+    @Override
     public int getCount() {
         return entities == null ? 0 : entities.size();
     }

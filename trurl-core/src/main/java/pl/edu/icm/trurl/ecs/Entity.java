@@ -23,9 +23,7 @@ import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class Entity {
-    public static final int NULL_ID = Integer.MIN_VALUE;
-
+public final class Entity extends AbstractEntity {
     private final MapperSet mapperSet;
     private final Session session;
     private final int id;
@@ -44,18 +42,21 @@ public final class Entity {
     public Entity(MapperSet mapperSet, Session session, int id) {
         this.mapperSet = mapperSet;
         this.session = session;
-        this.components = new Object[mapperSet.componentCount()];
         this.id = id;
+        this.components = new Object[mapperSet.componentCount()];
     }
 
+    @Override
     public <T> T get(Class<T> componentClass) {
         return get(componentClass, false);
     }
 
+    @Override
     public <T> T getOrCreate(Class<T> componentClass) {
         return get(componentClass, true);
     }
 
+    @Override
     public <T> T add(T component) {
         int idx = mapperSet.classToIndex(component.getClass());
         components[idx] = component;
@@ -71,10 +72,12 @@ public final class Entity {
         }
     }
 
+    @Override
     public int getId() {
         return id;
     }
 
+    @Override
     public Session getSession() {
         return session;
     }
@@ -96,7 +99,8 @@ public final class Entity {
         return Objects.hash(id);
     }
 
-    private <T> T get(Class<T> componentClass, boolean createIfDoesntExist) {
+    @Override
+    protected <T> T get(Class<T> componentClass, boolean createIfDoesntExist) {
         int idx = mapperSet.classToIndex(componentClass);
         if (components[idx] == null) {
             Mapper<T> mapper = mapperSet.classToMapper(componentClass);
@@ -109,6 +113,7 @@ public final class Entity {
         return (T) components[idx];
     }
 
+    @Override
     public <T> T get(ComponentToken<T> token) {
         if (components[token.index] == null && token.mapper.isPresent(id)) {
             components[token.index] = token.mapper.createAndLoad(session, id);

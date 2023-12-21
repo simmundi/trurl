@@ -19,6 +19,7 @@
 package pl.edu.icm.trurl.store.array;
 
 import com.google.common.base.Strings;
+import pl.edu.icm.trurl.ecs.AbstractEntity;
 import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.store.IntSink;
@@ -75,11 +76,11 @@ final class EntityEncoder {
     }
 
     static String encode(int id) {
-        return id == Entity.NULL_ID ? null : Integer.toString(id, 36);
+        return id == AbstractEntity.NULL_ID ? null : Integer.toString(id, 36);
     }
 
     static int decode(String id) {
-        return Strings.isNullOrEmpty(id) ? Entity.NULL_ID : Integer.parseInt(id, 36);
+        return Strings.isNullOrEmpty(id) ? AbstractEntity.NULL_ID : Integer.parseInt(id, 36);
     }
 
 
