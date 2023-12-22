@@ -21,8 +21,8 @@ package pl.edu.icm.trurl.generator;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import net.snowyhollows.bento.category.CategoryManager;
+import pl.edu.icm.trurl.ecs.AbstractSession;
 import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
 import pl.edu.icm.trurl.ecs.mapper.Mapper;
 import pl.edu.icm.trurl.ecs.mapper.Mappers;
@@ -54,7 +54,7 @@ public class CommonTypes {
     public static final ClassName SINGLE_JOIN_REVERSE_ONLY = ClassName.get(SingleJoinWithReverseOnly.class);
     public static final ClassName ARRAY_REFERENCE = ClassName.get(ArrayReference.class);
     public static final ClassName SINGLE_REFERENCE = ClassName.get(SingleReference.class);
-    public static final ClassName SESSION = ClassName.get(Session.class);
+    public static final ClassName ABSTRACT_SESSION = ClassName.get(AbstractSession.class);
     public static final ClassName LIST = ClassName.get(List.class);
     public static final ClassName LANG_STRING = ClassName.get(String.class);
     public static final ClassName ARRAYS = ClassName.get(Arrays.class);

@@ -57,7 +57,7 @@ public class LoadFeature implements Feature {
         MethodSpec.Builder methodSpec = MethodSpec
                 .methodBuilder("load")
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(CommonTypes.SESSION, "session")
+                .addParameter(CommonTypes.ABSTRACT_SESSION, "session")
                 .addParameter(component, "component")
                 .addParameter(TypeName.INT, "row")
                 .addAnnotation(Override.class);
@@ -112,7 +112,7 @@ public class LoadFeature implements Feature {
         MethodSpec.Builder methodSpec = MethodSpec
                 .methodBuilder("fetchValues")
                 .addModifiers(Modifier.PRIVATE)
-                .addParameter(CommonTypes.SESSION, "session")
+                .addParameter(CommonTypes.ABSTRACT_SESSION, "session")
                 .addParameter(component, "component")
                 .addParameter(TypeName.INT, "row");
 

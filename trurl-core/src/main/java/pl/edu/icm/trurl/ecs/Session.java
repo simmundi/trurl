@@ -81,7 +81,7 @@ public final class Session extends AbstractSession implements ComponentOwner {
             throw new IllegalStateException("Cannot remove entity from detached session");
         }
         entities.remove(entity.getId());
-        engine.getRootStore().free(entity.getId());
+        engine.getRootStore().free((int) entity.getId());
     }
 
     @Override

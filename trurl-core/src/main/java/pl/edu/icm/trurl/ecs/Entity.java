@@ -52,14 +52,30 @@ public final class Entity extends AbstractEntity {
     }
 
     @Override
+    public <T> T get(ComponentToken<T> token) {
+        return get(token, false);
+    }
+
+    @Override
     public <T> T getOrCreate(Class<T> componentClass) {
         return get(componentClass, true);
+    }
+
+    @Override
+    public <T> T getOrCreate(ComponentToken<T> token) {
+        return get(token, true);
     }
 
     @Override
     public <T> T add(T component) {
         int idx = mapperSet.classToIndex(component.getClass());
         components[idx] = component;
+        return component;
+    }
+
+    @Override
+    public <T> T add(ComponentToken<T> token, T component) {
+        components[token.index] = component;
         return component;
     }
 
@@ -73,7 +89,7 @@ public final class Entity extends AbstractEntity {
     }
 
     @Override
-    public int getId() {
+    public long getId() {
         return id;
     }
 
@@ -99,8 +115,7 @@ public final class Entity extends AbstractEntity {
         return Objects.hash(id);
     }
 
-    @Override
-    protected <T> T get(Class<T> componentClass, boolean createIfDoesntExist) {
+    private <T> T get(Class<T> componentClass, boolean createIfDoesntExist) {
         int idx = mapperSet.classToIndex(componentClass);
         if (components[idx] == null) {
             Mapper<T> mapper = mapperSet.classToMapper(componentClass);
@@ -113,10 +128,14 @@ public final class Entity extends AbstractEntity {
         return (T) components[idx];
     }
 
-    @Override
-    public <T> T get(ComponentToken<T> token) {
-        if (components[token.index] == null && token.mapper.isPresent(id)) {
-            components[token.index] = token.mapper.createAndLoad(session, id);
+
+    private <T> T get(ComponentToken<T> token, boolean createIfDoesntExist) {
+        if (components[token.index] == null) {
+            if (token.mapper.isPresent(id)) {
+                components[token.index] = token.mapper.createAndLoad(id);
+            } else if (createIfDoesntExist) {
+                components[token.index] = token.mapper.create();
+            }
         }
         return (T) components[token.index];
     }

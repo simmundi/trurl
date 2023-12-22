@@ -8,10 +8,8 @@ public class ReadWriteSession extends AbstractSession {
     private final Engine engine;
     private final Object[][] components;
     private final long[] ids;
-    private final int capacity;
 
     public ReadWriteSession(int capacity, Engine engine) {
-        this.capacity = capacity;
         idToSessionIndex = new Long2IntOpenHashMap(capacity);
         this.mapperSet = engine.getMapperSet();
         int componentCount = mapperSet.componentCount();
@@ -25,21 +23,30 @@ public class ReadWriteSession extends AbstractSession {
     }
 
     <T> T getOrCreate(Class<T> componentClass, int sessionIndex) {
-        T existing = get(componentClass, sessionIndex);
+        int i = mapperSet.classToIndex(componentClass);
+        T existing = (T) components[mapperSet.classToIndex(componentClass)][sessionIndex];
         if (existing == null) {
-
+//            T created = mapperSet.
         }
+        return existing;
     }
 
     <T> T add(T component, int sessionIndex) {
 
     }
 
-    public int getId(int sessionIndex) {
-        return (int) ids[sessionIndex];
+    long getId(int sessionIndex) {
+        return ids[sessionIndex];
     }
 
-    public <T> T get(ComponentToken<T> token, int sessionIndex) {
+    <T> T get(ComponentToken<T> token, int sessionIndex, boolean createIfDoesntExist) {
+        if (components[token.index][sessionIndex] == null) {
+            long id = ids[sessionIndex];
+            if (token.mapper.isPresent((int) id)) {
+                T component = token.mapper.createAndLoad(this, id);
+            }
+
+        }
         return (T) components[token.index][sessionIndex];
     }
 

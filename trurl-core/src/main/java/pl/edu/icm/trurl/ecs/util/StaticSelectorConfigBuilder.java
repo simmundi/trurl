@@ -23,8 +23,6 @@ public class StaticSelectorConfigBuilder {
     private int initialSize;
     private int chunkSize;
 
-
-
     public StaticSelectorConfigBuilder withChunkSize(int unitSize) {
         this.chunkSize = unitSize;
         return this;

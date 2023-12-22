@@ -16,13 +16,28 @@ public final class ReadWriteEntity extends AbstractEntity {
     }
 
     @Override
+    public <T> T get(ComponentToken<T> token) {
+        return session.get(token, sessionIndex, false);
+    }
+
+    @Override
     public <T> T getOrCreate(Class<T> componentClass) {
         return session.getOrCreate(componentClass, sessionIndex);
     }
 
     @Override
+    public <T> T getOrCreate(ComponentToken<T> componentClass) {
+        return null;
+    }
+
+    @Override
     public <T> T add(T component) {
         return session.add(component, sessionIndex);
+    }
+
+    @Override
+    public <T> T add(ComponentToken<T> token, T component) {
+        return null;
     }
 
     @Override
@@ -35,8 +50,4 @@ public final class ReadWriteEntity extends AbstractEntity {
         return session;
     }
 
-    @Override
-    public <T> T get(ComponentToken<T> token) {
-        return session.get(token, sessionIndex);
-    }
 }
