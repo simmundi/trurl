@@ -18,11 +18,11 @@
 
 package pl.edu.icm.trurl.exampledata;
 
-import pl.edu.icm.trurl.ecs.annotation.NotMapped;
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
-import pl.edu.icm.trurl.ecs.mapper.feature.RequiresSetup;
+import pl.edu.icm.trurl.ecs.dao.annotation.NotMapped;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
+import pl.edu.icm.trurl.ecs.dao.feature.RequiresSetup;
 
-@WithMapper
+@WithDao
 public class CounterWithSetup implements RequiresSetup {
     private float value;
     @NotMapped

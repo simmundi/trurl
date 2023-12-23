@@ -18,9 +18,9 @@
 
 package pl.edu.icm.trurl.exampledata;
 
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 
-@WithMapper
+@WithDao
 public class Coordinates {
     private float x;
     private float y;

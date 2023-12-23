@@ -19,9 +19,9 @@
 package pl.edu.icm.trurl.store.array;
 
 import com.google.common.base.Strings;
-import pl.edu.icm.trurl.ecs.AbstractEntity;
-import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.AnyEntity;
+import pl.edu.icm.trurl.ecs.DetachedEntity;
+import pl.edu.icm.trurl.ecs.NoCacheSession;
 import pl.edu.icm.trurl.store.IntSink;
 import pl.edu.icm.trurl.store.IntSource;
 
@@ -67,20 +67,20 @@ final class EntityEncoder {
         }
     }
 
-    static String encode(Entity entity) {
+    static String encode(DetachedEntity entity) {
         return entity != null ? Integer.toString(entity.getId(), 36) : null;
     }
 
-    static Entity decode(String id, Session session) {
-        return Strings.isNullOrEmpty(id) ? null : session.getEntity(Integer.parseInt(id, 36));
+    static DetachedEntity decode(String id, NoCacheSession noCacheSession) {
+        return Strings.isNullOrEmpty(id) ? null : noCacheSession.getEntity(Integer.parseInt(id, 36));
     }
 
     static String encode(int id) {
-        return id == AbstractEntity.NULL_ID ? null : Integer.toString(id, 36);
+        return id == AnyEntity.NULL_ID ? null : Integer.toString(id, 36);
     }
 
     static int decode(String id) {
-        return Strings.isNullOrEmpty(id) ? AbstractEntity.NULL_ID : Integer.parseInt(id, 36);
+        return Strings.isNullOrEmpty(id) ? AnyEntity.NULL_ID : Integer.parseInt(id, 36);
     }
 
 

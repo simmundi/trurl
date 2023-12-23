@@ -58,7 +58,7 @@ public class AttributesFeature implements Feature {
                         .filter(p -> p.type.columnType != null)
                         .map(p -> p.fieldName)
                         .collect(Collectors.joining(", ")))
-                .addStatement("$T.<$T>asList($L).stream().forEach(mapper -> result.addAll(mapper.attributes()))", CommonTypes.ARRAYS, CommonTypes.MAPPER, properties.stream()
+                .addStatement("$T.<$T>asList($L).stream().forEach(dao -> result.addAll(dao.attributes()))", CommonTypes.ARRAYS, CommonTypes.DAO, properties.stream()
                         .filter(p -> p.type == PropertyType.EMBEDDED_PROP)
                         .map(p -> p.fieldName)
                         .collect(Collectors.joining(", ")))

@@ -18,15 +18,15 @@
 
 package pl.edu.icm.trurl.exampledata.pizza;
 
-import pl.edu.icm.trurl.ecs.annotation.CollectionType;
-import pl.edu.icm.trurl.ecs.annotation.MappedCollection;
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+import pl.edu.icm.trurl.ecs.dao.annotation.CollectionType;
+import pl.edu.icm.trurl.ecs.dao.annotation.MappedCollection;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@WithMapper
+@WithDao
 public class Pizza {
     @MappedCollection(margin = 2)
     List<Olive> olives = new ArrayList<>();

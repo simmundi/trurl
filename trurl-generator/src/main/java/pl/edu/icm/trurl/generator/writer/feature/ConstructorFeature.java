@@ -20,7 +20,7 @@ package pl.edu.icm.trurl.generator.writer.feature;
 
 import com.squareup.javapoet.*;
 import net.snowyhollows.bento.annotation.WithFactory;
-import pl.edu.icm.trurl.ecs.annotation.EnumManagedBy;
+import pl.edu.icm.trurl.ecs.dao.annotation.EnumManagedBy;
 import pl.edu.icm.trurl.generator.CommonTypes;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
@@ -44,19 +44,19 @@ public class ConstructorFeature implements Feature {
 
     @Override
     public Stream<FieldSpec> fields() {
-        Stream<FieldSpec> mappersField = usesMappers()
-                ? Stream.of(FieldSpec.builder(CommonTypes.MAPPERS, "mappers", Modifier.FINAL).build())
+        Stream<FieldSpec> daoFields = usesDaos()
+                ? Stream.of(FieldSpec.builder(CommonTypes.DAOS, "daos", Modifier.FINAL).build())
                 : Stream.empty();
         Stream<FieldSpec> categoryManagerFields = getCategoryProperties()
                 .map(property -> FieldSpec.builder(
                                 ParameterizedTypeName.get(CommonTypes.CATEGORY_MANAGER, property.unwrappedTypeName), property.name + "Manager")
                         .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                         .build());
-        Stream<FieldSpec> mapperPrefix = Stream.of(FieldSpec.builder(CommonTypes.LANG_STRING, "mapperPrefix").build());
+        Stream<FieldSpec> daoPrefix = Stream.of(FieldSpec.builder(CommonTypes.LANG_STRING, "daoPrefix").build());
         return Stream.of(
                 categoryManagerFields,
-                mappersField,
-                mapperPrefix).flatMap(s -> s);
+                daoFields,
+                daoPrefix).flatMap(s -> s);
     }
 
     private Stream<ComponentProperty> getCategoryProperties() {
@@ -79,12 +79,12 @@ public class ConstructorFeature implements Feature {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(withFactory);
 
-        if (usesMappers()) {
-            constructorBuilder.addParameter(CommonTypes.MAPPERS, "mappers");
-            constructorBuilder.addStatement("this.mappers = mappers");
+        if (usesDaos()) {
+            constructorBuilder.addParameter(CommonTypes.DAOS, "daos");
+            constructorBuilder.addStatement("this.daos = daos");
         }
 
-        constructorBuilder.addParameter(CommonTypes.LANG_STRING, "mapperPrefix");
+        constructorBuilder.addParameter(CommonTypes.LANG_STRING, "daoPrefix");
 
         for (ComponentProperty property : properties) {
             EnumManagedBy managedBy = property.attribute.getAnnotation(EnumManagedBy.class);
@@ -95,11 +95,11 @@ public class ConstructorFeature implements Feature {
             constructorBuilder.addParameter(param, name);
             constructorBuilder.addStatement("this.$L = $L", name, name);
         }
-        constructorBuilder.addStatement("this.mapperPrefix = $S.equals(mapperPrefix) ? $S : mapperPrefix + $S", "", "", ".");
+        constructorBuilder.addStatement("this.daoPrefix = $S.equals(daoPrefix) ? $S : daoPrefix + $S", "", "", ".");
         return constructorBuilder.build();
     }
 
-    private boolean usesMappers() {
+    private boolean usesDaos() {
         return componentProperties.stream().anyMatch(p -> p.isUsingMappers());
     }
 

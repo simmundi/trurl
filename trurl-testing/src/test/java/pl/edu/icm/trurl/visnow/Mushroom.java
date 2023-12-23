@@ -17,10 +17,10 @@
  */
 package pl.edu.icm.trurl.visnow;
 
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 import pl.edu.icm.trurl.exampledata.Color;
 
-@WithMapper
+@WithDao
 public class Mushroom implements VnCoords {
     private float x;
     private float y;

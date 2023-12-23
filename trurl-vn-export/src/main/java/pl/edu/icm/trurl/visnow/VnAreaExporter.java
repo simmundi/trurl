@@ -21,10 +21,10 @@ package pl.edu.icm.trurl.visnow;
 import com.google.common.base.Preconditions;
 import net.snowyhollows.bento.config.DefaultWorkDir;
 import net.snowyhollows.bento.config.WorkDir;
-import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.NoCacheSession;
 import pl.edu.icm.trurl.ecs.SessionFactory;
-import pl.edu.icm.trurl.ecs.mapper.Mapper;
-import pl.edu.icm.trurl.ecs.mapper.Mappers;
+import pl.edu.icm.trurl.ecs.dao.Dao;
+import pl.edu.icm.trurl.ecs.dao.Daos;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
@@ -38,32 +38,32 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class VnAreaExporter<T> {
-    private final Mapper<T> mapper;
+    private final Dao<T> dao;
     private final Store store;
     private final String baseFileName;
     private final File baseDir;
     private final List<ColumnWrapper> columns;
     private final DataOutputStream dataOut;
     private final WorkDir workDir;
-    private final Session session;
+    private final NoCacheSession noCacheSession;
     private final int fromX;
     private final int width;
     private final int fromY;
     private final int height;
 
-    public static <T> VnAreaExporter<T> create(WorkDir workDir, Mapper<T> mapper, String baseFilePath, int fromX, int width, int fromY, int height) throws FileNotFoundException {
-        return new VnAreaExporter<T>(workDir, mapper, baseFilePath, fromX, width, fromY, height);
+    public static <T> VnAreaExporter<T> create(WorkDir workDir, Dao<T> dao, String baseFilePath, int fromX, int width, int fromY, int height) throws FileNotFoundException {
+        return new VnAreaExporter<T>(workDir, dao, baseFilePath, fromX, width, fromY, height);
     }
 
     public static <T> VnAreaExporter<T> create(WorkDir workDir, Class<T> areaDescription, String baseFilePath, int fromX, int width, int fromY, int height) throws FileNotFoundException {
-        return new VnAreaExporter<T>(workDir, new Mappers().create(areaDescription), baseFilePath, fromX, width, fromY, height);
+        return new VnAreaExporter<T>(workDir, new Daos().create(areaDescription), baseFilePath, fromX, width, fromY, height);
     }
 
     public static <T> VnAreaExporter<T> create(Class<T> areaDescription, String baseFilePath, int fromX, int width, int fromY, int height) throws FileNotFoundException {
-        return new VnAreaExporter<T>(new DefaultWorkDir(), new Mappers().create(areaDescription), baseFilePath, fromX, width, fromY, height);
+        return new VnAreaExporter<T>(new DefaultWorkDir(), new Daos().create(areaDescription), baseFilePath, fromX, width, fromY, height);
     }
 
-    private VnAreaExporter(WorkDir workDir, Mapper<T> mapper, String baseFilePath, int fromX, int width, int fromY, int height) throws FileNotFoundException {
+    private VnAreaExporter(WorkDir workDir, Dao<T> dao, String baseFilePath, int fromX, int width, int fromY, int height) throws FileNotFoundException {
         this.workDir = workDir;
         this.fromX = fromX;
         this.width = width;
@@ -73,31 +73,31 @@ public class VnAreaExporter<T> {
         File file = new File(baseFilePath);
         this.baseFileName = file.getName();
         this.store = new Store(new ArrayAttributeFactory(), size);
-        this.mapper = mapper;
-        this.mapper.configureStore(store);
-        this.mapper.attachStore(store);
-//        mapper.ensureCapacity(size);
+        this.dao = dao;
+        this.dao.configureStore(store);
+        this.dao.attachStore(store);
+//        dao.ensureCapacity(size);
         this.baseDir = file.getParentFile();
-        columns = mapper.attributes().stream()
+        columns = dao.attributes().stream()
                 .map(c -> ColumnWrapper.from(c))
                 .collect(Collectors.toList());
         dataOut = new DataOutputStream(new BufferedOutputStream(workDir.openForWriting(new File(baseDir, baseFileName + ".vnd")), 1024 * 128));
-        session = new SessionFactory(null, Session.Mode.STUB_ENTITIES).create();
+        noCacheSession = new SessionFactory(null, NoCacheSession.Mode.STUB_ENTITIES).createOrGet();
     }
 
     public void append(int x, int y, T object) throws IOException {
         Preconditions.checkArgument(x >= fromX && x < fromX + width, "x out of bounds: %s", x);
         Preconditions.checkArgument(y >= fromY && y < fromY + height, "y out of bounds: %s", y);
         int index = (x - fromX) + (y - fromY) * width;
-        mapper.save(session, object, index);
+        dao.save(noCacheSession, object, index);
     }
 
     public void close() throws IOException {
         int size = width * height;
-        T component = mapper.create();
+        T component = dao.create();
 
         for (int idx = 0; idx < size; idx++) {
-            mapper.load(null, component, idx);
+            dao.load(null, component, idx);
             for (ColumnWrapper column : columns) {
                 column.writeData(dataOut, idx);
             }

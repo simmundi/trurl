@@ -18,12 +18,12 @@
 
 package pl.edu.icm.trurl.exampledata.pizza;
 
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 
 import java.util.Objects;
 import java.util.Random;
 
-@WithMapper
+@WithDao
 public class Topping {
     private Ingredient ingredient;
     private float amount;

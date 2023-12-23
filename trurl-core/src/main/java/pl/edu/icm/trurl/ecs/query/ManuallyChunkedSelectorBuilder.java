@@ -18,9 +18,9 @@
 
 package pl.edu.icm.trurl.ecs.query;
 
-import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
-import pl.edu.icm.trurl.ecs.util.ManuallyChunkedArraySelector;
+import pl.edu.icm.trurl.ecs.DetachedEntity;
+import pl.edu.icm.trurl.ecs.index.RandomAccessIndex;
+import pl.edu.icm.trurl.ecs.util.ManuallyChunkedArrayIndex;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,15 +45,15 @@ public class ManuallyChunkedSelectorBuilder<T> implements Query.Result<T> {
      * @param tag    - must not be null
      */
     @Override
-    public void add(Entity entity, String tag, T tagClassifier) {
+    public void add(DetachedEntity entity, String tag, T tagClassifier) {
         data.computeIfAbsent(tag, unused -> new ConcurrentHashMap<>())
-                .put(entity.getId(), Boolean.TRUE);
+                .put((int) entity.getId(), Boolean.TRUE);
     }
 
-    public RandomAccessSelector build() {
+    public RandomAccessIndex build() {
         int size = data.values().stream().mapToInt(ConcurrentHashMap::size).sum();
 
-        ManuallyChunkedArraySelector selector = new ManuallyChunkedArraySelector(size, data.entrySet().size());
+        ManuallyChunkedArrayIndex selector = new ManuallyChunkedArrayIndex(size, data.entrySet().size());
         data.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(chunkData -> {
             chunkData.getValue().keySet().stream().sorted().forEach(selector::add);
             selector.endChunk(chunkData.getKey());

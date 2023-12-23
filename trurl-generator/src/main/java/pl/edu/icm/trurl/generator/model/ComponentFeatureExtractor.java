@@ -18,11 +18,11 @@
 
 package pl.edu.icm.trurl.generator.model;
 
-import pl.edu.icm.trurl.ecs.mapper.feature.CanBeNormalized;
-import pl.edu.icm.trurl.ecs.mapper.feature.CanResolveConflicts;
-import pl.edu.icm.trurl.ecs.mapper.feature.IsDirtyMarked;
-import pl.edu.icm.trurl.ecs.mapper.feature.RequiresOriginalCopy;
-import pl.edu.icm.trurl.ecs.mapper.feature.RequiresSetup;
+import pl.edu.icm.trurl.ecs.dao.feature.CanBeNormalized;
+import pl.edu.icm.trurl.ecs.dao.feature.CanResolveConflicts;
+import pl.edu.icm.trurl.ecs.dao.feature.IsDirtyMarked;
+import pl.edu.icm.trurl.ecs.dao.feature.RequiresOriginalCopy;
+import pl.edu.icm.trurl.ecs.dao.feature.RequiresSetup;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;

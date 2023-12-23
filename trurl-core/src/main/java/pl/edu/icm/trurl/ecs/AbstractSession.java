@@ -1,17 +1,10 @@
 package pl.edu.icm.trurl.ecs;
 
-public abstract class AbstractSession {
-    public abstract void close();
+import pl.edu.icm.trurl.ecs.dao.ComponentOwner;
 
-    public abstract Entity getEntity(int id);
+public abstract class AbstractSession implements ComponentOwner {
 
-    public abstract Entity createEntity(Object... components);
+    public abstract AnyEntity getEntity(long id);
 
-    public abstract void deleteEntity(Entity entity);
-
-    public abstract Engine getEngine();
-
-    public abstract int getCount();
-
-    public abstract int getOwnerId();
+    public abstract AnyEntity createEntity(Object... components);
 }

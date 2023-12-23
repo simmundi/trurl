@@ -18,155 +18,147 @@
 
  package pl.edu.icm.trurl.ecs.util;
 
- import pl.edu.icm.trurl.ecs.EntitySystem;
- import pl.edu.icm.trurl.ecs.Session;
- import pl.edu.icm.trurl.ecs.SessionFactory;
- import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
- import pl.edu.icm.trurl.ecs.selector.Chunk;
- import pl.edu.icm.trurl.ecs.selector.Selector;
+ import pl.edu.icm.trurl.ecs.*;
+ import pl.edu.icm.trurl.ecs.dao.LifecycleEvent;
+ import pl.edu.icm.trurl.ecs.index.Chunk;
+ import pl.edu.icm.trurl.ecs.index.Index;
 
  import java.util.ArrayList;
+ import java.util.Arrays;
  import java.util.List;
  import java.util.function.Function;
+ import java.util.function.Supplier;
 
  public class IteratingSystemBuilder {
 
-     private static class IteratingSystem<Context> implements PersistenceConfig, ContextConfig, FirstVisitConfig<Context>, VisitConfig<Context>, EntitySystem {
-
-         private final Selector selector;
-         private Session.Mode mode = Session.Mode.NORMAL;
+     private static class IteratingSystem<Context> implements Config, ActionConfig<Context>, EntitySystem {
+         private final Supplier<Index> index;
          private boolean parallel = false;
-         private List<Visit<Context>> visits = new ArrayList<>();
-         private Object[] componentsToPersist;
+         private List<Action<Context>> actions = new ArrayList<>();
+         private boolean persistAll = true;
+         private Class<?>[] componentsToPersist;
+         private boolean flush = true;
+         private boolean clear = true;
          private Function contextFactory;
-         private Visit[] operationsArray;
+         private Action[] operationsArray;
 
-         IteratingSystem(Selector selector, boolean parallel) {
-             this.selector = selector;
+         IteratingSystem(Supplier<Index> index, boolean parallel) {
+             this.index = index;
              this.parallel = parallel;
          }
 
          @Override
-         public void execute(SessionFactory initialSessionFactory) {
-             SessionFactory sessionFactory = initialSessionFactory.withModeAndCount(mode, selector.estimatedChunkSize() * 8);
-             for (Visit visit : operationsArray) {
-                 visit.init();
+         public void execute(SessionFactory sessionFactory) {
+             DaoManager daoManager = sessionFactory.getEngine().getDaoManager();
+             ComponentToken<?>[] tokens = persistAll && flush ? null : Arrays.stream(componentsToPersist).map(c -> daoManager.classToToken(c)).toArray(ComponentToken[]::new);
+             for (Action action : operationsArray) {
+                 action.init();
              }
              if (parallel) {
-                 initialSessionFactory.lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
+                 sessionFactory.lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
              }
-             (parallel ? selector.chunks().parallel() : selector.chunks()).forEach(chunk -> {
-                 final Session session = sessionFactory.create(chunk.getChunkInfo().getChunkId() + 1);
+             (parallel ? index.get().chunks().parallel() : index.get().chunks()).forEach(chunk -> {
+                 final Session session = sessionFactory.createOrGet();
+                 int ownerId = chunk.getChunkInfo().getChunkId() + 1;
+                 session.setOwnerId(ownerId);
+
                  Context context = (Context) contextFactory.apply(chunk);
                  chunk.ids().forEach(id -> {
-                             for (Visit visit : operationsArray) {
-                                 visit.perform(context, session, id);
+                             for (Action action : operationsArray) {
+                                 action.perform(context, session, id);
                              }
                          }
                  );
-                 session.close();
+                 if (flush) {
+                     if (persistAll) {
+                         session.flush();
+                     } else {
+                         session.flush(tokens);
+                     }
+                 }
+                 if (clear) {
+                     session.clear();
+                 }
              });
              if (parallel) {
-                 initialSessionFactory.lifecycleEvent(LifecycleEvent.POST_PARALLEL_ITERATION);
+                 sessionFactory.lifecycleEvent(LifecycleEvent.POST_PARALLEL_ITERATION);
              }
          }
 
          @Override
-         public ContextConfig sharedEntities() {
-             this.mode = Session.Mode.SHARED;
+         public Config persistingAll() {
+             persistAll = true;
              return this;
          }
 
          @Override
-         public ContextConfig readOnlyEntities() {
-             this.mode = Session.Mode.NO_PERSIST;
-             return this;
-         }
-
-         @Override
-         public ContextConfig detachedEntities() {
-             this.mode = Session.Mode.DETACHED_ENTITIES;
-             return this;
-         }
-
-         @Override
-         public ContextConfig persistingAll() {
-             return this;
-         }
-
-         @Override
-         public ContextConfig persisting(Object... components) {
+         public Config persisting(Class<?>... components) {
              componentsToPersist = components;
+             persistAll = false;
+             return this;
+         }
+
+         public Config withoutPersisting() {
+             flush = false;
+             persistAll = false;
+             componentsToPersist = null;
              return this;
          }
 
          @Override
-         public FirstVisitConfig<Void> withoutContext() {
+         public ActionConfig<Void> withoutContext() {
              this.contextFactory = (unused) -> null;
-             return (FirstVisitConfig<Void>) this;
+             return (ActionConfig<Void>) this;
          }
 
          @Override
-         public <Context> FirstVisitConfig<Context> withContext(Function<Chunk, Context> contextFactory) {
+         public <Context> ActionConfig<Context> withContext(Function<Chunk, Context> contextFactory) {
              this.contextFactory = contextFactory;
-             return (FirstVisitConfig<Context>) this;
+             return (ActionConfig<Context>) this;
          }
 
 
          @Override
-         public VisitConfig<Context> perform(Visit<Context> visit) {
-             visits.add(visit);
+         public ActionConfig<Context> perform(Action<Context> action) {
+             actions.add(action);
              return this;
-         }
-
-         @Override
-         public VisitConfig<Context> andPerform(Visit<Context> visit) {
-             return perform(visit);
          }
 
          @Override
          public EntitySystem build() {
-             operationsArray = visits.toArray(new Visit[0]);
+             operationsArray = actions.toArray(new Action[0]);
              return this;
          }
      }
 
-     public interface PersistenceConfig {
-         ContextConfig sharedEntities();
+     public interface Config {
 
-         ContextConfig readOnlyEntities();
-
-         ContextConfig detachedEntities();
-
-         ContextConfig persistingAll();
-
-         ContextConfig persisting(Object... components);
+         Config persistingAll();
+         Config persisting(Class<?>... components);
+         Config withoutPersisting();
+         ActionConfig<Void> withoutContext();
+         <Context> ActionConfig<Context> withContext(Function<Chunk, Context> contextFactory);
      }
 
-     public interface ContextConfig {
-         FirstVisitConfig<Void> withoutContext();
-
-         <Context> FirstVisitConfig<Context> withContext(Function<Chunk, Context> contextFactory);
-     }
-
-     public interface FirstVisitConfig<Context> {
-         VisitConfig<Context> perform(Visit<Context> visit);
-
-     }
-
-
-     public interface VisitConfig<Context> {
-         VisitConfig<Context> andPerform(Visit<Context> visit);
-
+     public interface ActionConfig<Context> {
+         ActionConfig<Context> perform(Action<Context> action);
          EntitySystem build();
      }
 
-     public static PersistenceConfig iteratingOver(final Selector selector) {
-         return new IteratingSystem(selector, false);
+     public static Config iteratingOver(final Index index) {
+         return new IteratingSystem(() -> index, false);
      }
 
-     public static PersistenceConfig iteratingOverInParallel(final Selector selector) {
-         return new IteratingSystem(selector, true);
+     public static Config iteratingOverInParallel(final Index index) {
+         return new IteratingSystem(() -> index, true);
+     }
+
+     public static Config iteratingOver(final Supplier<Index> index) {
+         return new IteratingSystem(index, false);
+     }
+
+     public static Config iteratingOverInParallel(final Supplier<Index> index) {
+         return new IteratingSystem(index, true);
      }
 
  }

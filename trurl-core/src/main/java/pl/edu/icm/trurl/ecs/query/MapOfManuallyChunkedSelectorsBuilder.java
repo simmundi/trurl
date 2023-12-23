@@ -18,7 +18,7 @@
 
 package pl.edu.icm.trurl.ecs.query;
 
-import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
+import pl.edu.icm.trurl.ecs.index.RandomAccessIndex;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -28,12 +28,12 @@ import java.util.Map;
 import static java.util.stream.Collectors.toMap;
 
 public class MapOfManuallyChunkedSelectorsBuilder<T> implements RawQuery.Result<T> {
-    private final Map<T, ManuallyChunkedRawSelectorBuilder<?>> selectorBuilders;
+    private final Map<T, ManuallyChunkedRawIndexBuilder<?>> selectorBuilders;
 
     public MapOfManuallyChunkedSelectorsBuilder(Map<T, Integer> tagClassifiersWithInitialSizes) {
-        Map<T, ManuallyChunkedRawSelectorBuilder<?>> map = new HashMap<>();
+        Map<T, ManuallyChunkedRawIndexBuilder<?>> map = new HashMap<>();
         tagClassifiersWithInitialSizes.forEach(
-                (k, v) -> map.computeIfAbsent(k, (unused) -> new ManuallyChunkedRawSelectorBuilder<>(v))
+                (k, v) -> map.computeIfAbsent(k, (unused) -> new ManuallyChunkedRawIndexBuilder<>(v))
         );
         selectorBuilders = Collections.unmodifiableMap(map);
     }
@@ -41,7 +41,7 @@ public class MapOfManuallyChunkedSelectorsBuilder<T> implements RawQuery.Result<
     public static <K> Map<K, Integer> getDefaultSizes(Collection<K> tagClassifiers) {
         return tagClassifiers.stream().collect(toMap(
                 tagClassifier -> tagClassifier,
-                u -> ManuallyChunkedRawSelectorBuilder.DEFAULT_INITIAL_SIZE
+                u -> ManuallyChunkedRawIndexBuilder.DEFAULT_INITIAL_SIZE
         ));
     }
 
@@ -55,7 +55,7 @@ public class MapOfManuallyChunkedSelectorsBuilder<T> implements RawQuery.Result<
         selectorBuilders.get(tagClassifier).add(entityId, tag);
     }
 
-    public Map<T, RandomAccessSelector> build() {
+    public Map<T, RandomAccessIndex> build() {
         return selectorBuilders.entrySet().stream().collect(toMap(Map.Entry::getKey, entry -> entry.getValue().build()));
     }
 }

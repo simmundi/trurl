@@ -22,9 +22,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.ecs.*;
-import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
-import pl.edu.icm.trurl.ecs.selector.Selector;
-import pl.edu.icm.trurl.ecs.util.Selectors;
+import pl.edu.icm.trurl.ecs.index.Index;
+import pl.edu.icm.trurl.ecs.index.RandomAccessIndex;
+import pl.edu.icm.trurl.ecs.util.Indices;
 import pl.edu.icm.trurl.exampledata.*;
 
 import java.util.HashSet;
@@ -40,7 +40,7 @@ class QueryServiceTest {
 
     EngineConfiguration engineConfiguration;
     Engine engine;
-    Selectors selectors;
+    Indices indices;
     QueryService service;
     Random random = new Random(0);
     String[] names = {"ANNA", "BARBARA", "CELINA", "DANUTA", "EWELINA", "FILIPINA", "GRAŻYNA", "HANNA", "IRENA", "JANINA", "KRZYSZTOFA"};
@@ -50,21 +50,21 @@ class QueryServiceTest {
         engineConfiguration = Bento.createRoot().get(EngineConfigurationFactory.IT);
         engineConfiguration.addComponentClasses(Person.class, Stats.class, House.class);
         engine = engineConfiguration.getEngine();
-        selectors = new Selectors(engineConfiguration);
+        indices = new Indices(engineConfiguration);
 
         engine.execute(sf -> {
-            Session session = sf.create(10000);
+            NoCacheSession noCacheSession = sf.createOrGet(10000);
             for (int i = 0; i < 1000; i++) {
-                Entity entity = session.createEntity(
+                DetachedEntity entity = noCacheSession.createEntity(
                         randomPerson(),
                         randomStats()
                 );
-                session.createEntity(new House(entity));
+                noCacheSession.createEntity(new House(entity));
             }
-            session.close();
+            noCacheSession.close();
         });
 
-        service = new QueryService(selectors, engineConfiguration);
+        service = new QueryService(indices, engineConfiguration);
     }
 
     @Test
@@ -83,18 +83,18 @@ class QueryServiceTest {
                 result.add(entity, "unwise_" + name);
             }
         };
-        PersonMapper personMapper = (PersonMapper) engine.getMapperSet().classToMapper(Person.class);
-        StatsMapper statsMapper = (StatsMapper) engine.getMapperSet().classToMapper(Stats.class);
+        PersonDao personMapper = (PersonDao) engine.getDaoManager().classToMapper(Person.class);
+        StatsDao statsMapper = (StatsDao) engine.getDaoManager().classToMapper(Stats.class);
 
         // execute
-        Selector selector = service.fixedSelectorFromQuery(queryForWise);
+        Index index = service.fixedSelectorFromQuery(queryForWise);
 
         // assert
         AtomicInteger counter = new AtomicInteger();
         Set<String> foundNames = new HashSet<>();
         Set<String> foundWiseNames = new HashSet<>();
 
-        selector.chunks().forEach(chunk -> {
+        index.chunks().forEach(chunk -> {
             String label = chunk.getChunkInfo().getLabel();
             String name = label.split("_")[1];
             boolean wise = label.startsWith("wise_");
@@ -127,9 +127,9 @@ class QueryServiceTest {
     @Disabled
     void fixedMultipleSelectorsFromRawQueryInParallel() {
         // given
-        PersonMapper personMapper = (PersonMapper) engine.getMapperSet().classToMapper(Person.class);
-        StatsMapper statsMapper = (StatsMapper) engine.getMapperSet().classToMapper(Stats.class);
-        HouseMapper houseMapper = (HouseMapper) engine.getMapperSet().classToMapper(House.class);
+        PersonDao personMapper = (PersonDao) engine.getDaoManager().classToMapper(Person.class);
+        StatsDao statsMapper = (StatsDao) engine.getDaoManager().classToMapper(Stats.class);
+        HouseDao houseMapper = (HouseDao) engine.getDaoManager().classToMapper(House.class);
 
         RawQuery<SelectorType> rawQuery = (entityId, result, label) -> {
             if (personMapper.isPresent(entityId) && statsMapper.isPresent(entityId)) {
@@ -146,7 +146,7 @@ class QueryServiceTest {
 
 
         // execute
-        Map<SelectorType, RandomAccessSelector> selectors = service.
+        Map<SelectorType, RandomAccessIndex> selectors = service.
                 fixedMultipleSelectorsFromRawQueryInParallel(asList(SelectorType.values()), rawQuery);
 
         // assert

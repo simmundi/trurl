@@ -20,10 +20,10 @@ package pl.edu.icm.trurl.generator.writer.feature;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
-import pl.edu.icm.trurl.ecs.annotation.CollectionType;
-import pl.edu.icm.trurl.ecs.annotation.Mapped;
-import pl.edu.icm.trurl.ecs.annotation.MappedCollection;
-import pl.edu.icm.trurl.ecs.annotation.Reverse;
+import pl.edu.icm.trurl.ecs.dao.annotation.CollectionType;
+import pl.edu.icm.trurl.ecs.dao.annotation.Mapped;
+import pl.edu.icm.trurl.ecs.dao.annotation.MappedCollection;
+import pl.edu.icm.trurl.ecs.dao.annotation.ReverseReference;
 import pl.edu.icm.trurl.generator.CommonTypes;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
@@ -66,31 +66,31 @@ public class ConfigureStoreFeature implements Feature {
             String name = property.qname;
             switch (property.type) {
                 case INT_PROP:
-                    methodSpec.addStatement("meta.addInt(mapperPrefix + $S)", name);
+                    methodSpec.addStatement("meta.addInt(daoPrefix + $S)", name);
                     break;
                 case BOOLEAN_PROP:
-                    methodSpec.addStatement("meta.addBoolean(mapperPrefix + $S)", name);
+                    methodSpec.addStatement("meta.addBoolean(daoPrefix + $S)", name);
                     break;
                 case BYTE_PROP:
-                    methodSpec.addStatement("meta.addByte(mapperPrefix + $S)", name);
+                    methodSpec.addStatement("meta.addByte(daoPrefix + $S)", name);
                     break;
                 case DOUBLE_PROP:
-                    methodSpec.addStatement("meta.addDouble(mapperPrefix + $S)", name);
+                    methodSpec.addStatement("meta.addDouble(daoPrefix + $S)", name);
                     break;
                 case SOFT_ENUM_PROP:
-                    methodSpec.addStatement("meta.addCategory(mapperPrefix + $S, $L)", name, property.name + "Manager");
+                    methodSpec.addStatement("meta.addCategory(daoPrefix + $S, $L)", name, property.name + "Manager");
                     break;
                 case ENUM_PROP:
-                    methodSpec.addStatement("meta.addEnum(mapperPrefix + $S, $T.class)", name, property.unwrappedTypeName);
+                    methodSpec.addStatement("meta.addEnum(daoPrefix + $S, $T.class)", name, property.unwrappedTypeName);
                     break;
                 case FLOAT_PROP:
-                    methodSpec.addStatement("meta.addFloat(mapperPrefix + $S)", name);
+                    methodSpec.addStatement("meta.addFloat(daoPrefix + $S)", name);
                     break;
                 case SHORT_PROP:
-                    methodSpec.addStatement("meta.addShort(mapperPrefix + $S)", name);
+                    methodSpec.addStatement("meta.addShort(daoPrefix + $S)", name);
                     break;
                 case STRING_PROP:
-                    methodSpec.addStatement("meta.addString(mapperPrefix + $S)", name);
+                    methodSpec.addStatement("meta.addString(daoPrefix + $S)", name);
                     break;
                 case EMBEDDED_LIST_PROP:
                     Optional<MappedCollection> mappedCollection = Optional.ofNullable(property.attribute.getAnnotation(MappedCollection.class));
@@ -98,36 +98,36 @@ public class ConfigureStoreFeature implements Feature {
                     int sizeMargin = mappedCollection.map(MappedCollection::margin).orElse(2);
                     String methodName = mappedCollection.map(MappedCollection::collectionType).orElse(CollectionType.RANGE) == CollectionType.RANGE ? "rangeTyped" : "arrayTyped";
 
-                    methodSpec.addStatement("$L = ($T) mappers.create($T.class, mapperPrefix + $S)", property.fieldName, property.getMapperType(), property.unwrappedTypeName, property.name);
-                    methodSpec.addStatement("$L.configureStore(meta.addJoin(mapperPrefix + $S).$L($L, $L))", property.fieldName, name, methodName, sizeMin, sizeMargin);
+                    methodSpec.addStatement("$L = ($T) daos.create($T.class, daoPrefix + $S)", property.fieldName, property.getMapperType(), property.unwrappedTypeName, property.name);
+                    methodSpec.addStatement("$L.configureStore(meta.addJoin(daoPrefix + $S).$L($L, $L))", property.fieldName, name, methodName, sizeMin, sizeMargin);
                     break;
                 case EMBEDDED_PROP:
-                    methodSpec.addStatement("$L = ($T) mappers.create($T.class, mapperPrefix + $S)", property.fieldName, property.getMapperType(), property.unwrappedTypeName, property.name);
+                    methodSpec.addStatement("$L = ($T) daos.create($T.class, daoPrefix + $S)", property.fieldName, property.getMapperType(), property.unwrappedTypeName, property.name);
                     methodSpec.addStatement("$L.configureStore(meta)", property.fieldName);
                     break;
                 case EMBEDDED_DENSE_PROP:
-                    methodSpec.addStatement("$L = ($T) mappers.create($T.class, mapperPrefix + $S)", property.fieldName, property.getMapperType(), property.unwrappedTypeName, property.name);
-                    Reverse reverse = Optional.ofNullable(property.attribute.getAnnotation(Mapped.class)).map(Mapped::reverse).orElse(Reverse.NO_REVERSE_ATTRIBUTE);
-                    switch (reverse) {
+                    methodSpec.addStatement("$L = ($T) daos.create($T.class, daoPrefix + $S)", property.fieldName, property.getMapperType(), property.unwrappedTypeName, property.name);
+                    ReverseReference reverseReference = Optional.ofNullable(property.attribute.getAnnotation(Mapped.class)).map(Mapped::reverse).orElse(ReverseReference.NO_REVERSE_ATTRIBUTE);
+                    switch (reverseReference) {
                         case NO_REVERSE_ATTRIBUTE:
-                            methodSpec.addStatement("$L.configureStore(meta.addJoin(mapperPrefix + $S).singleTyped())", property.fieldName, name);
+                            methodSpec.addStatement("$L.configureStore(meta.addJoin(daoPrefix + $S).singleTyped())", property.fieldName, name);
                             break;
                         case WITH_REVERSE_ATTRIBUTE:
-                            methodSpec.addStatement("$L.configureStore(meta.addJoin(mapperPrefix + $S).singleTypedWithReverse())", property.fieldName, name);
+                            methodSpec.addStatement("$L.configureStore(meta.addJoin(daoPrefix + $S).singleTypedWithReverse())", property.fieldName, name);
                             break;
                         case ONLY_REVERSE_ATTRIBUTE:
-                            methodSpec.addStatement("$L.configureStore(meta.addJoin(mapperPrefix + $S).singleTypedWithReverseOnly())", property.fieldName, name);
+                            methodSpec.addStatement("$L.configureStore(meta.addJoin(daoPrefix + $S).singleTypedWithReverseOnly())", property.fieldName, name);
                             break;
                         default:
-                            throw new IllegalStateException("Unknown reverse type " + reverse);
+                            throw new IllegalStateException("Unknown reverseReference type " + reverseReference);
                     }
-//                    methodSpec.addStatement("$L.configureStore(meta.addJoin(mapperPrefix + $S).singleTyped())", property.fieldName, name);
+//                    methodSpec.addStatement("$L.configureStore(meta.addJoin(daoPrefix + $S).singleTyped())", property.fieldName, name);
                     break;
                 case ENTITY_LIST_PROP:
-                    methodSpec.addStatement("meta.addReference(mapperPrefix + $S).arrayTyped($L, $L)", name, 1, 2);
+                    methodSpec.addStatement("meta.addReference(daoPrefix + $S).arrayTyped($L, $L)", name, 1, 2);
                     break;
                 case ENTITY_PROP:
-                    methodSpec.addStatement("meta.addReference(mapperPrefix + $S).single()", name);
+                    methodSpec.addStatement("meta.addReference(daoPrefix + $S).single()", name);
                     break;
                 default:
                     throw new IllegalStateException("Unknown entity type " + property.type);

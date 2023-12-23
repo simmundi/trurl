@@ -21,53 +21,52 @@ package pl.edu.icm.trurl.ecs.query;
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.EngineConfiguration;
 import pl.edu.icm.trurl.ecs.EntitySystem;
-import pl.edu.icm.trurl.ecs.selector.Chunk;
-import pl.edu.icm.trurl.ecs.selector.ChunkInfo;
-import pl.edu.icm.trurl.ecs.selector.RandomAccessSelector;
+import pl.edu.icm.trurl.ecs.index.Chunk;
+import pl.edu.icm.trurl.ecs.index.ChunkInfo;
+import pl.edu.icm.trurl.ecs.index.RandomAccessIndex;
+import pl.edu.icm.trurl.ecs.util.Action;
+import pl.edu.icm.trurl.ecs.util.Indices;
 import pl.edu.icm.trurl.ecs.util.IteratingSystemBuilder;
-import pl.edu.icm.trurl.ecs.util.Selectors;
-import pl.edu.icm.trurl.ecs.util.Visit;
 
 import java.util.Collection;
 import java.util.Map;
 
 public class QueryService {
 
-    private final Selectors selectors;
+    private final Indices indices;
     private final EngineConfiguration engineConfiguration;
 
     @WithFactory
-    public QueryService(Selectors selectors,
+    public QueryService(Indices indices,
                         EngineConfiguration engineConfiguration) {
-        this.selectors = selectors;
+        this.indices = indices;
         this.engineConfiguration = engineConfiguration;
     }
 
-    public <T> RandomAccessSelector fixedSelectorFromQuery(Query<T> query) {
+    public <T> RandomAccessIndex fixedSelectorFromQuery(Query<T> query) {
         ManuallyChunkedSelectorBuilder<T> selectorBuilder = new ManuallyChunkedSelectorBuilder<>();
-        EntitySystem entitySystem = IteratingSystemBuilder.iteratingOver(selectors.allEntities())
-                .readOnlyEntities()
+        EntitySystem entitySystem = IteratingSystemBuilder.iteratingOver(indices.allEntities())
                 .withoutContext()
-                .perform(Visit.of(entity -> query.process(entity, selectorBuilder, ChunkInfo.DEFAULT_LABEL)))
+                .perform(Action.of(entity -> query.process(entity, selectorBuilder, ChunkInfo.DEFAULT_LABEL)))
                 .build();
 
         engineConfiguration.getEngine().execute(entitySystem);
         return selectorBuilder.build();
     }
 
-    public <T> Map<T, RandomAccessSelector> fixedMultipleSelectorsFromRawQueryInParallel(Map<T, Integer> tagClassifiersWithInitialSizes,
-                                                                                         RawQuery<T> query) {
+    public <T> Map<T, RandomAccessIndex> fixedMultipleSelectorsFromRawQueryInParallel(Map<T, Integer> tagClassifiersWithInitialSizes,
+                                                                                      RawQuery<T> query) {
         MapOfManuallyChunkedSelectorsBuilder<T> selectorsBuilder = new MapOfManuallyChunkedSelectorsBuilder<>(tagClassifiersWithInitialSizes);
 
-        selectors.allEntities().chunks()
+        indices.allEntities().chunks()
                 .flatMapToInt(Chunk::ids)
                 .parallel()
                 .forEach(id -> query.process(id, selectorsBuilder, ChunkInfo.DEFAULT_LABEL));
         return selectorsBuilder.build();
     }
 
-    public <T> Map<T, RandomAccessSelector> fixedMultipleSelectorsFromRawQueryInParallel(Collection<T> tagClassifiers,
-                                                                                         RawQuery<T> query) {
+    public <T> Map<T, RandomAccessIndex> fixedMultipleSelectorsFromRawQueryInParallel(Collection<T> tagClassifiers,
+                                                                                      RawQuery<T> query) {
         return fixedMultipleSelectorsFromRawQueryInParallel(MapOfManuallyChunkedSelectorsBuilder.getDefaultSizes(tagClassifiers),
                 query);
     }

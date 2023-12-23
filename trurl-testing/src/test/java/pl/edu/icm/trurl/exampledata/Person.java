@@ -18,12 +18,12 @@
 
 package pl.edu.icm.trurl.exampledata;
 
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
-import pl.edu.icm.trurl.ecs.mapper.feature.CanBeNormalized;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
+import pl.edu.icm.trurl.ecs.dao.feature.CanBeNormalized;
 
 import java.util.Locale;
 
-@WithMapper
+@WithDao
 public class Person implements CanBeNormalized {
     private String name;
 

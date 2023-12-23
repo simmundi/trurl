@@ -18,9 +18,7 @@
 
 package pl.edu.icm.trurl.ecs.util;
 
-import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.Session;
-import pl.edu.icm.trurl.ecs.EntitySystem;
+import pl.edu.icm.trurl.ecs.*;
 import pl.edu.icm.trurl.util.Status;
 
 /**

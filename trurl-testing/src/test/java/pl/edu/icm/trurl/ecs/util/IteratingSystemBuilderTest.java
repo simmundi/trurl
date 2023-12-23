@@ -22,21 +22,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.EntitySystem;
-import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.NoCacheSession;
 import pl.edu.icm.trurl.ecs.SessionFactory;
-import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
-import pl.edu.icm.trurl.ecs.selector.Chunk;
-import pl.edu.icm.trurl.ecs.selector.Selector;
+import pl.edu.icm.trurl.ecs.dao.LifecycleEvent;
+import pl.edu.icm.trurl.ecs.index.Chunk;
 
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
@@ -47,60 +41,59 @@ class IteratingSystemBuilderTest {
 
     private Function<Chunk, String> contextFactory = chunk -> "#" + chunk.getChunkInfo().getChunkId();
     @Mock
-    private Visit<String> visit1;
+    private Action<String> action1;
     @Mock
-    private Visit<String> visit2;
+    private Action<String> action2;
     @Mock
     SessionFactory sessionFactory;
     @Mock
-    Session session;
+    NoCacheSession noCacheSession;
 
     @Test
     @DisplayName("Should create a system running in parallel")
     void create() {
         // given
-        RangeSelector rangeSelector = new RangeSelector(0, 1000, 10);
+        RangeIndex rangeIndex = new RangeIndex(0, 1000, 10);
         when(sessionFactory.withModeAndCount(any(), anyInt())).thenReturn(sessionFactory);
-        when(sessionFactory.create(anyInt())).thenReturn(session);
+        when(sessionFactory.createOrGet(anyInt())).thenReturn(noCacheSession);
 
         // execute
-        EntitySystem system = IteratingSystemBuilder.iteratingOverInParallel(rangeSelector)
+        EntitySystem system = IteratingSystemBuilder.iteratingOverInParallel(rangeIndex)
                 .persistingAll()
                 .withContext(contextFactory)
-                .perform(visit1)
-                .andPerform(visit2)
+                .perform(action1)
                 .build();
         system.execute(sessionFactory);
 
         // assert
-        verify(sessionFactory).withModeAndCount(Session.Mode.NORMAL, 80);
+        verify(sessionFactory).withModeAndCount(NoCacheSession.Mode.NORMAL, 80);
         verify(sessionFactory).lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
-        verify(sessionFactory, times(100)).create(anyInt());
-        verify(visit1, times(1000)).perform(anyString(), eq(session), anyInt());
-        verify(visit2, times(1000)).perform(anyString(), eq(session), anyInt());
+        verify(sessionFactory, times(100)).createOrGet(anyInt());
+        verify(action1, times(1000)).perform(anyString(), eq(noCacheSession), anyInt());
+        verify(action2, times(1000)).perform(anyString(), eq(noCacheSession), anyInt());
     }
 
     @Test
     @DisplayName("Should create a system running in sequence")
     void create__sequential() {
         // given
-        RangeSelector rangeSelector = new RangeSelector(0, 1000, 10);
+        RangeIndex rangeSelector = new RangeIndex(0, 1000, 10);
         when(sessionFactory.withModeAndCount(any(), anyInt())).thenReturn(sessionFactory);
-        when(sessionFactory.create(anyInt())).thenReturn(session);
+        when(sessionFactory.createOrGet(anyInt())).thenReturn(noCacheSession);
 
         // execute
         EntitySystem system = IteratingSystemBuilder.iteratingOver(rangeSelector)
-                .detachedEntities()
+                .withoutPersisting()
                 .withContext(contextFactory)
-                .perform(visit1)
+                .perform(action1)
                 .build();
         system.execute(sessionFactory);
 
         // assert
-        verify(sessionFactory).withModeAndCount(Session.Mode.DETACHED_ENTITIES, 80);
+        verify(sessionFactory).withModeAndCount(NoCacheSession.Mode.DETACHED_ENTITIES, 80);
         verify(sessionFactory, never()).lifecycleEvent(any());
-        verify(sessionFactory, times(100)).create(anyInt());
-        verify(visit1, times(1000)).perform(anyString(), eq(session), anyInt());
+        verify(sessionFactory, times(100)).createOrGet(anyInt());
+        verify(action1, times(1000)).perform(anyString(), eq(noCacheSession), anyInt());
     }
 
 }

@@ -1,74 +1,120 @@
-/*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- *
- */
-
 package pl.edu.icm.trurl.ecs;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import pl.edu.icm.trurl.ecs.mapper.ComponentOwner;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 
-public final class Session extends AbstractSession implements ComponentOwner {
+public class Session extends AbstractSession {
+    private final Long2IntOpenHashMap idToSessionIndex;
+    private final DaoManager daoManager;
     private final Engine engine;
-    private final Int2ObjectMap<Entity> entities;
+    private final Object[][] components;
+    private final Entity[] entities;
+    private final long[] ids;
+    private int ownerId;
+    private int counter;
 
-    private final boolean detachedEntities;
-    private final boolean createStubEntities;
-    private final boolean persist;
-    private final boolean clearOnClose;
-
-    private final int ownerId;
-
-    Session(Engine engine, int expectedEntityCount, Mode mode, int ownerId) {
+    public Session(Engine engine, int capacity) {
+        idToSessionIndex = new Long2IntOpenHashMap(capacity);
+        this.daoManager = engine.getDaoManager();
+        int componentCount = daoManager.componentCount();
+        components = new Object[componentCount][capacity];
+        ids = new long[capacity];
+        entities = new Entity[capacity];
         this.engine = engine;
-        this.createStubEntities = mode == Mode.STUB_ENTITIES;
-        this.detachedEntities = mode == Mode.DETACHED_ENTITIES;
-        this.persist = (mode == Mode.NORMAL || mode == Mode.SHARED);
-        this.clearOnClose = (mode == Mode.SHARED);
-        this.entities = (detachedEntities || expectedEntityCount == 0) ? null : new Int2ObjectOpenHashMap<>(expectedEntityCount);
-        this.ownerId = ownerId;
+        this.counter = 0;
     }
 
-    @Override
-    public void close() {
-        if (persist) {
-            entities.values().stream().forEach(Entity::persist);
+    public void clear() {
+        idToSessionIndex.clear();
+        for (int i = 0; i < components.length; i++) {
+            Object[] component = components[i];
+            for (int j = 0; j < component.length; j++) {
+                component[j] = null;
+            }
         }
-        if (clearOnClose) {
-            entities.clear();
+        for (int i = 0; i < entities.length; i++) {
+            entities[i] = null;
+        }
+        counter = 0;
+    }
+
+    public void flush() {
+
+    }
+
+    public void flush(ComponentToken<?>... tokens) {
+        for (ComponentToken token : tokens) {
+            for (int i = 0; i < counter; i++) {
+                if (components[token.index][i] != null) {
+                    token.dao.save(this, components[token.index][i], (int) ids[i]);
+                }
+            }
         }
     }
 
-    @Override
-    public Entity getEntity(int id) {
-        if (createStubEntities) {
-            return new Entity(id);
-        } else if (detachedEntities) {
-            return new Entity(engine.getMapperSet(), this, id);
+    <T> T get(Class<T> componentClass, int sessionIndex) {
+        return get(daoManager.classToToken(componentClass), sessionIndex, false);
+    }
+
+    <T> T getOrCreate(Class<T> componentClass, int sessionIndex) {
+        return get(daoManager.classToToken(componentClass), sessionIndex, true);
+    }
+
+    <T> T add(T component, int sessionIndex) {
+        return add((ComponentToken<T>) daoManager.classToToken(component.getClass()), component, sessionIndex);
+    }
+
+    <T> T add(ComponentToken<T> token, T component, int sessionIndex) {
+        components[token.index][sessionIndex] = component;
+        return component;
+    }
+
+    long getId(int sessionIndex) {
+        return ids[sessionIndex];
+    }
+
+    <T> T get(ComponentToken<T> token, int sessionIndex, boolean createIfDoesntExist) {
+        T existing = (T) components[token.index][sessionIndex];
+        if (existing != null) {
+            return existing;
         } else {
-            return entities
-                    .computeIfAbsent(id, newId ->
-                            new Entity(engine.getMapperSet(), this, newId));
+            long id = ids[sessionIndex];
+            if (token.dao.isPresent((int) id)) {
+                T component = token.dao.createAndLoad(this, (int) id);
+                components[token.index][sessionIndex] = component;
+                return component;
+            } else if (createIfDoesntExist) {
+                T component = token.dao.create();
+                components[token.index][sessionIndex] = component;
+                return component;
+            } else {
+                return null;
+            }
         }
+    }
+
+    @Override
+    public Entity getEntity(long id) {
+        int sessionIndex = idToSessionIndex.getOrDefault(id, -1);
+        if (sessionIndex >= 0) {
+            return entities[sessionIndex];
+        } else {
+            return createEmptyEntity(id);
+        }
+    }
+
+    private Entity createEmptyEntity(long id) {
+        int newIndex = counter++;
+        idToSessionIndex.put(id, newIndex);
+        ids[newIndex] = id;
+        Entity entity = new Entity(this, newIndex);
+        entities[newIndex] = entity;
+        return entity;
     }
 
     @Override
     public Entity createEntity(Object... components) {
-        Entity entity = getEntity(engine.nextId());
+        long id = engine.allocateNextId();
+        Entity entity = createEmptyEntity(id);
         for (Object component : components) {
             entity.add(component);
         }
@@ -76,34 +122,15 @@ public final class Session extends AbstractSession implements ComponentOwner {
     }
 
     @Override
-    public void deleteEntity(Entity entity) {
-        if (detachedEntities) {
-            throw new IllegalStateException("Cannot remove entity from detached session");
-        }
-        entities.remove(entity.getId());
-        engine.getRootStore().free((int) entity.getId());
-    }
-
-    @Override
-    public Engine getEngine() {
-        return engine;
-    }
-
-    @Override
-    public int getCount() {
-        return entities == null ? 0 : entities.size();
-    }
-
-    @Override
     public int getOwnerId() {
         return ownerId;
     }
 
-    public enum Mode {
-        NORMAL,
-        STUB_ENTITIES,
-        DETACHED_ENTITIES,
-        NO_PERSIST,
-        SHARED
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public Engine getEngine() {
+        return engine;
     }
 }

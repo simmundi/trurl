@@ -18,24 +18,24 @@
 
 package pl.edu.icm.trurl.exampledata;
 
-import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+import pl.edu.icm.trurl.ecs.DetachedEntity;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@WithMapper
+@WithDao
 public class House {
-    private List<Entity> members = new ArrayList<>();
+    private List<DetachedEntity> members = new ArrayList<>();
 
     public House() {
     }
 
-    public House(Entity entity) {
+    public House(DetachedEntity entity) {
         members.add(entity);
     }
 
-    public List<Entity> getMembers() {
+    public List<DetachedEntity> getMembers() {
         return members;
     }
 }

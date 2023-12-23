@@ -18,20 +18,20 @@
 
 package pl.edu.icm.trurl.exampledata;
 
-import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+import pl.edu.icm.trurl.ecs.DetachedEntity;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@WithMapper
+@WithDao
 public class BunchOfData {
     private boolean booleanProp;
     private byte byteProp;
     private double doubleProp;
-    private List<Entity> entitiesProp = new ArrayList<>();
-    private Entity entityProp;
+    private List<DetachedEntity> entitiesProp = new ArrayList<>();
+    private DetachedEntity entityProp;
     private Color enumProp;
     private float floatProp;
     private int intProp;
@@ -104,15 +104,15 @@ public class BunchOfData {
         this.stringProp = stringProp;
     }
 
-    public List<Entity> getEntitiesProp() {
+    public List<DetachedEntity> getEntitiesProp() {
         return entitiesProp;
     }
 
-    public Entity getEntityProp() {
+    public DetachedEntity getEntityProp() {
         return entityProp;
     }
 
-    public void setEntityProp(Entity entityProp) {
+    public void setEntityProp(DetachedEntity entityProp) {
         this.entityProp = entityProp;
     }
 

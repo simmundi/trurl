@@ -18,14 +18,14 @@
 
 package pl.edu.icm.trurl.ecs;
 
-import pl.edu.icm.trurl.ecs.mapper.Mapper;
+import pl.edu.icm.trurl.ecs.dao.Dao;
 
 public class ComponentToken<T> {
-    final public Mapper<T> mapper;
+    final public Dao<T> dao;
     final int index;
 
-    ComponentToken(Mapper<T> mapper, int index) {
-        this.mapper = mapper;
+    ComponentToken(Dao<T> dao, int index) {
+        this.dao = dao;
         this.index = index;
     }
 }

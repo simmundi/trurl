@@ -16,4 +16,4 @@
 #
 #
 
-pl.edu.icm.trurl.generator.MapperGenerator
+pl.edu.icm.trurl.generator.DaoGenerator

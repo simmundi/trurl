@@ -22,13 +22,14 @@ import com.google.common.base.Preconditions;
 import net.snowyhollows.bento.Bento;
 import net.snowyhollows.bento.annotation.ByName;
 import net.snowyhollows.bento.annotation.WithFactory;
-import pl.edu.icm.trurl.ecs.mapper.MappersFactory;
+import pl.edu.icm.trurl.ecs.dao.DaosFactory;
 import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EngineConfiguration {
+    private final int sessionCacheSize;
     private volatile Engine engine;
     private ComponentAccessorCreator componentAccessorCreator;
     private List<EngineCreationListener> engineCreationListeners = new CopyOnWriteArrayList<>();
@@ -37,23 +38,21 @@ public class EngineConfiguration {
     private final Bento bento;
     private final int initialCapacity;
     private final int capacityHeadroom;
-    private final boolean sharedSession;
 
     @WithFactory
     public EngineConfiguration(ComponentAccessorCreator componentAccessorCreator,
                                @ByName(value = "trurl.engine.initial-capacity", fallbackValue = "1024") int initialCapacity,
                                @ByName(value = "trurl.engine.capacity-headroom", fallbackValue = "128") int capacityHeadroom,
-                               @ByName(value = "trurl.engine.shared-session", fallbackValue = "false") boolean sharedSession,
+                               @ByName(value = "trurl.engine.session-cache-size", fallbackValue = "100000") int sessionCacheSize,
                                AttributeFactory attributeFactory,
                                Bento bento) {
         this.componentAccessorCreator = componentAccessorCreator;
         this.initialCapacity = initialCapacity;
         this.capacityHeadroom = capacityHeadroom;
-        this.sharedSession = sharedSession;
         this.attributeFactory = attributeFactory;
+        this.sessionCacheSize = sessionCacheSize;
         this.bento = bento;
     }
-
 
     public void addEngineCreationListener(EngineCreationListener engineCreationListeners) {
         preconditionEngineNotCreated();
@@ -62,7 +61,7 @@ public class EngineConfiguration {
 
     public Engine getEngine() {
         if (engine == null) {
-            engine = new Engine(initialCapacity, capacityHeadroom, getMapperSet(), sharedSession, attributeFactory);
+            engine = new Engine(initialCapacity, capacityHeadroom, getDaoManager(), attributeFactory, sessionCacheSize);
             for (EngineCreationListener engineCreationListener : engineCreationListeners) {
                 engineCreationListener.onEngineCreated(engine);
             }
@@ -76,10 +75,10 @@ public class EngineConfiguration {
     }
 
 
-    private MapperSet getMapperSet() {
+    private DaoManager getDaoManager() {
         preconditionEngineNotCreated();
         ComponentAccessor componentAccessor = getComponentIndexer();
-        return new MapperSet(componentAccessor, bento.get(MappersFactory.IT));
+        return new DaoManager(componentAccessor, bento.get(DaosFactory.IT));
     }
 
     private ComponentAccessor getComponentIndexer() {

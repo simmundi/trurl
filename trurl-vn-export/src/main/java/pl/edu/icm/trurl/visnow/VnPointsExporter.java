@@ -20,10 +20,10 @@ package pl.edu.icm.trurl.visnow;
 
 import net.snowyhollows.bento.config.DefaultWorkDir;
 import net.snowyhollows.bento.config.WorkDir;
-import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.NoCacheSession;
 import pl.edu.icm.trurl.ecs.SessionFactory;
-import pl.edu.icm.trurl.ecs.mapper.Mapper;
-import pl.edu.icm.trurl.ecs.mapper.Mappers;
+import pl.edu.icm.trurl.ecs.dao.Dao;
+import pl.edu.icm.trurl.ecs.dao.Daos;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class VnPointsExporter<T extends VnCoords> {
-    private final Mapper<T> mapper;
+    private final Dao<T> dao;
     private final Store store;
     private final String baseFileName;
     private final File baseDir;
@@ -45,30 +45,30 @@ public class VnPointsExporter<T extends VnCoords> {
     private final List<ColumnWrapper> columns;
     private final DataOutputStream dataOut;
     private final WorkDir workDir;
-    private final Session session;
+    private final NoCacheSession noCacheSession;
 
-    private VnPointsExporter(Mapper<T> mapper, WorkDir workDir, String baseFilePath) throws FileNotFoundException {
+    private VnPointsExporter(Dao<T> dao, WorkDir workDir, String baseFilePath) throws FileNotFoundException {
         File file = new File(baseFilePath);
         this.baseFileName = file.getName();
         this.store = new Store(new ArrayAttributeFactory(), 1);
-        this.mapper = mapper;
-        this.mapper.configureStore(store);
-        this.mapper.attachStore(store);
+        this.dao = dao;
+        this.dao.configureStore(store);
+        this.dao.attachStore(store);
         this.workDir = workDir;
         this.baseDir = file.getParentFile();
-        columns = mapper.attributes().stream()
+        columns = dao.attributes().stream()
                 .filter(c -> !c.name().equals("x") && !c.name().equals("y"))
                 .map(c -> ColumnWrapper.from(c))
                 .collect(Collectors.toList());
         dataOut = new DataOutputStream(new BufferedOutputStream(
                 workDir.openForWriting(new File(baseDir, baseFileName + ".vnd")),
                 1024 * 128));
-        session = new SessionFactory(null, Session.Mode.STUB_ENTITIES).create();
+        noCacheSession = new SessionFactory(null, NoCacheSession.Mode.STUB_ENTITIES).createOrGet();
     }
 
     public static <T extends VnCoords> VnPointsExporter<T> create(Class<T> componentClass, String baseFileName) {
         try {
-            return new VnPointsExporter<>(new Mappers().create(componentClass), new DefaultWorkDir(), baseFileName);
+            return new VnPointsExporter<>(new Daos().create(componentClass), new DefaultWorkDir(), baseFileName);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -76,7 +76,7 @@ public class VnPointsExporter<T extends VnCoords> {
 
     public static <T extends VnCoords> VnPointsExporter<T> create(Class<T> componentClass, WorkDir workDir, String baseFileName) {
         try {
-            return new VnPointsExporter<>(new Mappers().create(componentClass), workDir, baseFileName);
+            return new VnPointsExporter<>(new Daos().create(componentClass), workDir, baseFileName);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -85,7 +85,7 @@ public class VnPointsExporter<T extends VnCoords> {
     public void append(T item) {
         try {
             rows++;
-            mapper.save(session, item, 0);
+            dao.save(noCacheSession, item, 0);
             dataOut.writeFloat(item.getX());
             dataOut.writeFloat(item.getY());
             dataOut.writeFloat(0);

@@ -18,7 +18,7 @@
 
 package pl.edu.icm.trurl.generator;
 
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentFeatureExtractor;
 
@@ -32,14 +32,14 @@ public class BeanFinder {
     public Stream<BeanMetadata> findBeans(ProcessingEnvironment processingEnvironment, RoundEnvironment roundEnvironment) {
         ComponentFeatureExtractor featureExtractor = new ComponentFeatureExtractor(processingEnvironment);
         return roundEnvironment
-                .getElementsAnnotatedWith(WithMapper.class)
+                .getElementsAnnotatedWith(WithDao.class)
                 .stream()
                 .map(element -> (TypeElement) element )
                 .map(element ->
                         new BeanMetadata(
                                 processingEnvironment,
                                 element,
-                                element.getAnnotation(WithMapper.class).namespace(),
+                                element.getAnnotation(WithDao.class).namespace(),
                                 featureExtractor.extractFeatures(element)
                         ));
     }
