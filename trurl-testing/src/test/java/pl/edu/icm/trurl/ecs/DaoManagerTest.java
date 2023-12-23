@@ -47,8 +47,8 @@ class DaoManagerTest {
     @Test
     void classToMapper() {
         // execute
-        Looks looks = daoManager.classToMapper(Looks.class).create();
-        Stats stats = daoManager.classToMapper(Stats.class).create();
+        Looks looks = daoManager.classToDao(Looks.class).create();
+        Stats stats = daoManager.classToDao(Stats.class).create();
 
         // assert
         assertThat(looks).isExactlyInstanceOf(Looks.class);
@@ -58,8 +58,8 @@ class DaoManagerTest {
     @Test
     void indexToMapper() {
         // execute
-        Object stats = daoManager.indexToMapper(1).create();
-        Object looks = daoManager.indexToMapper(0).create();
+        Object stats = daoManager.indexToDao(1).create();
+        Object looks = daoManager.indexToDao(0).create();
 
         // assert
         assertThat(looks).isExactlyInstanceOf(Looks.class);

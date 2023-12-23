@@ -39,11 +39,11 @@ public final class DaoManager {
         }
     }
 
-    public <T> Dao<T> classToMapper(Class<T> componentClass) {
+    public <T> Dao<T> classToDao(Class<T> componentClass) {
         return daos[componentAccessor.classToIndex(componentClass)];
     }
 
-    public <T> Dao<T> indexToMapper(int componentIndex) {
+    public <T> Dao<T> indexToDao(int componentIndex) {
         return daos[componentIndex];
     }
 
@@ -57,10 +57,14 @@ public final class DaoManager {
 
     public Stream<Dao<Object>> streamMappers() {
         return IntStream.range(0, componentCount())
-                .mapToObj(this::indexToMapper);
+                .mapToObj(this::indexToDao);
     }
 
     public <T> ComponentToken<T> classToToken(Class<T> componentClass) {
         return tokens[componentAccessor.classToIndex(componentClass)];
+    }
+
+    ComponentToken[] allTokens() {
+        return tokens;
     }
 }

@@ -1,53 +1,64 @@
 package pl.edu.icm.trurl.ecs;
 
-public final class Entity extends AnyEntity {
+import java.util.Objects;
+
+public final class Entity {
+    public final static int NULL_ID = Integer.MIN_VALUE;
 
     private final Session session;
     private int sessionIndex;
+
+    public static Entity stub(long id) {
+        return new Entity(null, (int) id);
+    }
 
     Entity(Session session, int sessionIndex) {
         this.session = session;
         this.sessionIndex = sessionIndex;
     }
 
-    @Override
     public <T> T get(Class<T> componentClass) {
         return session.get(componentClass, sessionIndex);
     }
 
-    @Override
     public <T> T get(ComponentToken<T> token) {
         return session.get(token, sessionIndex, false);
     }
 
-    @Override
     public <T> T getOrCreate(Class<T> componentClass) {
         return session.getOrCreate(componentClass, sessionIndex);
     }
 
-    @Override
     public <T> T getOrCreate(ComponentToken<T> componentClass) {
         return null;
     }
 
-    @Override
     public <T> T add(T component) {
         return session.add(component, sessionIndex);
     }
 
-    @Override
     public <T> T add(ComponentToken<T> token, T component) {
         return null;
     }
 
-    @Override
-    public long getId() {
-        return session.getId(sessionIndex);
+    public int getId() {
+        return session == null ? sessionIndex : session.getId(sessionIndex);
     }
 
-    @Override
     public Session getSession() {
         return session;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Entity entity = (Entity) o;
+        return sessionIndex == entity.sessionIndex && Objects.equals(session, entity.session);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sessionIndex);
+    }
 }

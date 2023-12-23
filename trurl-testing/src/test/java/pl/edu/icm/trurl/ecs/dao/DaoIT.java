@@ -24,9 +24,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.edu.icm.trurl.ecs.DetachedEntity;
-import pl.edu.icm.trurl.ecs.DaoManager;
-import pl.edu.icm.trurl.ecs.NoCacheSession;
+import pl.edu.icm.trurl.ecs.*;
+import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
 import pl.edu.icm.trurl.exampledata.*;
 import pl.edu.icm.trurl.store.Store;
@@ -52,7 +51,7 @@ public class DaoIT {
     @Spy
     DaoManager daoManager = new DaoManager(new DynamicComponentAccessor(Collections.emptyList()), daos);
     @Mock
-    NoCacheSession noCacheSession;
+    Session session;
 
     Dao<BunchOfData> dao;
 
@@ -88,7 +87,7 @@ public class DaoIT {
         entityReference = store.getReference("entityProp");
         entitiesReference = store.getReference("entitiesProp");
 
-        lenient().when(noCacheSession.getEntity(anyInt())).thenAnswer(call -> createEntity(call.getArgument(0, Integer.class)));
+        lenient().when(session.getEntity(anyInt())).thenAnswer(call -> createEntity(call.getArgument(0, Integer.class)));
     }
 
     @Test
@@ -157,7 +156,7 @@ public class DaoIT {
 
         // execute
         BunchOfData copy = dao.create();
-        dao.load(noCacheSession, copy, idx);
+        dao.load(session, copy, idx);
 
         // assert
         assertThat(copy).isEqualTo(original);
@@ -173,7 +172,7 @@ public class DaoIT {
 
         // execute
         BunchOfData copy = dao.create();
-        dao.load(noCacheSession, copy, idx);
+        dao.load(session, copy, idx);
 
         // assert
         assertThat(copy).isEqualTo(original);
@@ -191,7 +190,7 @@ public class DaoIT {
 
         // execute
         BunchOfData copy = dao.create();
-        dao.load(noCacheSession, copy, idx);
+        dao.load(session, copy, idx);
 
         // assert
         assertThat(copy).isEqualTo(original);
@@ -212,7 +211,7 @@ public class DaoIT {
 
         // execute
         BunchOfData copy = dao.create();
-        dao.load(noCacheSession, copy, row);
+        dao.load(session, copy, row);
 
         // assert
         assertThat(copy).isEqualTo(original);
@@ -231,7 +230,7 @@ public class DaoIT {
 
         // execute
         BunchOfData copy = dao.create();
-        dao.load(noCacheSession, copy, idx);
+        dao.load(session, copy, idx);
 
         // assert
         assertThat(copy).isEqualTo(original);
@@ -248,7 +247,7 @@ public class DaoIT {
         List<BunchOfData> readBack = IntStream.range(0, store.getCounter().getCount())
                 .mapToObj(i -> {
                     BunchOfData bod = dao.create();
-                    dao.load(noCacheSession, bod, i);
+                    dao.load(session, bod, i);
                     return bod;
                 }).collect(Collectors.toList());
 
@@ -296,8 +295,8 @@ public class DaoIT {
         return bunchOfData;
     }
 
-    private DetachedEntity createEntity(int id) {
-        return new DetachedEntity(daoManager, noCacheSession, id);
+    private Entity createEntity(long id) {
+        return Entity.stub(id);
     }
 
     private BunchOfData withStats(Stats... stats) {

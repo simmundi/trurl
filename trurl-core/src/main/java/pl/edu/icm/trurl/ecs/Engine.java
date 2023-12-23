@@ -26,21 +26,16 @@ public final class Engine {
     private final Store rootStore;
     private final DaoManager daoManager;
     private final SessionFactory cachedSessionFactory;
-    private ThreadLocal<NoCacheSession> nonCachedSessions = ThreadLocal.withInitial(Engine.this::nonCachedSession);
-
-    private NoCacheSession nonCachedSession() {
-        return nonCachedSessions.get();
-    }
 
     public Engine(int initialCapacity, int capacityHeadroom, DaoManager daoManager, AttributeFactory attributeFactory, int sessionCacheCapacity) {
         this.rootStore = new Store(attributeFactory, initialCapacity + capacityHeadroom);
         this.capacityHeadroom = capacityHeadroom;
         this.daoManager = daoManager;
         this.cachedSessionFactory = new SessionFactory(this, sessionCacheCapacity);
-    }
-
-    public NoCacheSession getNoCacheSession() {
-        return nonCachedSessions.get();
+        this.daoManager.streamMappers().forEach(mapper -> {
+            mapper.configureStore(rootStore);
+            mapper.attachStore(rootStore);
+        });
     }
 
     public Engine(Store store, int capacityHeadroom, DaoManager daoManager, int sessionCacheCapacity) {

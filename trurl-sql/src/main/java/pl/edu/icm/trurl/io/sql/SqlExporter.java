@@ -20,7 +20,7 @@ package pl.edu.icm.trurl.sql;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import pl.edu.icm.trurl.ecs.DetachedEntity;
+import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.dao.Dao;
 import pl.edu.icm.trurl.store.attribute.*;
 import pl.edu.icm.trurl.store.attribute.CategoricalStaticAttribute;
@@ -169,7 +169,7 @@ public class SqlExporter {
             preparedStatement.setString(index, attribute.getString(row));
         } else if (attribute instanceof IdentifierAttribute) {
             int id = ((IdentifierAttribute) attribute).getId(row);
-            if (id != DetachedEntity.NULL_ID) {
+            if (id != Entity.NULL_ID) {
                 preparedStatement.setInt(index, id);
             } else {
                 preparedStatement.setNull(index, Types.INTEGER);

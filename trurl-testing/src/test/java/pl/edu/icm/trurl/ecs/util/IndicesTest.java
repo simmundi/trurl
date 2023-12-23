@@ -38,6 +38,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class IndicesTest {
 
+    public static final int DEFAULT_CHUNK_SIZE = 25_000;
     @Mock
     Engine engine;
 
@@ -83,14 +84,14 @@ class IndicesTest {
 
         when(index.chunks()).thenReturn(Stream.of(chunk));
         when(engine.getDaoManager()).thenReturn(daoManager);
-        when(daoManager.classToMapper(Looks.class)).thenReturn(looksMapper);
-        when(daoManager.classToMapper(Person.class)).thenReturn(personMapper);
+        when(daoManager.classToDao(Looks.class)).thenReturn(looksMapper);
+        when(daoManager.classToDao(Person.class)).thenReturn(personMapper);
     }
 
     @Test
     void filtered() {
         //given
-        Indices indices = new Indices(engine);
+        Indices indices = new Indices(engine, DEFAULT_CHUNK_SIZE);
 
         //execute
         Index filtered = indices.filtered(index,

@@ -50,7 +50,12 @@
          @Override
          public void execute(SessionFactory sessionFactory) {
              DaoManager daoManager = sessionFactory.getEngine().getDaoManager();
-             ComponentToken<?>[] tokens = persistAll && flush ? null : Arrays.stream(componentsToPersist).map(c -> daoManager.classToToken(c)).toArray(ComponentToken[]::new);
+             boolean flushSelected = !persistAll && flush;
+             if (flushSelected && componentsToPersist == null) {
+                 throw new IllegalStateException("Persisting selected components requires specifying which components to persist");
+             }
+
+             ComponentToken<?>[] tokens = flushSelected ? Arrays.stream(componentsToPersist).map(c -> daoManager.classToToken(c)).toArray(ComponentToken[]::new) : null;
              for (Action action : operationsArray) {
                  action.init();
              }

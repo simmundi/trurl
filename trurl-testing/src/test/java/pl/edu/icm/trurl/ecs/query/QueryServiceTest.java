@@ -50,18 +50,18 @@ class QueryServiceTest {
         engineConfiguration = Bento.createRoot().get(EngineConfigurationFactory.IT);
         engineConfiguration.addComponentClasses(Person.class, Stats.class, House.class);
         engine = engineConfiguration.getEngine();
-        indices = new Indices(engineConfiguration);
+        indices = new Indices(engineConfiguration, 25000);
 
         engine.execute(sf -> {
-            NoCacheSession noCacheSession = sf.createOrGet(10000);
+            Session session = sf.createOrGet();
             for (int i = 0; i < 1000; i++) {
-                DetachedEntity entity = noCacheSession.createEntity(
+                Entity entity = session.createEntity(
                         randomPerson(),
                         randomStats()
                 );
-                noCacheSession.createEntity(new House(entity));
+                session.createEntity(new House(entity));
             }
-            noCacheSession.close();
+            session.close();
         });
 
         service = new QueryService(indices, engineConfiguration);
@@ -83,8 +83,8 @@ class QueryServiceTest {
                 result.add(entity, "unwise_" + name);
             }
         };
-        PersonDao personMapper = (PersonDao) engine.getDaoManager().classToMapper(Person.class);
-        StatsDao statsMapper = (StatsDao) engine.getDaoManager().classToMapper(Stats.class);
+        PersonDao personMapper = (PersonDao) engine.getDaoManager().classToDao(Person.class);
+        StatsDao statsMapper = (StatsDao) engine.getDaoManager().classToDao(Stats.class);
 
         // execute
         Index index = service.fixedSelectorFromQuery(queryForWise);
@@ -127,9 +127,9 @@ class QueryServiceTest {
     @Disabled
     void fixedMultipleSelectorsFromRawQueryInParallel() {
         // given
-        PersonDao personMapper = (PersonDao) engine.getDaoManager().classToMapper(Person.class);
-        StatsDao statsMapper = (StatsDao) engine.getDaoManager().classToMapper(Stats.class);
-        HouseDao houseMapper = (HouseDao) engine.getDaoManager().classToMapper(House.class);
+        PersonDao personMapper = (PersonDao) engine.getDaoManager().classToDao(Person.class);
+        StatsDao statsMapper = (StatsDao) engine.getDaoManager().classToDao(Stats.class);
+        HouseDao houseMapper = (HouseDao) engine.getDaoManager().classToDao(House.class);
 
         RawQuery<SelectorType> rawQuery = (entityId, result, label) -> {
             if (personMapper.isPresent(entityId) && statsMapper.isPresent(entityId)) {

@@ -21,19 +21,12 @@ package pl.edu.icm.trurl.visnow;
 import com.google.common.base.Preconditions;
 import net.snowyhollows.bento.config.DefaultWorkDir;
 import net.snowyhollows.bento.config.WorkDir;
-import pl.edu.icm.trurl.ecs.NoCacheSession;
-import pl.edu.icm.trurl.ecs.SessionFactory;
 import pl.edu.icm.trurl.ecs.dao.Dao;
 import pl.edu.icm.trurl.ecs.dao.Daos;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,7 +38,6 @@ public class VnAreaExporter<T> {
     private final List<ColumnWrapper> columns;
     private final DataOutputStream dataOut;
     private final WorkDir workDir;
-    private final NoCacheSession noCacheSession;
     private final int fromX;
     private final int width;
     private final int fromY;
@@ -76,20 +68,18 @@ public class VnAreaExporter<T> {
         this.dao = dao;
         this.dao.configureStore(store);
         this.dao.attachStore(store);
-//        dao.ensureCapacity(size);
         this.baseDir = file.getParentFile();
         columns = dao.attributes().stream()
                 .map(c -> ColumnWrapper.from(c))
                 .collect(Collectors.toList());
         dataOut = new DataOutputStream(new BufferedOutputStream(workDir.openForWriting(new File(baseDir, baseFileName + ".vnd")), 1024 * 128));
-        noCacheSession = new SessionFactory(null, NoCacheSession.Mode.STUB_ENTITIES).createOrGet();
     }
 
     public void append(int x, int y, T object) throws IOException {
         Preconditions.checkArgument(x >= fromX && x < fromX + width, "x out of bounds: %s", x);
         Preconditions.checkArgument(y >= fromY && y < fromY + height, "y out of bounds: %s", y);
         int index = (x - fromX) + (y - fromY) * width;
-        dao.save(noCacheSession, object, index);
+        dao.save(object, index);
     }
 
     public void close() throws IOException {

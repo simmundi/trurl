@@ -18,7 +18,7 @@
 
 package pl.edu.icm.trurl.ecs.query;
 
-import pl.edu.icm.trurl.ecs.DetachedEntity;
+import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.index.RandomAccessIndex;
 import pl.edu.icm.trurl.ecs.util.ManuallyChunkedArrayIndex;
 
@@ -45,7 +45,7 @@ public class ManuallyChunkedSelectorBuilder<T> implements Query.Result<T> {
      * @param tag    - must not be null
      */
     @Override
-    public void add(DetachedEntity entity, String tag, T tagClassifier) {
+    public void add(Entity entity, String tag, T tagClassifier) {
         data.computeIfAbsent(tag, unused -> new ConcurrentHashMap<>())
                 .put((int) entity.getId(), Boolean.TRUE);
     }

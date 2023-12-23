@@ -89,7 +89,7 @@ single index), an optional label - and an integer stream of entity identifiers.
 It allows for running pieces of logic, called *systems*, but engine does not store or manage
 `System` instances.
 
-The list of components available and noCacheSession configuration are **immutable** and
+The list of components available and session configuration are **immutable** and
 initialized at construction time. On the other hand, different objects can
 require existence of certain components.
 
@@ -242,7 +242,7 @@ A `Query` can be used to create a index.
 It allows for running pieces of logic, called *systems*, but engine does not store or manage
 `System` instances.
 
-The list of components available and noCacheSession configuration are **immutable** and
+The list of components available and session configuration are **immutable** and
 initialized at construction time. On the other hand, different objects can
 require existence of certain components.
 
@@ -272,5 +272,5 @@ trurl.engine.store-factory=array
 trurl.engine.component-accessor=dynamic
 trurl.engine.initial-capacity=1024
 trurl.engine.capacity-headroom=128
-trurl.engine.shared-noCacheSession=false
+trurl.engine.shared-session=false
 ```

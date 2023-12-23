@@ -20,19 +20,12 @@ package pl.edu.icm.trurl.visnow;
 
 import net.snowyhollows.bento.config.DefaultWorkDir;
 import net.snowyhollows.bento.config.WorkDir;
-import pl.edu.icm.trurl.ecs.NoCacheSession;
-import pl.edu.icm.trurl.ecs.SessionFactory;
 import pl.edu.icm.trurl.ecs.dao.Dao;
 import pl.edu.icm.trurl.ecs.dao.Daos;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,7 +38,6 @@ public class VnPointsExporter<T extends VnCoords> {
     private final List<ColumnWrapper> columns;
     private final DataOutputStream dataOut;
     private final WorkDir workDir;
-    private final NoCacheSession noCacheSession;
 
     private VnPointsExporter(Dao<T> dao, WorkDir workDir, String baseFilePath) throws FileNotFoundException {
         File file = new File(baseFilePath);
@@ -63,7 +55,6 @@ public class VnPointsExporter<T extends VnCoords> {
         dataOut = new DataOutputStream(new BufferedOutputStream(
                 workDir.openForWriting(new File(baseDir, baseFileName + ".vnd")),
                 1024 * 128));
-        noCacheSession = new SessionFactory(null, NoCacheSession.Mode.STUB_ENTITIES).createOrGet();
     }
 
     public static <T extends VnCoords> VnPointsExporter<T> create(Class<T> componentClass, String baseFileName) {
@@ -85,7 +76,7 @@ public class VnPointsExporter<T extends VnCoords> {
     public void append(T item) {
         try {
             rows++;
-            dao.save(noCacheSession, item, 0);
+            dao.save(item, 0);
             dataOut.writeFloat(item.getX());
             dataOut.writeFloat(item.getY());
             dataOut.writeFloat(0);

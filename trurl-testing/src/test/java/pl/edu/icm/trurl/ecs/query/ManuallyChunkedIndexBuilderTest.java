@@ -21,7 +21,7 @@ package pl.edu.icm.trurl.ecs.query;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.ecs.DetachedEntity;
+import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.index.Index;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -37,7 +37,7 @@ class ManuallyChunkedIndexBuilderTest {
         int createCount = 10000 * 27 + 1;
         IntStream.range(0, createCount).parallel().forEach(id -> {
             String label = createLabel(id);
-            mcsb.add(new DetachedEntity(id), label);
+            mcsb.add(Entity.stub(id), label);
         });
 
         // execute

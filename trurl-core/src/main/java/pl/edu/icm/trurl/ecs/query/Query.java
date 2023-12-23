@@ -18,16 +18,16 @@
 
 package pl.edu.icm.trurl.ecs.query;
 
-import pl.edu.icm.trurl.ecs.DetachedEntity;
+import pl.edu.icm.trurl.ecs.Entity;
 
 public interface Query<T> {
-    void process(DetachedEntity entity, Query.Result<T> result, String label);
+    void process(Entity entity, Query.Result<T> result, String label);
 
     interface Result<T> {
-        default void add(DetachedEntity entity, String tag) {
+        default void add(Entity entity, String tag) {
             add(entity, tag, null);
         }
 
-        void add(DetachedEntity entity, String tag, T tagClassifier);
+        void add(Entity entity, String tag, T tagClassifier);
     }
 }

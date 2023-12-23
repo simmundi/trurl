@@ -41,9 +41,9 @@ public class EngineConfiguration {
 
     @WithFactory
     public EngineConfiguration(ComponentAccessorCreator componentAccessorCreator,
-                               @ByName(value = "trurl.engine.initial-capacity", fallbackValue = "1024") int initialCapacity,
+                               @ByName(value = "trurl.engine.initial-capacity", fallbackValue = "200000") int initialCapacity,
                                @ByName(value = "trurl.engine.capacity-headroom", fallbackValue = "128") int capacityHeadroom,
-                               @ByName(value = "trurl.engine.session-cache-size", fallbackValue = "100000") int sessionCacheSize,
+                               @ByName(value = "trurl.engine.session-cache-size", fallbackValue = "20000") int sessionCacheSize,
                                AttributeFactory attributeFactory,
                                Bento bento) {
         this.componentAccessorCreator = componentAccessorCreator;

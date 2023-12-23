@@ -18,11 +18,16 @@
 package pl.edu.icm.trurl.ecs.parallel;
 
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.ecs.NoCacheSession;
-import pl.edu.icm.trurl.ecs.SessionFactory;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import pl.edu.icm.trurl.ecs.*;
+import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.ecs.dao.Dao;
 import pl.edu.icm.trurl.ecs.dao.LifecycleEvent;
 import pl.edu.icm.trurl.ecs.parallel.domain.*;
+import pl.edu.icm.trurl.ecs.parallel.domain.Counter;
 import pl.edu.icm.trurl.ecs.parallel.domain.ParallelCounterDao;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
@@ -32,16 +37,24 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class CounterWithSetupParallelIT {
     final int SIZE = 10_000;
     final int CONTENTION = 4;
     final int PER_SESSION = 1000;
     final int LOAD = 3;
 
+    @Mock
+    Engine engine;
+    @Mock
+    DaoManager daoManager;
+
     @Test
     void test_parallel() {
         // given
+        when(engine.getDaoManager()).thenReturn(daoManager);
         Store store = new Store(new ArrayAttributeFactory(), SIZE);
         ParallelCounterDao parallelMapper = new ParallelCounterDao("");
         parallelMapper.configureAndAttach(store);
@@ -50,17 +63,18 @@ public class CounterWithSetupParallelIT {
 
         // execute
         Status status = Status.of("using counters in parallel: " + createMessage());
-        SessionFactory sessionFactory = new SessionFactory(null, NoCacheSession.Mode.STUB_ENTITIES, 0);
+        SessionFactory sessionFactory = new SessionFactory(engine, 0);
 
         IntStream.range(0, SIZE * CONTENTION).parallel().forEach(chunkId -> {
             int startId = ThreadLocalRandom.current().nextInt(0, SIZE);
-            NoCacheSession noCacheSession = sessionFactory.createOrGet(chunkId + 1);
+            Session session = sessionFactory.createOrGet();
+            session.setOwnerId(chunkId + 1);
             for (int i = 0; i < PER_SESSION; i++) {
                 int id = (startId + i) % SIZE;
                 ParallelCounter counter = parallelMapper.create();
-                parallelMapper.load(noCacheSession, counter, id);
+                parallelMapper.load(session, counter, id);
                 performLogicOnCounter(counter);
-                parallelMapper.save(noCacheSession, counter, id);
+                parallelMapper.save(session, counter, id);
             }
         });
         status.done();
@@ -151,11 +165,9 @@ public class CounterWithSetupParallelIT {
 
     private <T> void prepareZeroedCounters(Dao<T> dao) {
         Status status = Status.of("creating counters");
-        SessionFactory sessionFactory = new SessionFactory(null, NoCacheSession.Mode.STUB_ENTITIES);
-        NoCacheSession noCacheSession = sessionFactory.createOrGet();
         T counter = dao.create();
         for (int i = 0; i < SIZE; i++) {
-            dao.save(noCacheSession, counter, i);
+            dao.save(counter, i);
         }
         status.done();
     }

@@ -2,22 +2,22 @@ package pl.edu.icm.trurl.ecs;
 
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 
-public class Session extends AbstractSession {
+public class Session {
     private final Long2IntOpenHashMap idToSessionIndex;
     private final DaoManager daoManager;
     private final Engine engine;
     private final Object[][] components;
     private final Entity[] entities;
-    private final long[] ids;
+    private final int[] ids;
     private int ownerId;
     private int counter;
 
-    public Session(Engine engine, int capacity) {
+    Session(Engine engine, int capacity) {
         idToSessionIndex = new Long2IntOpenHashMap(capacity);
         this.daoManager = engine.getDaoManager();
         int componentCount = daoManager.componentCount();
         components = new Object[componentCount][capacity];
-        ids = new long[capacity];
+        ids = new int[capacity];
         entities = new Entity[capacity];
         this.engine = engine;
         this.counter = 0;
@@ -38,7 +38,12 @@ public class Session extends AbstractSession {
     }
 
     public void flush() {
+        flush(daoManager.allTokens());
+    }
 
+    public void close() {
+        flush();
+        clear();
     }
 
     public void flush(ComponentToken<?>... tokens) {
@@ -68,7 +73,7 @@ public class Session extends AbstractSession {
         return component;
     }
 
-    long getId(int sessionIndex) {
+    int getId(int sessionIndex) {
         return ids[sessionIndex];
     }
 
@@ -92,8 +97,7 @@ public class Session extends AbstractSession {
         }
     }
 
-    @Override
-    public Entity getEntity(long id) {
+    public Entity getEntity(int id) {
         int sessionIndex = idToSessionIndex.getOrDefault(id, -1);
         if (sessionIndex >= 0) {
             return entities[sessionIndex];
@@ -102,7 +106,7 @@ public class Session extends AbstractSession {
         }
     }
 
-    private Entity createEmptyEntity(long id) {
+    private Entity createEmptyEntity(int id) {
         int newIndex = counter++;
         idToSessionIndex.put(id, newIndex);
         ids[newIndex] = id;
@@ -111,9 +115,8 @@ public class Session extends AbstractSession {
         return entity;
     }
 
-    @Override
     public Entity createEntity(Object... components) {
-        long id = engine.allocateNextId();
+        int id = engine.allocateNextId();
         Entity entity = createEmptyEntity(id);
         for (Object component : components) {
             entity.add(component);
@@ -121,7 +124,6 @@ public class Session extends AbstractSession {
         return entity;
     }
 
-    @Override
     public int getOwnerId() {
         return ownerId;
     }

@@ -36,12 +36,13 @@ import static org.mockito.Mockito.*;
 class EngineTest {
     public static final int INITIAL_CAPACITY = 100;
     public static final int CAPACITY_HEADROOM = 50;
+    public static final int SESSION_CACHE_CAPACITY = 25000;
     @Mock
     Store store;
     @Mock
     DaoManager daoManager;
     @Mock
-    NoCacheSession noCacheSession;
+    Session session;
     @Mock
     SessionFactory sessionFactory;
     @Mock
@@ -61,13 +62,13 @@ class EngineTest {
                 daoA,
                 daoB
         ));
-        lenient().when(sessionFactory.createOrGet()).thenReturn(noCacheSession);
+        lenient().when(sessionFactory.createOrGet()).thenReturn(session);
     }
 
     @Test
     void construct() {
         // execute
-        new Engine(INITIAL_CAPACITY, CAPACITY_HEADROOM, daoManager, false, new ArrayAttributeFactory());
+        new Engine(INITIAL_CAPACITY, CAPACITY_HEADROOM, daoManager, new ArrayAttributeFactory(), SESSION_CACHE_CAPACITY);
 
         // assert
         verify(daoA).configureStore(any());
@@ -79,7 +80,7 @@ class EngineTest {
     @Test
     void execute() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, SESSION_CACHE_CAPACITY);
 
         // execute
         engine.execute(system);
@@ -91,7 +92,7 @@ class EngineTest {
     @Test
     void getRootStore() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, SESSION_CACHE_CAPACITY);
 
         // execute
         Store result = engine.getRootStore();
@@ -103,7 +104,7 @@ class EngineTest {
     @Test
     void getMapperSet() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, SESSION_CACHE_CAPACITY);
 
         // execute
         DaoManager result = engine.getDaoManager();
@@ -115,7 +116,7 @@ class EngineTest {
     @Test
     void getCount() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, SESSION_CACHE_CAPACITY);
 
         // execute
         int count = engine.getCount();
@@ -127,7 +128,7 @@ class EngineTest {
     @Test
     void nextId() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, SESSION_CACHE_CAPACITY);
 
         // execute
         int nextId = engine.allocateNextId();

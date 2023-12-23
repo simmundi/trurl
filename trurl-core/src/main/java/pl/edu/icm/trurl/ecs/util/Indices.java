@@ -64,7 +64,7 @@ public class Indices {
         Dao[] daos = new Dao[components.length];
 
         for (int i = 0; i < components.length; i++) {
-            daos[i] = getEngine().getDaoManager().classToMapper(components[i]);
+            daos[i] = getEngine().getDaoManager().classToDao(components[i]);
         }
 
         return (id) -> {
@@ -97,7 +97,7 @@ public class Indices {
     }
 
     public <M> Index filtered(Index index, Class<M> mappedType, Predicate<M> predicate) {
-        final Dao<M> mDao = getEngine().getDaoManager().classToMapper(mappedType);
+        final Dao<M> mDao = getEngine().getDaoManager().classToDao(mappedType);
         return new Index() {
             @Override
             public Stream<Chunk> chunks() {
@@ -133,8 +133,8 @@ public class Indices {
     public <M, K> Index filtered(Index index,
                                  Class<M> mClass, Predicate<M> mPredicate, boolean mAcceptIfAbsent,
                                  Class<K> kClass, Predicate<K> kPredicate, boolean kAcceptIfAbsent) {
-        final Dao<M> mDao = getEngine().getDaoManager().classToMapper(mClass);
-        final Dao<K> kDao = getEngine().getDaoManager().classToMapper(kClass);
+        final Dao<M> mDao = getEngine().getDaoManager().classToDao(mClass);
+        final Dao<K> kDao = getEngine().getDaoManager().classToDao(kClass);
 
         return new Index() {
             @Override
@@ -182,10 +182,10 @@ public class Indices {
                                        Class<K> kClass, Predicate<K> kPredicate, boolean kAcceptIfAbsent,
                                        Class<L> lClass, Predicate<L> lPredicate, boolean lAcceptIfAbsent,
                                        Class<W> wClass, Predicate<W> wPredicate, boolean wAcceptIfAbsent) {
-        final Dao<M> mDao = getEngine().getDaoManager().classToMapper(mClass);
-        final Dao<K> kDao = getEngine().getDaoManager().classToMapper(kClass);
-        final Dao<L> lDao = getEngine().getDaoManager().classToMapper(lClass);
-        final Dao<W> wDao = getEngine().getDaoManager().classToMapper(wClass);
+        final Dao<M> mDao = getEngine().getDaoManager().classToDao(mClass);
+        final Dao<K> kDao = getEngine().getDaoManager().classToDao(kClass);
+        final Dao<L> lDao = getEngine().getDaoManager().classToDao(lClass);
+        final Dao<W> wDao = getEngine().getDaoManager().classToDao(wClass);
         return new Index() {
             @Override
             public Stream<Chunk> chunks() {

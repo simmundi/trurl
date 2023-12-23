@@ -60,7 +60,7 @@ public class StaticSelectors {
             ids = new IntArrayList((int) (initialSize > 0 ? initialSize : engineConfiguration.getEngine().getCount() * 0.5));
             Dao[] daos = new Dao[components.length];
             for (int i = 0; i < components.length; i++) {
-                daos[i] = engineConfiguration.getEngine().getDaoManager().classToMapper(components[i]);
+                daos[i] = engineConfiguration.getEngine().getDaoManager().classToDao(components[i]);
             }
 
             next_id:

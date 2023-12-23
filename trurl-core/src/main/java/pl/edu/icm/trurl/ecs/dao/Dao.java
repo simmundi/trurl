@@ -18,7 +18,8 @@
 
 package pl.edu.icm.trurl.ecs.dao;
 
-import pl.edu.icm.trurl.ecs.AbstractSession;
+import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.StoreConfigurer;
 import pl.edu.icm.trurl.store.attribute.Attribute;
@@ -33,11 +34,11 @@ public interface Dao<T> {
     T create();
     boolean isPresent(int row);
     void erase(int index);
-    void load(AbstractSession session, T component, int index);
+    void load(Session session, T component, int index);
     default void save(T component, int row) {
         save(null, component, row);
     }
-    void save(AbstractSession owner, T component, int row);
+    void save(Session owner, T component, int row);
     List<Attribute> attributes();
     default String name() {
         return this.create().getClass().getSimpleName().toLowerCase(Locale.ROOT);
@@ -45,7 +46,7 @@ public interface Dao<T> {
     default T createAndLoad(int row) {
         return createAndLoad(null, row);
     }
-    default T createAndLoad(AbstractSession session, int row) {
+    default T createAndLoad(Session session, int row) {
         T created = create();
         load(session, created, row);
         return created;
