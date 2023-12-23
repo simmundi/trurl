@@ -36,7 +36,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class IndicesTest {
+class IndexesTest {
 
     public static final int DEFAULT_CHUNK_SIZE = 25_000;
     @Mock
@@ -91,10 +91,10 @@ class IndicesTest {
     @Test
     void filtered() {
         //given
-        Indices indices = new Indices(engine, DEFAULT_CHUNK_SIZE);
+        Indexes indexes = new Indexes(engine, DEFAULT_CHUNK_SIZE);
 
         //execute
-        Index filtered = indices.filtered(index,
+        Index filtered = indexes.filtered(index,
                 Looks.class, looks -> looks.getColor() == Color.GOLD, true,
                 Person.class, person -> person.getName().equals("Pomponik") || person.getName().equals("Niewiadomska"), false);
 

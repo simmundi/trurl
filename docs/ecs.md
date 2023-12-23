@@ -67,7 +67,7 @@ And it will actually consist of four arrays: one for names, one for last names, 
 This means that even if the model contains millions of entities, it can be stored in four allocated arrays (although
 yes, strings and - generally - variable size fields are another story, described later).
 
-## Basic operations: iteration, chunks and indices
+## Basic operations: iteration, chunks and indexes
 
 Selector (an interface)
 : Selector describes a set of entities, grouped into `Chunk`s. The grouping suggests affinity
@@ -148,7 +148,7 @@ called per each entity in the `Engine`.
 The tag, in this context, is a plain string, which can be accompanied by an additional classifier (which is also a string).
 The intention of tags is to directly turn them into chunks (entities with the same tag are expected to be processed together).
 The tag classifier is an extension point - another level of entity classification. The intended scenario is to enable
-efficient creation of multiple indices in one pass.
+efficient creation of multiple indexes in one pass.
 
 Queries are free to use null tags, if that makes sense. Results are free to throw `NullPointerExceptions` upon
 receiving a null tag, if that makes sense. This only means that some query/results combination don't make sense.

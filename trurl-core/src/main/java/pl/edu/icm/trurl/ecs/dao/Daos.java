@@ -44,7 +44,7 @@ public class Daos {
             Bento child = bento.create();
             child.register("daoPrefix", daoPrefix);
             return child.get(
-                    Class.forName(clazz.getPackage().getName() + ".MapperOf" + clazz.getSimpleName() + "Factory")
+                    Class.forName(clazz.getPackage().getName() + ".DaoOf" + clazz.getSimpleName() + "Factory")
                             .getField("IT")
                             .get(null));
         } catch (ReflectiveOperationException cause) {

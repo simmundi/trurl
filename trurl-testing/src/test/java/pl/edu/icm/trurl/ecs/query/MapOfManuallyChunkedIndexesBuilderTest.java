@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static pl.edu.icm.trurl.ecs.query.MapOfManuallyChunkedSelectorsBuilder.getDefaultSizes;
 
-class MapOfManuallyChunkedIndicesBuilderTest {
+class MapOfManuallyChunkedIndexesBuilderTest {
     private enum TestTags {
         TAG1, TAG2
     }

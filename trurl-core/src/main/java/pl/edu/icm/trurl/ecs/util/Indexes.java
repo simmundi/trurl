@@ -30,19 +30,19 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class Indices {
+public class Indexes {
     private final int defaultChunkSize;
     private final EngineConfiguration engineConfiguration;
     private final Engine engine;
 
     @WithFactory
-    public Indices(EngineConfiguration engineConfiguration, @ByName(value = "trurl.engine.default-chunk-size", fallbackValue = "25000") int defaultChunkSize) {
+    public Indexes(EngineConfiguration engineConfiguration, @ByName(value = "trurl.engine.default-chunk-size", fallbackValue = "25000") int defaultChunkSize) {
         this.engineConfiguration = engineConfiguration;
         this.defaultChunkSize = defaultChunkSize;
         this.engine = null;
     }
 
-    public Indices(Engine engine, int defaultChunkSize) {
+    public Indexes(Engine engine, int defaultChunkSize) {
         this.engineConfiguration = null;
         this.engine = engine;
         this.defaultChunkSize = defaultChunkSize;

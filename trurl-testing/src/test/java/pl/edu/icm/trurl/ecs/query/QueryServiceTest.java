@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.ecs.*;
 import pl.edu.icm.trurl.ecs.index.Index;
 import pl.edu.icm.trurl.ecs.index.RandomAccessIndex;
-import pl.edu.icm.trurl.ecs.util.Indices;
+import pl.edu.icm.trurl.ecs.util.Indexes;
 import pl.edu.icm.trurl.exampledata.*;
 
 import java.util.HashSet;
@@ -40,7 +40,7 @@ class QueryServiceTest {
 
     EngineConfiguration engineConfiguration;
     Engine engine;
-    Indices indices;
+    Indexes indexes;
     QueryService service;
     Random random = new Random(0);
     String[] names = {"ANNA", "BARBARA", "CELINA", "DANUTA", "EWELINA", "FILIPINA", "GRAŻYNA", "HANNA", "IRENA", "JANINA", "KRZYSZTOFA"};
@@ -50,7 +50,7 @@ class QueryServiceTest {
         engineConfiguration = Bento.createRoot().get(EngineConfigurationFactory.IT);
         engineConfiguration.addComponentClasses(Person.class, Stats.class, House.class);
         engine = engineConfiguration.getEngine();
-        indices = new Indices(engineConfiguration, 25000);
+        indexes = new Indexes(engineConfiguration, 25000);
 
         engine.execute(sf -> {
             Session session = sf.createOrGet();
@@ -64,7 +64,7 @@ class QueryServiceTest {
             session.close();
         });
 
-        service = new QueryService(indices, engineConfiguration);
+        service = new QueryService(indexes, engineConfiguration);
     }
 
     @Test

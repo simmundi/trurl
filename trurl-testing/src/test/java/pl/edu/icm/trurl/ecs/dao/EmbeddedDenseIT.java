@@ -23,7 +23,7 @@ import net.snowyhollows.bento.config.Configurer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.exampledata.Coordinates;
-import pl.edu.icm.trurl.exampledata.MapperOfThingFactory;
+import pl.edu.icm.trurl.exampledata.DaoOfThingFactory;
 import pl.edu.icm.trurl.exampledata.Thing;
 import pl.edu.icm.trurl.exampledata.ThingDao;
 import pl.edu.icm.trurl.store.Store;
@@ -46,7 +46,7 @@ public class EmbeddedDenseIT {
     @BeforeEach
     void beforeEach() {
         Bento config = new Configurer().setParam("daoPrefix", "").getConfig();
-        thingMapper = config.get(MapperOfThingFactory.IT);
+        thingMapper = config.get(DaoOfThingFactory.IT);
         thingMapper.configureAndAttach(store);
     }
 

@@ -73,7 +73,7 @@ public class ConstructorFeature implements Feature {
         List<ComponentProperty> properties = getCategoryProperties().collect(Collectors.toList());
 
         AnnotationSpec withFactory = AnnotationSpec.builder(WithFactory.class)
-                .addMember("exactName", "$S", "MapperOf" + beanMetadata.componentName.simpleName() + "Factory").build();
+                .addMember("exactName", "$S", "DaoOf" + beanMetadata.componentName.simpleName() + "Factory").build();
 
         MethodSpec.Builder constructorBuilder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)

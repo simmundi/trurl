@@ -25,7 +25,7 @@ import pl.edu.icm.trurl.ecs.index.Chunk;
 import pl.edu.icm.trurl.ecs.index.ChunkInfo;
 import pl.edu.icm.trurl.ecs.index.RandomAccessIndex;
 import pl.edu.icm.trurl.ecs.util.Action;
-import pl.edu.icm.trurl.ecs.util.Indices;
+import pl.edu.icm.trurl.ecs.util.Indexes;
 import pl.edu.icm.trurl.ecs.util.IteratingSystemBuilder;
 
 import java.util.Collection;
@@ -33,19 +33,19 @@ import java.util.Map;
 
 public class QueryService {
 
-    private final Indices indices;
+    private final Indexes indexes;
     private final EngineConfiguration engineConfiguration;
 
     @WithFactory
-    public QueryService(Indices indices,
+    public QueryService(Indexes indexes,
                         EngineConfiguration engineConfiguration) {
-        this.indices = indices;
+        this.indexes = indexes;
         this.engineConfiguration = engineConfiguration;
     }
 
     public <T> RandomAccessIndex fixedSelectorFromQuery(Query<T> query) {
         ManuallyChunkedSelectorBuilder<T> selectorBuilder = new ManuallyChunkedSelectorBuilder<>();
-        EntitySystem entitySystem = IteratingSystemBuilder.iteratingOver(indices.allEntities())
+        EntitySystem entitySystem = IteratingSystemBuilder.iteratingOver(indexes.allEntities())
                 .withoutContext()
                 .perform(Action.of(entity -> query.process(entity, selectorBuilder, ChunkInfo.DEFAULT_LABEL)))
                 .build();
@@ -58,7 +58,7 @@ public class QueryService {
                                                                                       RawQuery<T> query) {
         MapOfManuallyChunkedSelectorsBuilder<T> selectorsBuilder = new MapOfManuallyChunkedSelectorsBuilder<>(tagClassifiersWithInitialSizes);
 
-        indices.allEntities().chunks()
+        indexes.allEntities().chunks()
                 .flatMapToInt(Chunk::ids)
                 .parallel()
                 .forEach(id -> query.process(id, selectorsBuilder, ChunkInfo.DEFAULT_LABEL));

@@ -37,7 +37,7 @@ public class DaoSoftEnumsIT {
         // given
         Store store = new Store(new ArrayAttributeFactory(), 1024);
         Bento config = new Configurer().loadConfigResource("/contamination.properties").setParam("daoPrefix", "").getConfig();
-        HealthDao healthMapper = config.get(MapperOfHealthFactory.IT);
+        HealthDao healthMapper = config.get(DaoOfHealthFactory.IT);
         ContaminationTypes contaminationTypes = config.get(ContaminationTypesFactory.IT);
 
         ContaminationType WILD = contaminationTypes.getByOrdinal(0);

@@ -165,5 +165,4 @@
      public static Config iteratingOverInParallel(final Supplier<Index> index) {
          return new IteratingSystem(index, true);
      }
-
  }
