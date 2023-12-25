@@ -18,6 +18,7 @@
 
 package pl.edu.icm.trurl.ecs.dao;
 
+import net.snowyhollows.bento.BentoFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,10 +34,7 @@ import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.*;
 import pl.edu.icm.trurl.store.reference.Reference;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -48,8 +46,9 @@ import static org.mockito.Mockito.lenient;
 public class DaoIT {
     @Spy
     Daos daos = new Daos();
+    Map<Class<?>, BentoFactory<?>> factories = new HashMap<>();
     @Spy
-    DaoManager daoManager = new DaoManager(new DynamicComponentAccessor(Collections.emptyList()), daos);
+    DaoManager daoManager = new DaoManager(new DynamicComponentAccessor(Collections.emptyList()), factories, daos);
     @Mock
     Session session;
 
@@ -71,6 +70,7 @@ public class DaoIT {
 
     @BeforeEach
     void before() {
+        assert daoManager != null;
         dao = new Daos().create(BunchOfData.class);
         dao.configureStore(store);
         dao.attachStore(store);

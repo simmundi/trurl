@@ -18,13 +18,13 @@
 
 package pl.edu.icm.trurl.ecs.util;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.EngineConfiguration;
 import pl.edu.icm.trurl.ecs.dao.Dao;
 import pl.edu.icm.trurl.ecs.index.Chunk;
 import pl.edu.icm.trurl.ecs.index.ChunkInfo;
 import pl.edu.icm.trurl.ecs.index.Index;
+import pl.edu.icm.trurl.util.IntArray;
 
 import java.util.stream.Stream;
 
@@ -33,7 +33,7 @@ import static java.util.stream.Stream.*;
 
 public class StaticSelectors {
 
-    private EngineConfiguration engineConfiguration;
+    private final EngineConfiguration engineConfiguration;
 
     @WithFactory
     public StaticSelectors(EngineConfiguration engineConfiguration) {
@@ -52,12 +52,12 @@ public class StaticSelectors {
     }
 
     private class StaticIndex implements Index {
-        private final IntArrayList ids;
+        private final IntArray ids;
         private final int chunkSize;
 
         private StaticIndex(int initialSize, int chunkSize, Class<?>... components) {
             this.chunkSize = chunkSize > 0 ? chunkSize : 1024;
-            ids = new IntArrayList((int) (initialSize > 0 ? initialSize : engineConfiguration.getEngine().getCount() * 0.5));
+            ids = new IntArray((int) (initialSize > 0 ? initialSize : engineConfiguration.getEngine().getCount() * 0.5));
             Dao[] daos = new Dao[components.length];
             for (int i = 0; i < components.length; i++) {
                 daos[i] = engineConfiguration.getEngine().getDaoManager().classToDao(components[i]);
@@ -76,14 +76,14 @@ public class StaticSelectors {
 
         @Override
         public Stream<Chunk> chunks() {
-            int size = ids.size();
+            int size = ids.size;
             int units = size / chunkSize;
             int lastSize = size % chunkSize;
 
             return concat(
                     range(0, units).mapToObj(unit ->
-                            new Chunk(ChunkInfo.of(unit, chunkSize), range(unit * chunkSize, unit * chunkSize + chunkSize).map(ids::getInt))),
-                    lastSize > 0 ? of(new Chunk(ChunkInfo.of(units, lastSize), range(units * chunkSize, size).map(ids::getInt))) : empty());
+                            new Chunk(ChunkInfo.of(unit, chunkSize), range(unit * chunkSize, unit * chunkSize + chunkSize).map(ids::get))),
+                    lastSize > 0 ? of(new Chunk(ChunkInfo.of(units, lastSize), range(units * chunkSize, size).map(ids::get))) : empty());
         }
 
         @Override

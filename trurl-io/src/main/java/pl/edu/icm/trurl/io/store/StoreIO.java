@@ -1,8 +1,6 @@
 package pl.edu.icm.trurl.io.store;
 
 import net.snowyhollows.bento.annotation.WithFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pl.edu.icm.trurl.store.Store;
 
 import java.io.File;
@@ -20,7 +18,6 @@ public class StoreIO {
     private static final String METADATA_FORMAT_FIELD = "format";
     private static final String METADATA_BASE_NAME_FIELD = "base-name";
     private static final String METADATA_SUBSTORES_FIELD = "substores";
-    private final Logger logger = LoggerFactory.getLogger(StoreIO.class);
     private final SingleStoreIOProvider singleStoreIOProvider;
 
     @WithFactory
@@ -78,7 +75,7 @@ public class StoreIO {
             substoreNames.remove(namespace);
         }
         if (!substoreNames.isEmpty()) {
-            logger.warn(String.format("Some substores are available to load, but were not loaded. Omitted substores: %s", String.join(", ", substoreNames)));
+            System.out.println(String.format("Some substores are available to load, but were not loaded. Omitted substores: %s", String.join(", ", substoreNames)));
         }
     }
 

@@ -28,9 +28,7 @@ import pl.edu.icm.trurl.store.reference.ArrayReference;
 import pl.edu.icm.trurl.store.reference.Reference;
 import pl.edu.icm.trurl.store.reference.SingleReference;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,7 +55,7 @@ import java.util.stream.Stream;
  */
 public final class Store implements StoreConfigurer, StoreInspector {
     private final Map<String, Attribute> allAttributes = new LinkedHashMap<>(40);
-    private final CopyOnWriteArrayList<Attribute> visibleAttributes = new CopyOnWriteArrayList<>();
+    private final List<Attribute> visibleAttributes = Collections.synchronizedList(new ArrayList<>());
     private final Map<String, Store> substores = new LinkedHashMap<>();
     private final Map<String, Join> joins = new LinkedHashMap<>();
     private final Map<String, Reference> references = new LinkedHashMap<>();

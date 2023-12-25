@@ -21,8 +21,6 @@ package pl.edu.icm.trurl.io.csv;
 import com.univocity.parsers.csv.CsvParser;
 import com.univocity.parsers.csv.CsvParserSettings;
 import net.snowyhollows.bento.annotation.WithFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pl.edu.icm.trurl.io.store.SingleStoreReader;
 import pl.edu.icm.trurl.store.StoreInspector;
 import pl.edu.icm.trurl.store.attribute.Attribute;
@@ -38,7 +36,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class CsvReader implements SingleStoreReader {
-    private final Logger logger = LoggerFactory.getLogger(CsvReader.class);
 
     private final Attribute SKIP = new StubAttribute();
 
@@ -84,16 +81,9 @@ public class CsvReader implements SingleStoreReader {
             if (line == null) {
                 break;
             }
-            try {
-                int next = store.getCounter().next();
-                for (int i = 0; i < columnCount; i++) {
-                    attributes[i].setString(next, line[i]);
-                }
-            } catch (RuntimeException re) {
-                logger.info("wrong format in csv file: "
-                        + re.getMessage()
-                        .replace('\n', ' ')
-                        .replace('\r', ' '));
+            int next = store.getCounter().next();
+            for (int i = 0; i < columnCount; i++) {
+                attributes[i].setString(next, line[i]);
             }
         }
     }

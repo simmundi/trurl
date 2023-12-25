@@ -20,6 +20,7 @@ package pl.edu.icm.trurl.ecs.util;
 
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.*;
+import pl.edu.icm.trurl.util.Systems;
 
 public class ActionService {
     private final EngineConfiguration engineConfiguration;

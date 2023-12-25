@@ -17,6 +17,8 @@
  */
 package pl.edu.icm.trurl.ecs;
 
+import net.snowyhollows.bento.BentoFactory;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,10 +27,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.dao.Dao;
 import pl.edu.icm.trurl.ecs.dao.Daos;
 import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
-import pl.edu.icm.trurl.exampledata.Looks;
-import pl.edu.icm.trurl.exampledata.Stats;
+import pl.edu.icm.trurl.exampledata.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,11 +41,20 @@ class DaoManagerTest {
 
     @Spy
     ComponentAccessor componentAccessor = new DynamicComponentAccessor(Arrays.asList(Looks.class, Stats.class));
+    Map<Class<?>, BentoFactory<?>> factories = new HashMap<>(); {
+        factories.put(Looks.class, DaoOfLooksFactory.IT);
+        factories.put(Stats.class, DaoOfStatsFactory.IT);
+    }
     @Spy
     Daos daos = new Daos();
 
-    @InjectMocks
     DaoManager daoManager;
+
+    @BeforeEach
+    void init() {
+        daoManager = new DaoManager(componentAccessor, factories, daos);
+
+    }
 
     @Test
     void classToMapper() {

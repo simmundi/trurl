@@ -34,11 +34,11 @@
      private static class IteratingSystem<Context> implements Config, ActionConfig<Context>, EntitySystem {
          private final Supplier<Index> index;
          private boolean parallel = false;
-         private List<Action<Context>> actions = new ArrayList<>();
+         private final List<Action<Context>> actions = new ArrayList<>();
          private boolean persistAll = true;
          private Class<?>[] componentsToPersist;
          private boolean flush = true;
-         private boolean clear = true;
+         private final boolean clear = true;
          private Function contextFactory;
          private Action[] operationsArray;
 

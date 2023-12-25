@@ -6,7 +6,7 @@ public final class Entity {
     public final static int NULL_ID = Integer.MIN_VALUE;
 
     private final Session session;
-    private int sessionIndex;
+    private final int sessionIndex;
 
     public static Entity stub(long id) {
         return new Entity(null, (int) id);

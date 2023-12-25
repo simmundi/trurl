@@ -28,9 +28,9 @@ import java.util.Collection;
 
 
 public final class RangedJoin implements Join {
-    private IntAttribute start;
-    private ByteAttribute length;
-    private Store target;
+    private final IntAttribute start;
+    private final ByteAttribute length;
+    private final Store target;
     private final int minimum;
     private final int margin;
 

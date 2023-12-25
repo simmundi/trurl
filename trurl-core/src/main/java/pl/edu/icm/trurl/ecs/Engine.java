@@ -22,7 +22,7 @@ import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 
 public final class Engine {
-    private int capacityHeadroom;
+    private final int capacityHeadroom;
     private final Store rootStore;
     private final DaoManager daoManager;
     private final SessionFactory cachedSessionFactory;

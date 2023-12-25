@@ -18,10 +18,10 @@
 
 package pl.edu.icm.trurl.ecs.util;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import pl.edu.icm.trurl.ecs.index.Chunk;
 import pl.edu.icm.trurl.ecs.index.ChunkInfo;
 import pl.edu.icm.trurl.ecs.index.RandomAccessIndex;
+import pl.edu.icm.trurl.util.IntArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +32,8 @@ public class ManuallyChunkedArrayIndex implements RandomAccessIndex {
     private final static int DEFAULT_INITIAL_SIZE = 1_000_000;
     private final static int DEFAULT_INITIAL_CHUNKS = 1_000;
 
-    private final IntArrayList ids;
-    private final IntArrayList chunks;
+    private final IntArray ids;
+    private final IntArray chunks;
     private final List<String> labels;
     private int maxSize = 0;
 
@@ -42,15 +42,15 @@ public class ManuallyChunkedArrayIndex implements RandomAccessIndex {
     }
 
     public ManuallyChunkedArrayIndex(int initialSize, int initialChunkCount) {
-        ids = new IntArrayList(initialSize);
-        chunks = new IntArrayList(initialChunkCount + 1);
+        ids = new IntArray(initialSize);
+        chunks = new IntArray(initialChunkCount + 1);
         labels = new ArrayList<>(initialChunkCount);
         chunks.add(0);
     }
 
     @Override
     public synchronized int getIdFromRatio(float random) {
-        return ids.getInt((int) (ids.size() * random));
+        return ids.get((int) (ids.size * random));
     }
 
     public synchronized void add(int id) {
@@ -62,7 +62,7 @@ public class ManuallyChunkedArrayIndex implements RandomAccessIndex {
     }
 
     public synchronized void endChunk(String label) {
-        chunks.add(ids.size());
+        chunks.add(ids.size);
         int runningSize = getRunningSize();
         if (runningSize > maxSize) {
             maxSize = runningSize;
@@ -71,11 +71,11 @@ public class ManuallyChunkedArrayIndex implements RandomAccessIndex {
     }
 
     public synchronized int getCount() {
-        return ids.size();
+        return ids.size;
     }
 
     public synchronized int getRunningSize() {
-        return getCount() - chunks.getInt(chunks.size() - 1);
+        return getCount() - chunks.get(chunks.size - 1);
     }
 
     @Override
@@ -83,15 +83,15 @@ public class ManuallyChunkedArrayIndex implements RandomAccessIndex {
         if (getRunningSize() > 0) {
             endChunk();
         }
-        return IntStream.range(0, chunks.size() - 1)
+        return IntStream.range(0, chunks.size - 1)
                 .mapToObj(chunkId -> {
-                    int firstInc = chunks.getInt(chunkId);
-                    int lastExc = chunks.getInt(chunkId + 1);
+                    int firstInc = chunks.get(chunkId);
+                    int lastExc = chunks.get(chunkId + 1);
                     int size = lastExc - firstInc;
                     return
                             new Chunk(ChunkInfo.of(chunkId, size, labels.get(chunkId)),
                                     IntStream.range(firstInc, lastExc)
-                                            .map(i -> ids.getInt(i)));
+                                            .map(i -> ids.get(i)));
                 });
     }
 

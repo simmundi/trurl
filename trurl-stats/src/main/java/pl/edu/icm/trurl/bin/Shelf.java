@@ -18,8 +18,6 @@
 
 package pl.edu.icm.trurl.bin;
 
-import com.google.common.collect.Streams;
-
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -89,7 +87,7 @@ class Shelf<Label> {
         if (next == null) {
             return myBins;
         } else {
-            return Streams.concat(myBins, next.streamBins());
+            return Stream.concat(myBins, next.streamBins());
         }
     }
 }

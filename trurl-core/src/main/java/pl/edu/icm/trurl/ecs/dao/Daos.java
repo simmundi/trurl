@@ -19,7 +19,9 @@
 package pl.edu.icm.trurl.ecs.dao;
 
 import net.snowyhollows.bento.Bento;
+import net.snowyhollows.bento.BentoFactory;
 import net.snowyhollows.bento.annotation.WithFactory;
+import pl.edu.icm.trurl.ecs.dao.annotation.GwtIncompatible;
 
 public class Daos {
 
@@ -34,21 +36,37 @@ public class Daos {
         this.bento = Bento.createRoot();
     }
 
+    @GwtIncompatible
     public <T> Dao<T> create(Class<T> clazz) {
         return create(clazz, "");
     }
 
-
-    public <T> Dao<T> create(Class<T> clazz, String daoPrefix) {
+    @GwtIncompatible
+    public <T> BentoFactory<Dao<T>> createFactory(Class<T> clazz) {
+        String qname = clazz.getName();
+        String packageName = qname.lastIndexOf('.') == -1 ? "" : qname.substring(0, qname.lastIndexOf('.'));
+        String daoOfName = packageName + ".DaoOf" + clazz.getSimpleName();
         try {
-            Bento child = bento.create();
-            child.register("daoPrefix", daoPrefix);
-            return child.get(
-                    Class.forName(clazz.getPackage().getName() + ".DaoOf" + clazz.getSimpleName() + "Factory")
-                            .getField("IT")
-                            .get(null));
-        } catch (ReflectiveOperationException cause) {
-            throw new IllegalArgumentException("Class " + clazz + " does not have a valid dao (did you forget the @WithDao annotation? is trurl-generator configured as an annotation processor?)", cause);
+            return (BentoFactory<Dao<T>>) Class.forName(daoOfName + "Factory")
+                    .getField("IT")
+                    .get(null);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Class " + clazz + " does not have a valid dao (did you forget the @WithDao annotation? is trurl-generator configured as an annotation processor?)", e);
         }
+    }
+
+    @GwtIncompatible
+    public <T> Dao<T> create(Class<T> clazz, String daoPrefix) {
+        return create(createFactory(clazz), daoPrefix);
+    }
+
+    public <T> Dao<T> create(BentoFactory<Dao<T>> factory) {
+        return create(factory, "");
+    }
+
+    public <T> Dao<T> create(BentoFactory<Dao<T>> factory, String daoPrefix) {
+        Bento child = bento.create();
+        child.register("daoPrefix", daoPrefix);
+        return child.get(factory);
     }
 }

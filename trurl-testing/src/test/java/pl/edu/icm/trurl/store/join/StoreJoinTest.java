@@ -27,7 +27,7 @@ public class StoreJoinTest {
         Store hobbiesStore = this.store.addJoin("hobby").arrayTyped(3, 5);
         hobbiesStore.addString("name");
         hobbiesStore.addEnum("proficiency", Proficiency.class);
-        ArrayJoin hobbyJoin = (ArrayJoin) store.getJoin("hobby");
+        ArrayJoin hobbyJoin = store.getJoin("hobby");
 
         // assert
         assertThat(hobbyJoin.getTarget()).isSameAs(hobbiesStore);
@@ -45,7 +45,7 @@ public class StoreJoinTest {
         Store hobbiesStore = this.store.addJoin("hobby").rangeTyped(3, 5);
         hobbiesStore.addString("name");
         hobbiesStore.addEnum("proficiency", Proficiency.class);
-        RangedJoin hobbyJoin = (RangedJoin) store.getJoin("hobby");
+        RangedJoin hobbyJoin = store.getJoin("hobby");
 
         // assert
         assertThat(hobbyJoin.getTarget()).isSameAs(hobbiesStore);

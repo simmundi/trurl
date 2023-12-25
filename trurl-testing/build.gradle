@@ -9,8 +9,7 @@ dependencies {
     testImplementation project(':trurl-sql')
     testImplementation project(':trurl-vn-export')
     testImplementation "it.unimi.dsi:fastutil:${fastutilVersion}"
-
-
+    testImplementation "net.snowyhollows.bento:bento-config:${bentoVersion}"
 
     testAnnotationProcessor project(':trurl-generator')
     testAnnotationProcessor "net.snowyhollows.bento:bento-generator:${bentoVersion}"

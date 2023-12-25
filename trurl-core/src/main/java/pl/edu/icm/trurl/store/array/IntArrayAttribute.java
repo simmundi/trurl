@@ -18,13 +18,12 @@
 
 package pl.edu.icm.trurl.store.array;
 
-import com.google.common.base.Strings;
 import pl.edu.icm.trurl.store.attribute.IntAttribute;
 
 import java.util.Arrays;
 
 final public class IntArrayAttribute implements IntAttribute {
-    private String name;
+    private final String name;
     private int capacity;
     private int[] values;
     private final static int NULL = Integer.MIN_VALUE;
@@ -67,7 +66,7 @@ final public class IntArrayAttribute implements IntAttribute {
 
     @Override
     public void setString(int row, String value) {
-        setInt(row, Strings.isNullOrEmpty(value) ? Integer.MIN_VALUE : Integer.parseInt(value));
+        setInt(row, isNullOrEmpty(value) ? Integer.MIN_VALUE : Integer.parseInt(value));
     }
 
     @Override
@@ -78,5 +77,9 @@ final public class IntArrayAttribute implements IntAttribute {
     @Override
     public void setInt(int row, int value) {
         values[row] = value;
+    }
+
+    private static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 }

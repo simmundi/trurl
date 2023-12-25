@@ -26,7 +26,7 @@ import java.util.List;
 
 @WithDao
 public class House {
-    private List<Entity> members = new ArrayList<>();
+    private final List<Entity> members = new ArrayList<>();
 
     public House() {
     }

@@ -18,12 +18,9 @@
 
 package pl.edu.icm.trurl.store.array;
 
-import com.google.common.base.Strings;
-import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import pl.edu.icm.trurl.store.attribute.FloatAttribute;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 final public class FloatArrayAttribute implements FloatAttribute {
     private final String name;
@@ -70,7 +67,7 @@ final public class FloatArrayAttribute implements FloatAttribute {
 
     @Override
     public void setString(int row, String value) {
-        setFloat(row, Strings.isNullOrEmpty(value) ? NULL : Float.parseFloat(value));
+        setFloat(row, isNullOrEmpty(value) ? NULL : Float.parseFloat(value));
     }
 
     @Override
@@ -81,5 +78,9 @@ final public class FloatArrayAttribute implements FloatAttribute {
     @Override
     public void setFloat(int row, float value) {
         values[row] = value;
+    }
+
+    private static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 }

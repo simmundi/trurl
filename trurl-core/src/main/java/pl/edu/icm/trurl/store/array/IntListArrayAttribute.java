@@ -18,19 +18,16 @@
 
 package pl.edu.icm.trurl.store.array;
 
-import com.google.common.base.Strings;
 import pl.edu.icm.trurl.store.IntSink;
 import pl.edu.icm.trurl.store.IntSource;
 import pl.edu.icm.trurl.store.attribute.IntListAttribute;
 
 import java.util.Arrays;
-import java.util.regex.Pattern;
 
 public class IntListArrayAttribute implements IntListAttribute {
     private final String name;
     private int capacity;
     private int[][] values;
-    private Pattern splitter = Pattern.compile(",");
 
     public IntListArrayAttribute(String name, int capacity) {
         this.name = name;
@@ -78,19 +75,30 @@ public class IntListArrayAttribute implements IntListAttribute {
 
     @Override
     public void setString(int row, String value) {
-        if (!Strings.isNullOrEmpty(value)) {
-            String[] split = splitter.split(value);
+        if (!isNullOrEmpty(value)) {
             int[] result = values[row];
-            if (result == null || result.length != split.length) {
-                result = new int[split.length];
+            int valueSize = countCommas(value) + 1;
+            if (result == null || result.length != valueSize) {
+                result = new int[valueSize];
                 values[row] = result;
             }
-            for (int i = 0; i < split.length; i++) {
-                result[i] = EntityEncoder.decode(split[i]);
+            int current = 0;
+            for (int i = 0; i < valueSize; i++) {
+                int next = value.indexOf(',', current);
+                result[i] = EntityEncoder.decode(value.substring(current, next == -1 ? value.length() : next));
+                current = next + 1;
             }
         } else {
             setEmpty(row);
         }
+    }
+
+    public int countCommas(String value) {
+        int count = 0;
+        for (int i = 0; i < value.length(); i++) {
+            if (value.charAt(i)==',') count++;
+        }
+        return count;
     }
 
     @Override
@@ -142,5 +150,9 @@ public class IntListArrayAttribute implements IntListAttribute {
             }
         }
         return true;
+    }
+
+    private static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 }

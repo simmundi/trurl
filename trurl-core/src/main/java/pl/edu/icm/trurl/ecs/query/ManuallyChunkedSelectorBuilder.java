@@ -47,7 +47,7 @@ public class ManuallyChunkedSelectorBuilder<T> implements Query.Result<T> {
     @Override
     public void add(Entity entity, String tag, T tagClassifier) {
         data.computeIfAbsent(tag, unused -> new ConcurrentHashMap<>())
-                .put((int) entity.getId(), Boolean.TRUE);
+                .put(entity.getId(), Boolean.TRUE);
     }
 
     public RandomAccessIndex build() {

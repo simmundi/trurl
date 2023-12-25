@@ -29,7 +29,7 @@ public interface IntListAttribute extends Attribute {
 
     void saveInts(int row, int size, IntSource ints);
 
-    public void setInts(int row, int[] values);
+    void setInts(int row, int[] values);
 
     int[] getInts(int row);
 

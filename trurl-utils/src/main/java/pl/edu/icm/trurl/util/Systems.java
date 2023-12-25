@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.util;
+package pl.edu.icm.trurl.util;
 
 import pl.edu.icm.trurl.ecs.*;
-import pl.edu.icm.trurl.util.Status;
 
 /**
  * This class contains pocs and examples of different approaches of using systems.

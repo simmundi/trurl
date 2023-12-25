@@ -23,7 +23,7 @@ import pl.edu.icm.trurl.ecs.dao.LifecycleEvent;
 public final class SessionFactory {
     private final Engine engine;
     private final int expectedEntityCount;
-    private ThreadLocal<Session> sessions = ThreadLocal.withInitial(this::createNew);
+    private final ThreadLocal<Session> sessions = ThreadLocal.withInitial(this::createNew);
 
     public SessionFactory(Engine engine, int expectedEntityCount) {
         this.engine = engine;

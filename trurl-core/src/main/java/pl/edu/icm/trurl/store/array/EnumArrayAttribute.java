@@ -18,25 +18,22 @@
 
 package pl.edu.icm.trurl.store.array;
 
-import com.google.common.base.Converter;
-import com.google.common.base.Enums;
-import com.google.common.base.Strings;
 import pl.edu.icm.trurl.store.attribute.EnumAttribute;
 
 import java.util.Arrays;
 
 final public class EnumArrayAttribute<T extends Enum<T>> implements EnumAttribute<T> {
     private final String name;
-    private final Converter<String, T> converter;
     private byte[] values;
-    private static byte NULL = Byte.MIN_VALUE;
-    private T[] instances;
+    private static final byte NULL = Byte.MIN_VALUE;
+    private final T[] instances;
     private int capacity;
+    private Class<T> enumClass;
 
     public EnumArrayAttribute(Class<T> enumType, String name, int capacity) {
         this.name = name;
         values = new byte[0];
-        converter = Enums.stringConverter(enumType);
+        enumClass = enumType;
         instances = enumType.getEnumConstants();
         ensureCapacity(capacity);
     }
@@ -75,7 +72,7 @@ final public class EnumArrayAttribute<T extends Enum<T>> implements EnumAttribut
 
     @Override
     public void setString(int row, String value) {
-        values[row] = Strings.isNullOrEmpty(value) ? Byte.MIN_VALUE : (byte) converter.convert(value).ordinal();
+        values[row] = isNullOrEmpty(value) ? Byte.MIN_VALUE : (byte) Enum.valueOf(this.enumClass, value).ordinal();
     }
 
     @Override
@@ -101,5 +98,9 @@ final public class EnumArrayAttribute<T extends Enum<T>> implements EnumAttribut
     @Override
     public T[] values() {
         return instances;
+    }
+
+    private static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 }

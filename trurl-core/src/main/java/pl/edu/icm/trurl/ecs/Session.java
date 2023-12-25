@@ -1,9 +1,9 @@
 package pl.edu.icm.trurl.ecs;
 
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import pl.edu.icm.trurl.util.IntMap;
 
 public class Session {
-    private final Long2IntOpenHashMap idToSessionIndex;
+    private final IntMap<Entity> idToEntity;
     private final DaoManager daoManager;
     private final Engine engine;
     private final Object[][] components;
@@ -13,7 +13,7 @@ public class Session {
     private int counter;
 
     Session(Engine engine, int capacity) {
-        idToSessionIndex = new Long2IntOpenHashMap(capacity);
+        idToEntity = new IntMap<>(capacity);
         this.daoManager = engine.getDaoManager();
         int componentCount = daoManager.componentCount();
         components = new Object[componentCount][capacity];
@@ -24,7 +24,7 @@ public class Session {
     }
 
     public void clear() {
-        idToSessionIndex.clear();
+        idToEntity.clear();
         for (int i = 0; i < components.length; i++) {
             Object[] component = components[i];
             for (int j = 0; j < component.length; j++) {
@@ -50,7 +50,7 @@ public class Session {
         for (ComponentToken token : tokens) {
             for (int i = 0; i < counter; i++) {
                 if (components[token.index][i] != null) {
-                    token.dao.save(this, components[token.index][i], (int) ids[i]);
+                    token.dao.save(this, components[token.index][i], ids[i]);
                 }
             }
         }
@@ -98,19 +98,15 @@ public class Session {
     }
 
     public Entity getEntity(int id) {
-        int sessionIndex = idToSessionIndex.getOrDefault(id, -1);
-        if (sessionIndex >= 0) {
-            return entities[sessionIndex];
-        } else {
-            return createEmptyEntity(id);
-        }
+        Entity entity  = idToEntity.get(id);
+        return entity != null ? entity : createEmptyEntity(id);
     }
 
     private Entity createEmptyEntity(int id) {
         int newIndex = counter++;
-        idToSessionIndex.put(id, newIndex);
         ids[newIndex] = id;
         Entity entity = new Entity(this, newIndex);
+        idToEntity.put(id, entity);
         entities[newIndex] = entity;
         return entity;
     }

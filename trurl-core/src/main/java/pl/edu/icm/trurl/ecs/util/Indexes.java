@@ -92,7 +92,7 @@ public class Indexes {
             @Override
             public int estimatedChunkSize() {
                 return index.estimatedChunkSize() / 2;
-            };
+            }
         };
     }
 
@@ -113,10 +113,10 @@ public class Indexes {
                 return index.estimatedChunkSize();
             }
         };
-    };
+    }
 
 
-            /**
+    /**
      * Filters index with given predicates, allowing to choose whether accept ID of entity without a component on
      * which the predicate is given or not.
      * @param index        Index to be filtered.

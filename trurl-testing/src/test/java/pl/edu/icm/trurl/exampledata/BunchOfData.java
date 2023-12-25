@@ -30,7 +30,7 @@ public class BunchOfData {
     private boolean booleanProp;
     private byte byteProp;
     private double doubleProp;
-    private List<Entity> entitiesProp = new ArrayList<>();
+    private final List<Entity> entitiesProp = new ArrayList<>();
     private Entity entityProp;
     private Color enumProp;
     private float floatProp;
