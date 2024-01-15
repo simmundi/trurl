@@ -27,9 +27,9 @@ import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SingleJoinWithReverseOnly implements Join {
-    private IntAttribute reverseRowAttribute;
-    private ConcurrentHashMap<Integer, Integer> reverseMap = new ConcurrentHashMap<>();
-    private Store target;
+    private final IntAttribute reverseRowAttribute;
+    private final ConcurrentHashMap<Integer, Integer> reverseMap = new ConcurrentHashMap<>();
+    private final Store target;
 
     public SingleJoinWithReverseOnly(Store store, String name) {
         this.target = store.addSubstore(name);

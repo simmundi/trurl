@@ -46,7 +46,7 @@ final class BooleanWrapper extends AbstractColumnWrapper<LongColumnVector, Boole
 
     @Override
     void rememberFirstValue(int attributeRow) {
-        this.firstValue = attribute.isEmpty(attributeRow) ? false : attribute.getBoolean(attributeRow);
+        this.firstValue = !attribute.isEmpty(attributeRow) && attribute.getBoolean(attributeRow);
     }
 
     @Override

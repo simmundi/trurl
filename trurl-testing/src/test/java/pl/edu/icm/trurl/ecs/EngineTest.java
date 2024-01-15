@@ -22,13 +22,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.edu.icm.trurl.ecs.mapper.Mapper;
+import pl.edu.icm.trurl.ecs.dao.Dao;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -39,10 +37,11 @@ import static org.mockito.Mockito.*;
 class EngineTest {
     public static final int INITIAL_CAPACITY = 100;
     public static final int CAPACITY_HEADROOM = 50;
+    public static final int SESSION_CACHE_CAPACITY = 25000;
     @Mock
     Store store;
     @Mock
-    MapperSet mapperSet;
+    DaoManager daoManager;
     @Mock
     Session session;
     @Mock
@@ -50,9 +49,9 @@ class EngineTest {
     @Mock
     EntitySystem system;
     @Mock
-    Mapper mapperA;
+    Dao daoA;
     @Mock
-    Mapper mapperB;
+    Dao daoB;
     @Mock
     Counter counterA;
 
@@ -60,29 +59,29 @@ class EngineTest {
     void before() {
         lenient().when(store.getCounter()).thenReturn(counterA);
         lenient().when(counterA.getCount()).thenReturn(300);
-        lenient().when(mapperSet.streamMappers()).thenAnswer(params -> Stream.of(
-                mapperA,
-                mapperB
+        lenient().when(daoManager.allDaos()).thenAnswer(params -> List.of(
+                daoA,
+                daoB
         ));
-        lenient().when(sessionFactory.create()).thenReturn(session);
+        lenient().when(sessionFactory.createOrGet()).thenReturn(session);
     }
 
     @Test
     void construct() {
         // execute
-        new Engine(INITIAL_CAPACITY, CAPACITY_HEADROOM, mapperSet, false, new ArrayAttributeFactory());
+        new Engine(INITIAL_CAPACITY, CAPACITY_HEADROOM, daoManager, new ArrayAttributeFactory(), SESSION_CACHE_CAPACITY);
 
         // assert
-        verify(mapperA).configureStore(any());
-        verify(mapperA).attachStore(any());
-        verify(mapperB).configureStore(any());
-        verify(mapperB).attachStore(any());
+        verify(daoA).configureStore(any());
+        verify(daoA).attachStore(any());
+        verify(daoB).configureStore(any());
+        verify(daoB).attachStore(any());
     }
 
     @Test
     void execute() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, SESSION_CACHE_CAPACITY);
 
         // execute
         engine.execute(system);
@@ -94,7 +93,7 @@ class EngineTest {
     @Test
     void getRootStore() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, SESSION_CACHE_CAPACITY);
 
         // execute
         Store result = engine.getRootStore();
@@ -106,19 +105,19 @@ class EngineTest {
     @Test
     void getMapperSet() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, SESSION_CACHE_CAPACITY);
 
         // execute
-        MapperSet result = engine.getMapperSet();
+        DaoManager result = engine.getDaoManager();
 
         // assert
-        assertThat(result).isSameAs(mapperSet);
+        assertThat(result).isSameAs(daoManager);
     }
 
     @Test
     void getCount() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, SESSION_CACHE_CAPACITY);
 
         // execute
         int count = engine.getCount();
@@ -130,11 +129,11 @@ class EngineTest {
     @Test
     void nextId() {
         // given
-        Engine engine = new Engine(store, CAPACITY_HEADROOM, mapperSet, false);
+        Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, SESSION_CACHE_CAPACITY);
 
         // execute
-        int nextId = engine.nextId();
-        int nextNextId = engine.nextId();
+        int nextId = engine.allocateNextId();
+        int nextNextId = engine.allocateNextId();
 
         // assert
         verify(counterA, times(2)).next();

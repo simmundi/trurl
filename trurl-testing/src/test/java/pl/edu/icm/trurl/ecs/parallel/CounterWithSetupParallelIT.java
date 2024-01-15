@@ -18,15 +18,17 @@
 package pl.edu.icm.trurl.ecs.parallel;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import pl.edu.icm.trurl.ecs.*;
 import pl.edu.icm.trurl.ecs.Session;
-import pl.edu.icm.trurl.ecs.SessionFactory;
-import pl.edu.icm.trurl.ecs.mapper.LifecycleEvent;
-import pl.edu.icm.trurl.ecs.mapper.Mapper;
+import pl.edu.icm.trurl.ecs.dao.Dao;
+import pl.edu.icm.trurl.ecs.dao.LifecycleEvent;
+import pl.edu.icm.trurl.ecs.parallel.domain.*;
 import pl.edu.icm.trurl.ecs.parallel.domain.Counter;
-import pl.edu.icm.trurl.ecs.parallel.domain.CounterMapper;
-import pl.edu.icm.trurl.ecs.parallel.domain.HasAAndB;
-import pl.edu.icm.trurl.ecs.parallel.domain.ParallelCounter;
-import pl.edu.icm.trurl.ecs.parallel.domain.ParallelCounterMapper;
+import pl.edu.icm.trurl.ecs.parallel.domain.ParallelCounterDao;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
 import pl.edu.icm.trurl.util.Status;
@@ -35,29 +37,38 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class CounterWithSetupParallelIT {
     final int SIZE = 10_000;
     final int CONTENTION = 4;
     final int PER_SESSION = 1000;
     final int LOAD = 3;
 
+    @Mock
+    Engine engine;
+    @Mock
+    DaoManager daoManager;
+
     @Test
     void test_parallel() {
         // given
+        when(engine.getDaoManager()).thenReturn(daoManager);
         Store store = new Store(new ArrayAttributeFactory(), SIZE);
-        ParallelCounterMapper parallelMapper = new ParallelCounterMapper("");
+        ParallelCounterDao parallelMapper = new ParallelCounterDao("");
         parallelMapper.configureAndAttach(store);
         this.prepareZeroedCounters(parallelMapper);
         parallelMapper.lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
 
         // execute
         Status status = Status.of("using counters in parallel: " + createMessage());
-        SessionFactory sessionFactory = new SessionFactory(null, Session.Mode.STUB_ENTITIES, 0);
+        SessionFactory sessionFactory = new SessionFactory(engine, 0);
 
         IntStream.range(0, SIZE * CONTENTION).parallel().forEach(chunkId -> {
             int startId = ThreadLocalRandom.current().nextInt(0, SIZE);
-            Session session = sessionFactory.create(chunkId + 1);
+            Session session = sessionFactory.createOrGet();
+            session.setOwnerId(chunkId + 1);
             for (int i = 0; i < PER_SESSION; i++) {
                 int id = (startId + i) % SIZE;
                 ParallelCounter counter = parallelMapper.create();
@@ -77,7 +88,7 @@ public class CounterWithSetupParallelIT {
     void test_sequential() {
         // given
         Store store = new Store(new ArrayAttributeFactory(), SIZE);
-        CounterMapper counterMapper = new CounterMapper("");
+        CounterDao counterMapper = new CounterDao("");
         counterMapper.configureAndAttach(store);
         prepareZeroedCounters(counterMapper);
 
@@ -106,12 +117,12 @@ public class CounterWithSetupParallelIT {
     void test_sequential_incorrect_results() {
         // given
         Store store = new Store(new ArrayAttributeFactory(), SIZE);
-        CounterMapper sequentialMapper = new CounterMapper("");
+        CounterDao sequentialMapper = new CounterDao("");
         sequentialMapper.configureAndAttach(store);
         prepareZeroedCounters(sequentialMapper);
 
         // execute
-        Status status = Status.of("using sequential mapper in parallel (which is wrong): " + createMessage());
+        Status status = Status.of("using sequential dao in parallel (which is wrong): " + createMessage());
         IntStream.range(0, SIZE * CONTENTION).parallel().forEach(chunkId -> {
             int startId = ThreadLocalRandom.current().nextInt(0, SIZE);
 
@@ -152,23 +163,21 @@ public class CounterWithSetupParallelIT {
         return "(" + SIZE + " counters, " + (SIZE * CONTENTION * PER_SESSION) + " operations)";
     }
 
-    private <T> void prepareZeroedCounters(Mapper<T> mapper) {
+    private <T> void prepareZeroedCounters(Dao<T> dao) {
         Status status = Status.of("creating counters");
-        SessionFactory sessionFactory = new SessionFactory(null, Session.Mode.STUB_ENTITIES);
-        Session session = sessionFactory.create();
-        T counter = mapper.create();
+        T counter = dao.create();
         for (int i = 0; i < SIZE; i++) {
-            mapper.save(session, counter, i);
+            dao.save(counter, i);
         }
         status.done();
     }
 
-    private <T extends HasAAndB> int verifyAndDumpDebugInfo(Mapper<T> mapper) {
+    private <T extends HasAAndB> int verifyAndDumpDebugInfo(Dao<T> dao) {
         int sum = 0;
         int corrupt = 0;
         for (int i = 0; i < SIZE; i++) {
-            T counter = mapper.create();
-            mapper.load(null, counter, i);
+            T counter = dao.create();
+            dao.load(null, counter, i);
             sum += counter.getA();
             if (counter.getA() != -counter.getB()) {
                 corrupt++;

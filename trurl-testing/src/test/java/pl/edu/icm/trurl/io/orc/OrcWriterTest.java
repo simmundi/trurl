@@ -21,6 +21,7 @@ package pl.edu.icm.trurl.io.orc;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import pl.edu.icm.trurl.io.ReaderProvider;
 import pl.edu.icm.trurl.io.csv.CsvReader;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
@@ -54,8 +55,8 @@ class OrcWriterReaderTest {
         int writeCount = storeToWrite.getCounter().getCount();
 
         // execute
-        orcWriter.write(file,storeToWrite);
-        orcStoreReader.read(file,storeToRead);
+        orcWriter.write(file.getAbsolutePath(),storeToWrite);
+        orcStoreReader.read(file.getAbsolutePath(),storeToRead);
         int readCount = storeToRead.getCounter().getCount();
 
         // assert
@@ -65,8 +66,8 @@ class OrcWriterReaderTest {
     }
 
     private void loadFromCsvResource(Store storeToWrite, String name) throws IOException {
-        new CsvReader().read(
-                new File(Objects.requireNonNull(this.getClass().getResource(name)).getFile()),
+        new CsvReader(new ReaderProvider()).read(
+                new File(Objects.requireNonNull(this.getClass().getResource(name)).getFile()).getAbsolutePath(),
                 storeToWrite
         );
     }

@@ -26,9 +26,9 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class SingleJoinWithReverse implements Join {
-    private IntAttribute rowAttribute;
-    private IntAttribute reverseRowAttribute;
-    private Store target;
+    private final IntAttribute rowAttribute;
+    private final IntAttribute reverseRowAttribute;
+    private final Store target;
 
     public SingleJoinWithReverse(Store store, String name) {
         store.addInt(name);

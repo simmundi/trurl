@@ -29,10 +29,10 @@ import java.util.Collections;
 
 public final class ArrayReference implements Reference {
     private final String name;
-    private IntListAttribute values;
+    private final IntListAttribute values;
     private final int minimum;
     private final int margin;
-    private StoreInspector store;
+    private final StoreInspector store;
 
     public ArrayReference(Store store, String name, int minimum, int margin) {
         this.store = store;

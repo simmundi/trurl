@@ -18,63 +18,52 @@
 
 package pl.edu.icm.trurl.ecs;
 
-import pl.edu.icm.trurl.ecs.mapper.Mapper;
+import pl.edu.icm.trurl.ecs.dao.Dao;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 
-import static java.util.stream.Collectors.toList;
-
 public final class Engine {
+    private final int capacityHeadroom;
     private final Store rootStore;
-    private final MapperSet mapperSet;
-    private final Mapper<?>[] mappers;
-    private final SessionFactory defaultSessionFactory;
-    private int capacityHeadroom;
+    private final DaoManager daoManager;
+    private final SessionFactory sessionFactory;
 
-    public Engine(int initialCapacity, int capacityHeadroom, MapperSet mapperSet, boolean shared, AttributeFactory attributeFactory) {
+    public Engine(int initialCapacity, int capacityHeadroom, DaoManager daoManager, AttributeFactory attributeFactory, int sessionCacheCapacity) {
         this.rootStore = new Store(attributeFactory, initialCapacity + capacityHeadroom);
         this.capacityHeadroom = capacityHeadroom;
-        this.mapperSet = mapperSet;
-        if (shared) {
-            this.defaultSessionFactory = new SessionFactory(this, Session.Mode.SHARED, initialCapacity + capacityHeadroom);
-        } else {
-            this.defaultSessionFactory = new SessionFactory(this, Session.Mode.NORMAL);
+        this.daoManager = daoManager;
+        this.sessionFactory = new SessionFactory(this, sessionCacheCapacity);
+        for (Dao<?> dao : daoManager.allDaos()) {
+            dao.configureStore(rootStore);
+            dao.attachStore(rootStore);
         }
-        mappers = this.mapperSet.streamMappers().peek(mapper -> {
-            mapper.configureStore(rootStore);
-            mapper.attachStore(rootStore);
-        }).collect(toList()).toArray(new Mapper<?>[0]);
     }
 
-    public Engine(Store store, int capacityHeadroom, MapperSet mapperSet, boolean shared) {
+    public Engine(Store store, int capacityHeadroom, DaoManager daoManager, int sessionCacheCapacity) {
         this.rootStore = store;
         this.capacityHeadroom = capacityHeadroom;
-        this.mapperSet = mapperSet;
-        this.defaultSessionFactory = new SessionFactory(this, shared ? Session.Mode.SHARED : Session.Mode.NORMAL);
-        mappers = this.mapperSet
-                .streamMappers()
-                .collect(toList())
-                .toArray(new Mapper<?>[0]);
+        this.daoManager = daoManager;
+        this.sessionFactory = new SessionFactory(this, sessionCacheCapacity);
     }
 
     public void execute(EntitySystem system) {
         ensureHeadroom();
-        system.execute(defaultSessionFactory);
+        system.execute(sessionFactory);
     }
 
     public Store getRootStore() {
         return rootStore;
     }
 
-    public MapperSet getMapperSet() {
-        return mapperSet;
+    public DaoManager getDaoManager() {
+        return daoManager;
     }
 
     public int getCount() {
         return rootStore.getCounter().getCount();
     }
 
-    int nextId() {
+    int allocateNextId() {
         return rootStore.getCounter().next();
     }
 

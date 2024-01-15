@@ -18,7 +18,6 @@
 
 package pl.edu.icm.trurl.store.array;
 
-import com.google.common.base.Strings;
 import pl.edu.icm.trurl.store.attribute.StringAttribute;
 
 import java.util.ArrayList;
@@ -47,7 +46,7 @@ final public class StringArrayAttribute implements StringAttribute {
 
     @Override
     public boolean isEmpty(int row) {
-        return row >= strings.size() || Strings.isNullOrEmpty(strings.get(row));
+        return row >= strings.size() || isNullOrEmpty(strings.get(row));
     }
 
     @Override
@@ -63,7 +62,7 @@ final public class StringArrayAttribute implements StringAttribute {
     @Override
     public String getString(int row) {
         String value = strings.get(row);
-        return Strings.isNullOrEmpty(value) ? "" : value;
+        return isNullOrEmpty(value) ? "" : value;
     }
 
     @Override
@@ -71,4 +70,7 @@ final public class StringArrayAttribute implements StringAttribute {
         strings.set(row, value);
     }
 
+    private static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
+    }
 }

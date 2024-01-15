@@ -18,24 +18,22 @@
 
 package pl.edu.icm.trurl.ecs.util;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.snowyhollows.bento.annotation.ByName;
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.ComponentAccessor;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DynamicComponentAccessor implements ComponentAccessor {
     private final Class[] componentClasses;
-    private final Object2IntMap<Class<?>> componentMap;
+    private final Map<Class<?>, Integer> componentMap;
 
     @WithFactory
     public DynamicComponentAccessor(@ByName Collection componentClasses) {
         this.componentClasses = ((Collection<Class<?>>)componentClasses).toArray(new Class[]{});
-        componentMap = new Object2IntOpenHashMap<>(this.componentClasses.length);
+        componentMap = new HashMap<>(this.componentClasses.length);
         for (int i = 0; i < this.componentClasses.length; i++) {
             componentMap.put(this.componentClasses[i], i);
         }
@@ -43,7 +41,7 @@ public class DynamicComponentAccessor implements ComponentAccessor {
 
     @Override
     public int classToIndex(Class<?> componentClass) {
-        return componentMap.getInt(componentClass);
+        return componentMap.get(componentClass).intValue();
     }
 
     @Override

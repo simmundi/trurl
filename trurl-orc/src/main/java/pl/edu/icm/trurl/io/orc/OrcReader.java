@@ -1,5 +1,6 @@
 package pl.edu.icm.trurl.io.orc;
 
+import net.snowyhollows.bento.annotation.WithFactory;
 import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.orc.Reader;
@@ -28,12 +29,14 @@ public class OrcReader implements SingleStoreReader {
         UserGroupInformation.setLoginUser(UserGroupInformation.createRemoteUser("hduser"));
     }
 
+    @WithFactory
     public OrcReader() {
         this.orcImplementationsService = new OrcImplementationsService();
     }
 
     @Override
-    public void read(File file, StoreInspector store) throws IOException {
+    public void read(String fileName, StoreInspector store) throws IOException {
+        File file = new File(fileName);
         TypeDescription schema;
         VectorizedRowBatch batch;
         RecordReader rows;

@@ -19,6 +19,7 @@
 package pl.edu.icm.trurl.io.orc;
 
 import com.google.common.io.Files;
+import net.snowyhollows.bento.annotation.WithFactory;
 import org.apache.hadoop.hive.ql.exec.vector.VectorizedRowBatch;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.orc.TypeDescription;
@@ -43,13 +44,15 @@ public class OrcWriter implements SingleStoreWriter {
         UserGroupInformation.setLoginUser(UserGroupInformation.createRemoteUser("hduser"));
     }
 
+    @WithFactory
     public OrcWriter() {
         this.orcImplementationsService = new OrcImplementationsService();
     }
 
 
     @Override
-    public void write(File file, StoreInspector store) throws IOException {
+    public void write(String fileName, StoreInspector store) throws IOException {
+        File file = new File(fileName);
         int count = store.getCounter().getCount();
         TypeDescription typeDescription = TypeDescription.createStruct();
         List<AbstractColumnWrapper> wrappers = store.attributes().map(AbstractColumnWrapper::create).collect(Collectors.toList());

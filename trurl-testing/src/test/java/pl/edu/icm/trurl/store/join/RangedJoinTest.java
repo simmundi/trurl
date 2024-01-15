@@ -18,7 +18,7 @@ public class RangedJoinTest extends AbstractJoinTest<RangedJoin>{
 
     @Override
     RangedJoin getJoin() {
-        return (RangedJoin) store.getJoin("hobby");
+        return store.getJoin("hobby");
     }
 
     @Test

@@ -1,6 +1,8 @@
 package pl.edu.icm.trurl.io.store;
 
 import org.junit.jupiter.api.Test;
+import pl.edu.icm.trurl.io.ReaderProvider;
+import pl.edu.icm.trurl.io.WriterProvider;
 import pl.edu.icm.trurl.io.csv.CsvReader;
 import pl.edu.icm.trurl.io.csv.CsvWriter;
 
@@ -12,7 +14,7 @@ class CsvSingleStoreIOProviderTest {
     @Test
     void getReaderForCsv() {
         // given
-        CsvSingleStoreIOProvider csvSingleStoreIOProvider = new CsvSingleStoreIOProvider();
+        CsvSingleStoreIOProvider csvSingleStoreIOProvider = new CsvSingleStoreIOProvider(new CsvReader(new ReaderProvider()), new CsvWriter(new WriterProvider()));
         //execute & assert
         assertThat(csvSingleStoreIOProvider.getReaderFor("csv")).isInstanceOf(CsvReader.class);
     }
@@ -20,7 +22,7 @@ class CsvSingleStoreIOProviderTest {
     @Test
     void getWriterForCsv() {
         // given
-        CsvSingleStoreIOProvider csvSingleStoreIOProvider = new CsvSingleStoreIOProvider();
+        CsvSingleStoreIOProvider csvSingleStoreIOProvider = new CsvSingleStoreIOProvider(new CsvReader(new ReaderProvider()), new CsvWriter(new WriterProvider()));
         //execute & assert
         assertThat(csvSingleStoreIOProvider.getWriterFor("csv")).isInstanceOf(CsvWriter.class);
     }
@@ -28,7 +30,7 @@ class CsvSingleStoreIOProviderTest {
     @Test
     void shouldThrowOtherwise() {
         // given
-        CsvSingleStoreIOProvider csvSingleStoreIOProvider = new CsvSingleStoreIOProvider();
+        CsvSingleStoreIOProvider csvSingleStoreIOProvider = new CsvSingleStoreIOProvider(new CsvReader(new ReaderProvider()), new CsvWriter(new WriterProvider()));
         // execute & assert
         assertThrows(IllegalArgumentException.class, () -> csvSingleStoreIOProvider.getReaderFor("orc"));
         assertThrows(IllegalArgumentException.class, () -> csvSingleStoreIOProvider.getWriterFor("orc"));

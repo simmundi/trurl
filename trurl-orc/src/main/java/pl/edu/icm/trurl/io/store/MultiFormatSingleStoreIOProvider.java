@@ -1,5 +1,7 @@
 package pl.edu.icm.trurl.io.store;
 
+import pl.edu.icm.trurl.io.ReaderProvider;
+import pl.edu.icm.trurl.io.WriterProvider;
 import pl.edu.icm.trurl.io.csv.CsvReader;
 import pl.edu.icm.trurl.io.csv.CsvWriter;
 import pl.edu.icm.trurl.io.orc.OrcReader;
@@ -9,11 +11,11 @@ import java.util.Map;
 
 public class MultiFormatSingleStoreIOProvider implements SingleStoreIOProvider {
     private final Map<String, SingleStoreWriter> writers = Map.of(
-            "csv", new CsvWriter(),
+            "csv", new CsvWriter(new WriterProvider()),
             "orc", new OrcWriter()
     );
     private final Map<String, SingleStoreReader> readers = Map.of(
-            "csv", new CsvReader(),
+            "csv", new CsvReader(new ReaderProvider()),
             "orc", new OrcReader()
     );
 

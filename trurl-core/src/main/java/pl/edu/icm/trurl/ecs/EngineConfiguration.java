@@ -18,42 +18,41 @@
 
 package pl.edu.icm.trurl.ecs;
 
-import com.google.common.base.Preconditions;
-import net.snowyhollows.bento.Bento;
+import net.snowyhollows.bento.BentoFactory;
 import net.snowyhollows.bento.annotation.ByName;
 import net.snowyhollows.bento.annotation.WithFactory;
-import pl.edu.icm.trurl.ecs.mapper.MappersFactory;
+import pl.edu.icm.trurl.ecs.dao.Dao;
+import pl.edu.icm.trurl.ecs.dao.Daos;
+import pl.edu.icm.trurl.ecs.dao.annotation.GwtIncompatible;
 import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EngineConfiguration {
+    private final int sessionCacheSize;
     private volatile Engine engine;
-    private ComponentAccessorCreator componentAccessorCreator;
-    private List<EngineCreationListener> engineCreationListeners = new CopyOnWriteArrayList<>();
-    private Set<Class<?>> componentClasses = new LinkedHashSet<>();
+    private final ComponentAccessorCreator componentAccessorCreator;
+    private final List<EngineCreationListener> engineCreationListeners = Collections.synchronizedList(new ArrayList<>());
+    private final Map<Class<?>, BentoFactory<?>> componentClasses = new LinkedHashMap<>();
     private final AttributeFactory attributeFactory;
-    private final Bento bento;
+    private final Daos daos;
     private final int initialCapacity;
     private final int capacityHeadroom;
-    private final boolean sharedSession;
 
     @WithFactory
     public EngineConfiguration(ComponentAccessorCreator componentAccessorCreator,
-                               @ByName(value = "trurl.engine.initial-capacity", fallbackValue = "1024") int initialCapacity,
+                               @ByName(value = "trurl.engine.initial-capacity", fallbackValue = "200000") int initialCapacity,
                                @ByName(value = "trurl.engine.capacity-headroom", fallbackValue = "128") int capacityHeadroom,
-                               @ByName(value = "trurl.engine.shared-session", fallbackValue = "false") boolean sharedSession,
+                               @ByName(value = "trurl.engine.session-cache-size", fallbackValue = "20000") int sessionCacheSize,
                                AttributeFactory attributeFactory,
-                               Bento bento) {
+                               Daos daos) {
         this.componentAccessorCreator = componentAccessorCreator;
         this.initialCapacity = initialCapacity;
         this.capacityHeadroom = capacityHeadroom;
-        this.sharedSession = sharedSession;
         this.attributeFactory = attributeFactory;
-        this.bento = bento;
+        this.sessionCacheSize = sessionCacheSize;
+        this.daos = daos;
     }
-
 
     public void addEngineCreationListener(EngineCreationListener engineCreationListeners) {
         preconditionEngineNotCreated();
@@ -62,7 +61,7 @@ public class EngineConfiguration {
 
     public Engine getEngine() {
         if (engine == null) {
-            engine = new Engine(initialCapacity, capacityHeadroom, getMapperSet(), sharedSession, attributeFactory);
+            engine = new Engine(initialCapacity, capacityHeadroom, getDaoManager(), attributeFactory, sessionCacheSize);
             for (EngineCreationListener engineCreationListener : engineCreationListeners) {
                 engineCreationListener.onEngineCreated(engine);
             }
@@ -70,35 +69,44 @@ public class EngineConfiguration {
         return engine;
     }
 
+    @GwtIncompatible
     public void addComponentClasses(Class<?>... componentClass) {
         preconditionEngineNotCreated();
-        componentClasses.addAll(Arrays.asList(componentClass));
+        for (Class<?> aClass : componentClass) {
+            componentClasses.computeIfAbsent(aClass, k -> daos.createDaoFactory(k) );
+        }
     }
 
-
-    private MapperSet getMapperSet() {
+    public <T> void addComponentClass(Class<T> componentClass, BentoFactory<? extends Dao<T>> factory) {
         preconditionEngineNotCreated();
-        ComponentAccessor componentAccessor = getComponentIndexer();
-        return new MapperSet(componentAccessor, bento.get(MappersFactory.IT));
+        componentClasses.put(componentClass, factory);
     }
 
-    private ComponentAccessor getComponentIndexer() {
-        ComponentAccessor componentAccessor = componentAccessorCreator.create(componentClasses);
+    private DaoManager getDaoManager() {
+        preconditionEngineNotCreated();
+        ComponentAccessor componentAccessor = getComponentAccessor();
+        return new DaoManager(componentAccessor, componentClasses, daos);
+    }
+
+    private ComponentAccessor getComponentAccessor() {
+        ComponentAccessor componentAccessor = componentAccessorCreator.create(new ArrayList<>(componentClasses.keySet()));
         verifyComponentAccessor(componentAccessor);
         return componentAccessor;
     }
 
     private void preconditionEngineNotCreated() {
-        Preconditions.checkState(this.engine == null, "Engine already created set");
+        if (engine != null) {
+            throw new IllegalStateException("Engine already created");
+        }
     }
 
     private void verifyComponentAccessor(ComponentAccessor componentAccessor) {
-        // loop for fast failing if the indexer doesn't support any of the components
+        // loop for fast failing if the indexer doesn't support any of the required components
         Map<Integer, Class<?>> map = new HashMap<>(componentClasses.size());
-        for (Class<?> componentClass : componentClasses) {
+        for (Class<?> componentClass : componentClasses.keySet()) {
             map.put(componentAccessor.classToIndex(componentClass), componentClass);
         }
-        if (!new HashSet<>(map.values()).equals(new HashSet<>(componentClasses))) {
+        if (!new HashSet<>(map.values()).equals(new HashSet<>(componentClasses.keySet()))) {
             throw new IllegalStateException("Some components were not mapped by " + componentAccessor);
         }
         for (Integer index : map.keySet()) {

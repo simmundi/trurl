@@ -8,3 +8,6 @@ build
 #jupyter
 /jupyter/.ipynb_checkpoints/
 /jte-classes/
+
+# misc
+.DS_Store

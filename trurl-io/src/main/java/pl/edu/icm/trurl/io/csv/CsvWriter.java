@@ -19,34 +19,33 @@
 package pl.edu.icm.trurl.io.csv;
 
 import net.snowyhollows.bento.annotation.WithFactory;
+import pl.edu.icm.trurl.io.WriterProvider;
 import pl.edu.icm.trurl.io.store.SingleStoreWriter;
 import pl.edu.icm.trurl.store.StoreInspector;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class CsvWriter implements SingleStoreWriter {
     private final Pattern NEEDS_ESCAPE = Pattern.compile("[,\\n\\r\"]");
+    private final WriterProvider writerProvider;
 
     @WithFactory
-    public CsvWriter() {
+    public CsvWriter(WriterProvider writerProvider) {
+        this.writerProvider = writerProvider;
     }
 
-
     @Override
-    public void write(File outputPath, StoreInspector store) throws IOException {
-        try (OutputStream outputStream = Files.newOutputStream(outputPath.toPath());
-             OutputStreamWriter streamWriter = new OutputStreamWriter(outputStream, StandardCharsets.UTF_8);
-             BufferedWriter bufferedWriter = new BufferedWriter(streamWriter, 1024 * 1024 * 128)) {
+    public void write(String outputPath, StoreInspector store) throws IOException {
+        try (Writer bufferedWriter = writerProvider.writerForFile(outputPath, 1024 * 1024 * 128)) {
             write(bufferedWriter, store, 0, store.getCounter().getCount());
         }
     }
 
-    private void write(BufferedWriter bufferedWriter, StoreInspector store, int fromInclusive, int toExclusive) throws IOException {
+    private void write(Writer bufferedWriter, StoreInspector store, int fromInclusive, int toExclusive) throws IOException {
         Attribute[] attributes = store.attributes().collect(Collectors.toList()).toArray(new Attribute[]{});
 
         for (int i = 0; i < attributes.length; i++) {

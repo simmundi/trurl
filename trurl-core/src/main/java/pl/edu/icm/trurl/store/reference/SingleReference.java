@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class SingleReference implements Reference {
-    private IntAttribute idAttribute;
+    private final IntAttribute idAttribute;
 
     public SingleReference(Store store, String name) {
         store.addInt(name);

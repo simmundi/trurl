@@ -33,7 +33,7 @@ public abstract class AbstractColumnWrapper<T extends ColumnVector, A extends At
     public T columnVector;
     public A attribute;
 
-    private String name;
+    private final String name;
 
     public AbstractColumnWrapper(A attribute) {
         this.name = attribute.name();

@@ -26,8 +26,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.Counter;
+import pl.edu.icm.trurl.io.WriterProvider;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
@@ -57,6 +59,8 @@ class CsvWriterTest {
     Store store;
     @Mock
     Counter counter;
+    @Spy
+    WriterProvider writerProvider = new WriterProvider();
 
     @InjectMocks
     CsvWriter csvWriter;
@@ -76,7 +80,7 @@ class CsvWriterTest {
     void writeCsv__header() throws IOException {
         // execute
         File outputPath = new File(tempDir.toFile(), "test.csv");
-        csvWriter.write(outputPath, store);
+        csvWriter.write(outputPath.getAbsolutePath(), store);
 
         // assert
         try (Stream<String> stream = Files.lines(outputPath.toPath())) {
@@ -98,7 +102,7 @@ class CsvWriterTest {
         setMockValues(columnC, null, null, "five", null);
 
         // execute
-        csvWriter.write(outputPath, store);
+        csvWriter.write(outputPath.getAbsolutePath(), store);
 
         // assert
         try (Stream<String> stringStream = Files.lines(outputPath.toPath())) {
@@ -118,7 +122,7 @@ class CsvWriterTest {
         setMockValues(columnC, "Jack\nand\nJill");
 
         // execute
-        csvWriter.write(outputPath, store);
+        csvWriter.write(outputPath.getAbsolutePath(), store);
 
         // assert
         try (Stream<String> stream = Files.lines(outputPath.toPath())) {

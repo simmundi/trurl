@@ -18,13 +18,13 @@
 
 package pl.edu.icm.trurl.ecs.parallel.domain;
 
-import pl.edu.icm.trurl.ecs.annotation.NotMapped;
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
-import pl.edu.icm.trurl.ecs.mapper.feature.CanResolveConflicts;
-import pl.edu.icm.trurl.ecs.mapper.feature.IsDirtyMarked;
-import pl.edu.icm.trurl.ecs.mapper.feature.RequiresOriginalCopy;
+import pl.edu.icm.trurl.ecs.dao.annotation.NotMapped;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
+import pl.edu.icm.trurl.ecs.dao.feature.CanResolveConflicts;
+import pl.edu.icm.trurl.ecs.dao.feature.IsDirtyMarked;
+import pl.edu.icm.trurl.ecs.dao.feature.RequiresOriginalCopy;
 
-@WithMapper
+@WithDao
 public class ParallelCounter implements RequiresOriginalCopy<ParallelCounter>, CanResolveConflicts<ParallelCounter>, IsDirtyMarked, HasAAndB {
     private int a;
     private int b;

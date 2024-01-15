@@ -94,6 +94,6 @@ class CounterTest {
         // assert
         assertThat(counter.next()).isEqualTo(slabStart + 2);
         assertThat(counter.next()).isEqualTo(slabStart + 1);
-        assertThat(counter.next()).isEqualTo(slabStart + 0);
+        assertThat(counter.next()).isEqualTo(slabStart);
     }
 }

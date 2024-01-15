@@ -19,18 +19,18 @@
 package pl.edu.icm.trurl.exampledata;
 
 import pl.edu.icm.trurl.ecs.Entity;
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@WithMapper
+@WithDao
 public class BunchOfData {
     private boolean booleanProp;
     private byte byteProp;
     private double doubleProp;
-    private List<Entity> entitiesProp = new ArrayList<>();
+    private final List<Entity> entitiesProp = new ArrayList<>();
     private Entity entityProp;
     private Color enumProp;
     private float floatProp;

@@ -18,9 +18,9 @@
 
 package pl.edu.icm.trurl.visnow;
 
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 
-@WithMapper
+@WithDao
 public class AreaInfo {
     private int countOfTrees;
 

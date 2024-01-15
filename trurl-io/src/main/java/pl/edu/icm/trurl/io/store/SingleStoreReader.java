@@ -6,5 +6,5 @@ import java.io.File;
 import java.io.IOException;
 
 public interface SingleStoreReader {
-    void read(File file, StoreInspector store) throws IOException;
+    void read(String file, StoreInspector store) throws IOException;
 }

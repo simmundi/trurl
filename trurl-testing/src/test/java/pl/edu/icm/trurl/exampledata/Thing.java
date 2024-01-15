@@ -18,14 +18,14 @@
 
 package pl.edu.icm.trurl.exampledata;
 
-import pl.edu.icm.trurl.ecs.annotation.Mapped;
-import pl.edu.icm.trurl.ecs.annotation.Type;
-import pl.edu.icm.trurl.ecs.annotation.WithMapper;
+import pl.edu.icm.trurl.ecs.dao.annotation.Mapped;
+import pl.edu.icm.trurl.ecs.dao.annotation.Type;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 
-import static pl.edu.icm.trurl.ecs.annotation.Reverse.ONLY_REVERSE_ATTRIBUTE;
-import static pl.edu.icm.trurl.ecs.annotation.Reverse.WITH_REVERSE_ATTRIBUTE;
+import static pl.edu.icm.trurl.ecs.dao.annotation.ReverseReference.ONLY_REVERSE_ATTRIBUTE;
+import static pl.edu.icm.trurl.ecs.dao.annotation.ReverseReference.WITH_REVERSE_ATTRIBUTE;
 
-@WithMapper
+@WithDao
 public class Thing {
     @Mapped(type = Type.DENSE)
     Coordinates coordinates;

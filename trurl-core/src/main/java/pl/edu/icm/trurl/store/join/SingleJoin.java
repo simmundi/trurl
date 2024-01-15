@@ -26,8 +26,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class SingleJoin implements Join {
-    private IntAttribute rowAttribute;
-    private Store target;
+    private final IntAttribute rowAttribute;
+    private final Store target;
 
     public SingleJoin(Store store, String name) {
         store.addInt(name);

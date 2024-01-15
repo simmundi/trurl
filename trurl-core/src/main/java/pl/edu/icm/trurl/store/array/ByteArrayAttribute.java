@@ -18,7 +18,6 @@
 
 package pl.edu.icm.trurl.store.array;
 
-import com.google.common.base.Strings;
 import pl.edu.icm.trurl.store.attribute.ByteAttribute;
 
 import java.util.Arrays;
@@ -68,7 +67,7 @@ final public class ByteArrayAttribute implements ByteAttribute {
 
     @Override
     public void setString(int row, String value) {
-        setByte(row, Strings.isNullOrEmpty(value) ? Byte.MIN_VALUE : Byte.parseByte(value));
+        setByte(row, isNullOrEmpty(value) ? Byte.MIN_VALUE : Byte.parseByte(value));
     }
 
     @Override
@@ -79,5 +78,9 @@ final public class ByteArrayAttribute implements ByteAttribute {
     @Override
     public void setByte(int row, byte value) {
         values[row] = value;
+    }
+
+    private static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 }

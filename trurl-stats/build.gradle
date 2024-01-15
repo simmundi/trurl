@@ -6,6 +6,7 @@ java {
 
 dependencies {
     implementation project(":trurl-core")
+    api "com.google.guava:guava:${guavaVersion}"
     implementation "it.unimi.dsi:fastutil:${fastutilVersion}"
     implementation project(':trurl-utils')
 }

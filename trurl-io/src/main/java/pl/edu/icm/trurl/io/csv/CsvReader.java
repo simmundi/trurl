@@ -18,59 +18,50 @@
 
 package pl.edu.icm.trurl.io.csv;
 
-import com.univocity.parsers.csv.CsvParser;
-import com.univocity.parsers.csv.CsvParserSettings;
 import net.snowyhollows.bento.annotation.WithFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pl.edu.icm.trurl.io.ReaderProvider;
+import pl.edu.icm.trurl.io.parser.Parser;
 import pl.edu.icm.trurl.io.store.SingleStoreReader;
 import pl.edu.icm.trurl.store.StoreInspector;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.StubAttribute;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
+import java.io.Reader;
+import java.util.*;
 
 public class CsvReader implements SingleStoreReader {
-    private final Logger logger = LoggerFactory.getLogger(CsvReader.class);
+
+    private final ReaderProvider readerProvider;
 
     private final Attribute SKIP = new StubAttribute();
 
     @WithFactory
-    public CsvReader() {
+    public CsvReader(ReaderProvider readerProvider) {
+        this.readerProvider = readerProvider;
     }
 
 
     @Override
-    public void read(File file, StoreInspector store) throws IOException {
-        try (InputStream stream = Files.newInputStream(file.toPath())) {
-            load(stream, store);
-        }
+    public void read(String file, StoreInspector store) {
+        load(readerProvider.readerForFile(file), store, Collections.emptyMap());
     }
 
-    public void load(InputStream stream, StoreInspector store, String... columns) {
-        load(stream, store, Collections.emptyMap(), columns);
+    public void load(Reader reader, StoreInspector store, String... columns) {
+        load(reader, store, Collections.emptyMap(), columns);
     }
 
 
-    private void load(InputStream stream, StoreInspector store, Map<String, String> mappings, String... columns) {
-        CsvParserSettings settings = new CsvParserSettings();
-        settings.detectFormatAutomatically(',', '\t');
-        settings.setSkipEmptyLines(false);
-        CsvParser csvParser = new CsvParser(settings);
-        csvParser.beginParsing(new BufferedInputStream(stream, 1024 * 1024));
-        String[] header = columns.length > 0 ? columns : csvParser.parseNext();
-        Attribute[] attributes = new Attribute[header.length];
+    private void load(Reader reader, StoreInspector store, Map<String, String> mappings, String... columns) {
+        Parser parser = new Parser(reader);
 
-        final int columnCount = header.length;
+        List<String> header = new ArrayList<>();
+        parser.nextCsvRow(header);
+        parser.nextLine();
+        Attribute[] attributes = new Attribute[header.size()];
+
+        final int columnCount = header.size();
         for (int i = 0; i < columnCount; i++) {
-            String attributeName = mappings.getOrDefault(header[i], header[i]);
+            String attributeName = mappings.getOrDefault(header.get(i), header.get(i));
             attributes[i] = Optional.<Attribute>ofNullable(store.get(attributeName)).orElse(SKIP);
         }
 
@@ -79,21 +70,13 @@ public class CsvReader implements SingleStoreReader {
         // It is possible that the CSV file was created by saving only a part of the
         // store or that the store wasn't empty; in those cases we need to offset
         // values of references and joins.
-        while (true) {
-            String[] line = csvParser.parseNext();
-            if (line == null) {
-                break;
-            }
-            try {
-                int next = store.getCounter().next();
-                for (int i = 0; i < columnCount; i++) {
-                    attributes[i].setString(next, line[i]);
-                }
-            } catch (RuntimeException re) {
-                logger.info("wrong format in csv file: "
-                        + re.getMessage()
-                        .replace('\n', ' ')
-                        .replace('\r', ' '));
+        List<String> line = new ArrayList<>();
+        while (parser.hasMore()) {
+            parser.nextCsvRow(line);
+            parser.nextLine();
+            int next = store.getCounter().next();
+            for (int i = 0; i < columnCount; i++) {
+                attributes[i].setString(next, line.get(i));
             }
         }
     }

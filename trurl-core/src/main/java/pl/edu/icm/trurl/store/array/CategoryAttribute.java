@@ -18,18 +18,18 @@
 
 package pl.edu.icm.trurl.store.array;
 
-import com.google.common.base.Strings;
 import net.snowyhollows.bento.category.Category;
 import net.snowyhollows.bento.category.CategoryManager;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 final public class CategoryAttribute<T extends Category> implements pl.edu.icm.trurl.store.attribute.CategoryAttribute<T> {
     private final String name;
     private final CategoryManager<T> manager;
     private byte[] values;
-    private static byte NULL = Byte.MIN_VALUE;
-    private T[] instances;
+    private static final byte NULL = Byte.MIN_VALUE;
+    private final T[] instances;
     private int capacity;
 
     public CategoryAttribute(CategoryManager<T> manager, String name, int capacity) {
@@ -74,7 +74,7 @@ final public class CategoryAttribute<T extends Category> implements pl.edu.icm.t
 
     @Override
     public void setString(int row, String value) {
-        values[row] = Strings.isNullOrEmpty(value) ? Byte.MIN_VALUE : manager.getByName(value).ordinal();
+        values[row] = isNullOrEmpty(value) ? Byte.MIN_VALUE : manager.getByName(value).ordinal();
     }
 
     @Override
@@ -101,5 +101,9 @@ final public class CategoryAttribute<T extends Category> implements pl.edu.icm.t
     @Override
     public T[] values() {
         return instances;
+    }
+
+    private static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 }

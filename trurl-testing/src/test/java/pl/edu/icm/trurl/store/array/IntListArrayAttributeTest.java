@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.*;
 
 class IntListArrayAttributeTest {
 
-    private IntListArrayAttribute attribute = new IntListArrayAttribute("abcde", 100);
+    private final IntListArrayAttribute attribute = new IntListArrayAttribute("abcde", 100);
 
     @Test
     @DisplayName("Should ensure capacity")

@@ -18,7 +18,6 @@
 
 package pl.edu.icm.trurl.store.array;
 
-import com.google.common.base.Strings;
 import pl.edu.icm.trurl.store.attribute.DoubleAttribute;
 
 import java.util.Arrays;
@@ -69,7 +68,7 @@ final public class DoubleArrayAttribute implements DoubleAttribute {
 
     @Override
     public void setString(int row, String value) {
-        setDouble(row, Strings.isNullOrEmpty(value) ? NULL : Double.parseDouble(value));
+        setDouble(row, isNullOrEmpty(value) ? NULL : Double.parseDouble(value));
     }
 
     @Override
@@ -81,5 +80,7 @@ final public class DoubleArrayAttribute implements DoubleAttribute {
     public void setDouble(int row, double value) {
         values[row] = value;
     }
-
+    private static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
+    }
 }

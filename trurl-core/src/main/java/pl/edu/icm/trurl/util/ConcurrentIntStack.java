@@ -19,6 +19,7 @@
 package pl.edu.icm.trurl.util;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.IntUnaryOperator;
 
 /**
  * A concurrent stack of ints with a fixed capacity.
@@ -36,14 +37,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ConcurrentIntStack {
     private final int[] table;
 
-    private AtomicInteger head = new AtomicInteger(0);
+    private final AtomicInteger head = new AtomicInteger(0);
 
     public ConcurrentIntStack(int size) {
         this.table = new int[size];
     }
 
     public synchronized boolean push(int value) {
-        int oldHead = this.head.getAndUpdate(head -> {
+        int oldHead = getAndUpdate(head -> {
             if (head < table.length) {
                 table[head] = value;
                 return head + 1;
@@ -60,7 +61,7 @@ public class ConcurrentIntStack {
      */
     synchronized public int shift() {
         AtomicInteger valueRef = new AtomicInteger(Integer.MIN_VALUE);
-        this.head.getAndUpdate(head -> {
+        getAndUpdate(head -> {
             if (head == 0) {
                 return head;
             } else {
@@ -69,6 +70,15 @@ public class ConcurrentIntStack {
             }
         });
         return valueRef.get();
+    }
+
+    private final int getAndUpdate(IntUnaryOperator updateFunction) {
+        int prev, next;
+        do {
+            prev = head.get();
+            next = updateFunction.applyAsInt(prev);
+        } while (!head.compareAndSet(prev, next));
+        return prev;
     }
 
 }

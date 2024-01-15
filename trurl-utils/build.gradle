@@ -8,7 +8,8 @@ dependencies {
     implementation "net.snowyhollows.bento:bento-config:${bentoVersion}"
     implementation "net.snowyhollows.bento:bento-core:${bentoVersion}"
     implementation "com.google.guava:guava:${guavaVersion}"
-    implementation "it.unimi.dsi:fastutil:${fastutilVersion}"
+
+    implementation project(":trurl-core")
 }
 
 publishing {
