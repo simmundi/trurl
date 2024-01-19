@@ -19,7 +19,7 @@
 package pl.edu.icm.trurl.ecs.query;
 
 import net.snowyhollows.bento.annotation.WithFactory;
-import pl.edu.icm.trurl.ecs.EngineConfiguration;
+import pl.edu.icm.trurl.ecs.EngineBuilder;
 import pl.edu.icm.trurl.ecs.EntitySystem;
 import pl.edu.icm.trurl.ecs.index.Chunk;
 import pl.edu.icm.trurl.ecs.index.ChunkInfo;
@@ -34,13 +34,13 @@ import java.util.Map;
 public class QueryService {
 
     private final Indexes indexes;
-    private final EngineConfiguration engineConfiguration;
+    private final EngineBuilder engineBuilder;
 
     @WithFactory
     public QueryService(Indexes indexes,
-                        EngineConfiguration engineConfiguration) {
+                        EngineBuilder engineBuilder) {
         this.indexes = indexes;
-        this.engineConfiguration = engineConfiguration;
+        this.engineBuilder = engineBuilder;
     }
 
     public <T> RandomAccessIndex fixedIndexFromQuery(Query<T> query) {
@@ -50,7 +50,7 @@ public class QueryService {
                 .perform(Action.of(entity -> query.process(entity, indexBuilder, ChunkInfo.DEFAULT_LABEL)))
                 .build();
 
-        engineConfiguration.getEngine().execute(entitySystem);
+        engineBuilder.getEngine().execute(entitySystem);
         return indexBuilder.build();
     }
 

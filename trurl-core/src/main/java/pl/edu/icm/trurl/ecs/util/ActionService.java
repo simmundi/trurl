@@ -21,12 +21,16 @@ package pl.edu.icm.trurl.ecs.util;
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.*;
 
+/**
+ * Service with helper methods for creating actions with typical patterns, like actions with filters
+ * based on presence of components.
+ */
 public class ActionService {
-    private final EngineConfiguration engineConfiguration;
+    private final EngineBuilder engineBuilder;
 
     @WithFactory
-    public ActionService(EngineConfiguration engineConfiguration) {
-        this.engineConfiguration = engineConfiguration;
+    public ActionService(EngineBuilder engineBuilder) {
+        this.engineBuilder = engineBuilder;
     }
 
     public <Context, Q> Action<Context> withComponent(Class<Q> q, Systems.OneComponentSystem<Q> system) {
@@ -34,7 +38,7 @@ public class ActionService {
             ComponentToken<Q> qToken;
             @Override
             public void init() {
-                 qToken = engineConfiguration.getEngine().getDaoManager().classToToken(q);
+                 qToken = engineBuilder.getEngine().getDaoManager().classToToken(q);
             }
 
             @Override
@@ -53,8 +57,8 @@ public class ActionService {
             ComponentToken<W> wToken;
             @Override
             public void init() {
-                qToken = engineConfiguration.getEngine().getDaoManager().classToToken(q);
-                wToken = engineConfiguration.getEngine().getDaoManager().classToToken(w);
+                qToken = engineBuilder.getEngine().getDaoManager().classToToken(q);
+                wToken = engineBuilder.getEngine().getDaoManager().classToToken(w);
             }
 
             @Override
@@ -75,9 +79,9 @@ public class ActionService {
             ComponentToken<E> eToken;
             @Override
             public void init() {
-                qToken = engineConfiguration.getEngine().getDaoManager().classToToken(q);
-                wToken = engineConfiguration.getEngine().getDaoManager().classToToken(w);
-                eToken = engineConfiguration.getEngine().getDaoManager().classToToken(e);
+                qToken = engineBuilder.getEngine().getDaoManager().classToToken(q);
+                wToken = engineBuilder.getEngine().getDaoManager().classToToken(w);
+                eToken = engineBuilder.getEngine().getDaoManager().classToToken(e);
             }
 
             @Override
@@ -100,10 +104,10 @@ public class ActionService {
             ComponentToken<R> rToken;
             @Override
             public void init() {
-                qToken = engineConfiguration.getEngine().getDaoManager().classToToken(q);
-                wToken = engineConfiguration.getEngine().getDaoManager().classToToken(w);
-                eToken = engineConfiguration.getEngine().getDaoManager().classToToken(e);
-                rToken = engineConfiguration.getEngine().getDaoManager().classToToken(r);
+                qToken = engineBuilder.getEngine().getDaoManager().classToToken(q);
+                wToken = engineBuilder.getEngine().getDaoManager().classToToken(w);
+                eToken = engineBuilder.getEngine().getDaoManager().classToToken(e);
+                rToken = engineBuilder.getEngine().getDaoManager().classToToken(r);
             }
 
             @Override

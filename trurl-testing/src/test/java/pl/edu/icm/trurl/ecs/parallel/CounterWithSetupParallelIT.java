@@ -20,7 +20,6 @@ package pl.edu.icm.trurl.ecs.parallel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.*;
 import pl.edu.icm.trurl.ecs.Session;
@@ -30,7 +29,7 @@ import pl.edu.icm.trurl.ecs.parallel.domain.*;
 import pl.edu.icm.trurl.ecs.parallel.domain.Counter;
 import pl.edu.icm.trurl.ecs.parallel.domain.ParallelCounterDao;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 import pl.edu.icm.trurl.util.Status;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -55,11 +54,11 @@ public class CounterWithSetupParallelIT {
     void test_parallel() {
         // given
         when(engine.getDaoManager()).thenReturn(daoManager);
-        Store store = new Store(new ArrayAttributeFactory(), SIZE);
+        Store store = new Store(new BasicAttributeFactory(), SIZE);
         ParallelCounterDao parallelMapper = new ParallelCounterDao("");
         parallelMapper.configureAndAttach(store);
         this.prepareZeroedCounters(parallelMapper);
-        parallelMapper.lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
+        parallelMapper.fireEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
 
         // execute
         Status status = Status.of("using counters in parallel: " + createMessage());
@@ -87,7 +86,7 @@ public class CounterWithSetupParallelIT {
     @Test
     void test_sequential() {
         // given
-        Store store = new Store(new ArrayAttributeFactory(), SIZE);
+        Store store = new Store(new BasicAttributeFactory(), SIZE);
         CounterDao counterMapper = new CounterDao("");
         counterMapper.configureAndAttach(store);
         prepareZeroedCounters(counterMapper);
@@ -116,7 +115,7 @@ public class CounterWithSetupParallelIT {
     @Test
     void test_sequential_incorrect_results() {
         // given
-        Store store = new Store(new ArrayAttributeFactory(), SIZE);
+        Store store = new Store(new BasicAttributeFactory(), SIZE);
         CounterDao sequentialMapper = new CounterDao("");
         sequentialMapper.configureAndAttach(store);
         prepareZeroedCounters(sequentialMapper);

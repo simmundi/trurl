@@ -28,7 +28,7 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.dao.Dao;
-import pl.edu.icm.trurl.ecs.dao.Daos;
+import pl.edu.icm.trurl.ecs.dao.DaosCreator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -46,7 +46,7 @@ class VnAreaExporterTest {
     WorkDir workDir;
 
     @Spy
-    Dao<AreaInfo> areaInfoDao = new Daos().createDao(AreaInfo.class);
+    Dao<AreaInfo> areaInfoDao = new DaosCreator().createDao(AreaInfo.class);
 
     VnAreaExporter<AreaInfo> vnAreaExporter;
 

@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class QueryServiceTest {
 
-    EngineConfiguration engineConfiguration;
+    EngineBuilder engineBuilder;
     Engine engine;
     Indexes indexes;
     QueryService service;
@@ -47,10 +47,10 @@ class QueryServiceTest {
 
     @BeforeEach
     void prepare() {
-        engineConfiguration = Bento.createRoot().get(EngineConfigurationFactory.IT);
-        engineConfiguration.addComponentClasses(Person.class, Stats.class, House.class);
-        engine = engineConfiguration.getEngine();
-        indexes = new Indexes(engineConfiguration, 25000);
+        engineBuilder = Bento.createRoot().get(EngineBuilderFactory.IT);
+        engineBuilder.addComponentClasses(Person.class, Stats.class, House.class);
+        engine = engineBuilder.getEngine();
+        indexes = new Indexes(engineBuilder, 25000);
 
         engine.execute(sf -> {
             Session session = sf.createOrGet();
@@ -64,7 +64,7 @@ class QueryServiceTest {
             session.close();
         });
 
-        service = new QueryService(indexes, engineConfiguration);
+        service = new QueryService(indexes, engineBuilder);
     }
 
     @Test

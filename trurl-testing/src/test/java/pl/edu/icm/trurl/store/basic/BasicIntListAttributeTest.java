@@ -16,7 +16,7 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store.basic;
 
 import org.assertj.core.api.*;
 import org.junit.jupiter.api.DisplayName;
@@ -26,9 +26,9 @@ import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.*;
 
-class IntListArrayAttributeTest {
+class BasicIntListAttributeTest {
 
-    private final IntListArrayAttribute attribute = new IntListArrayAttribute("abcde", 100);
+    private final BasicIntListAttribute attribute = new BasicIntListAttribute("abcde", 100);
 
     @Test
     @DisplayName("Should ensure capacity")

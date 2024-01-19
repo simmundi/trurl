@@ -16,21 +16,22 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store.basic;
 
-import pl.edu.icm.trurl.store.attribute.IntAttribute;
+import pl.edu.icm.trurl.store.attribute.DoubleAttribute;
 
 import java.util.Arrays;
 
-final public class IntArrayAttribute implements IntAttribute {
+final public class BasicDoubleAttribute implements DoubleAttribute {
+
     private final String name;
     private int capacity;
-    private int[] values;
-    private final static int NULL = Integer.MIN_VALUE;
+    private double[] values;
+    private final static double NULL = Double.NaN;
 
-    public IntArrayAttribute(String name, int capacity) {
+    public BasicDoubleAttribute(String name, int capacity) {
         this.name = name;
-        values = new int[0];
+        this.values = new double[0];
         ensureCapacity(capacity);
     }
 
@@ -39,14 +40,15 @@ final public class IntArrayAttribute implements IntAttribute {
         if (capacity > this.capacity) {
             int target = (int) Math.max(capacity, this.capacity * 1.5);
             this.capacity = target;
-            int[] bigger = Arrays.copyOf(values, target);
+            double[] bigger = Arrays.copyOf(values, target);
             Arrays.fill(bigger, values.length, target, NULL);
             this.values = bigger;
         }
     }
+
     @Override
     public boolean isEmpty(int row) {
-        return row >= values.length || values[row] == NULL;
+        return row >= values.length || Double.isNaN(values[row]);
     }
 
     @Override
@@ -61,24 +63,23 @@ final public class IntArrayAttribute implements IntAttribute {
 
     @Override
     public String getString(int row) {
-        return Integer.toString(getInt(row));
+        return Double.toString(getDouble(row));
     }
 
     @Override
     public void setString(int row, String value) {
-        setInt(row, isNullOrEmpty(value) ? Integer.MIN_VALUE : Integer.parseInt(value));
+        setDouble(row, isNullOrEmpty(value) ? NULL : Double.parseDouble(value));
     }
 
     @Override
-    public int getInt(int row) {
+    public double getDouble(int row) {
         return values[row];
     }
 
     @Override
-    public void setInt(int row, int value) {
+    public void setDouble(int row, double value) {
         values[row] = value;
     }
-
     private static boolean isNullOrEmpty(String value) {
         return value == null || value.isEmpty();
     }

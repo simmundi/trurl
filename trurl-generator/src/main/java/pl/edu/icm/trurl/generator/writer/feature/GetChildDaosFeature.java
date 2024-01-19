@@ -18,10 +18,11 @@
 
 package pl.edu.icm.trurl.generator.writer.feature;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
-import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.CommonTypes;
+import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
 import pl.edu.icm.trurl.generator.model.PropertyType;
 
@@ -30,10 +31,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class AttributesFeature implements Feature {
+public class GetChildDaosFeature implements Feature {
     private final BeanMetadata beanMetadata;
 
-    public AttributesFeature(BeanMetadata beanMetadata) {
+    public GetChildDaosFeature(BeanMetadata beanMetadata) {
         this.beanMetadata = beanMetadata;
     }
 
@@ -44,27 +45,33 @@ public class AttributesFeature implements Feature {
 
     @Override
     public Stream<MethodSpec> methods() {
-        return Stream.of(overrideAttributes(beanMetadata));
+        return Stream.of(overrideGetChildMappers(beanMetadata));
     }
 
-    private MethodSpec overrideAttributes(BeanMetadata beanMetadata) {
-        List<ComponentProperty> properties = beanMetadata.getComponentProperties();
-        return MethodSpec.methodBuilder("attributes")
-                .returns(CommonTypes.ATTRIBUTE_LIST)
+    private MethodSpec overrideGetChildMappers(BeanMetadata beanMetadata) {
+        List<ComponentProperty> childMappers = beanMetadata
+                .getComponentProperties().stream()
+                .filter(p -> p.type == PropertyType.EMBEDDED_PROP || p.type == PropertyType.EMBEDDED_LIST_PROP)
+                .collect(Collectors.toList());
+        return MethodSpec.methodBuilder("getChildDaos")
+                .returns(CommonTypes.MAPPER_LIST)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
-                .addStatement("$T result = new $T()", CommonTypes.ATTRIBUTE_LIST, CommonTypes.ATTRIBUTE_ARRAY_LIST)
-                .addStatement("result.addAll($T.asList($L))", CommonTypes.ARRAYS, properties.stream()
-                        .filter(p -> p.type.columnType != null)
-                        .map(p -> p.fieldName)
-                        .collect(Collectors.joining(", ")))
-                .addStatement("$T.<$T>asList($L).stream().forEach(dao -> result.addAll(dao.attributes()))", CommonTypes.ARRAYS, CommonTypes.DAO, properties.stream()
-                        .filter(p -> p.type == PropertyType.EMBEDDED_PROP)
-                        .map(p -> p.fieldName)
-                        .collect(Collectors.joining(", ")))
-                .addStatement("return result")
+                .addCode(childMappers.isEmpty() ? emptyList() : listMappers(childMappers))
                 .build();
     }
 
+    private CodeBlock listMappers(List<ComponentProperty> mapperProperties) {
+        return CodeBlock.builder()
+                .addStatement("return $T.asList($L)", CommonTypes.ARRAYS, mapperProperties.stream()
+                        .map(p -> p.fieldName)
+                        .collect(Collectors.joining(", ")))
+                .build();
+    }
 
+    private CodeBlock emptyList() {
+        return CodeBlock.builder()
+                .addStatement("return $T.emptyList()", CommonTypes.COLLECTIONS)
+                .build();
+    }
 }

@@ -54,11 +54,11 @@ public class DaoWriter {
                 new IsPresentFeature(beanMetadata),
                 new LoadFeature(beanMetadata),
                 new SaveFeature(beanMetadata),
-                new AttributesFeature(beanMetadata),
+                new GetAttributesFeature(beanMetadata),
                 new ColumnarAccessFeature(beanMetadata),
                 new EraseFeature(beanMetadata),
-                new GetChildMappersFeature(beanMetadata),
-                new LifecycleEventFeature(beanMetadata));
+                new GetChildDaosFeature(beanMetadata),
+                new FireEventFeature(beanMetadata));
 
         features.stream()
                 .flatMap(Feature::fields)

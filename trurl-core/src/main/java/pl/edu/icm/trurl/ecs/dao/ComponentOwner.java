@@ -18,6 +18,11 @@
 
 package pl.edu.icm.trurl.ecs.dao;
 
+/**
+ * This interface is only used by Session and describes any object which can inform about
+ * the chunk owning a specific entity.
+ */
+@Deprecated
 public interface ComponentOwner {
     int getOwnerId();
 }

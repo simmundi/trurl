@@ -16,21 +16,25 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store.basic;
 
-import pl.edu.icm.trurl.store.attribute.BooleanAttribute;
+import pl.edu.icm.trurl.store.attribute.EnumAttribute;
 
 import java.util.Arrays;
 
-final public class BooleanArrayAttribute implements BooleanAttribute {
-    final private String name;
+final public class BasicEnumAttribute<T extends Enum<T>> implements EnumAttribute<T> {
+    private final String name;
     private byte[] values;
-    private final static byte NULL = Byte.MIN_VALUE;
+    private static final byte NULL = Byte.MIN_VALUE;
+    private final T[] instances;
     private int capacity;
+    private Class<T> enumClass;
 
-    public BooleanArrayAttribute(String name, int capacity) {
+    public BasicEnumAttribute(Class<T> enumType, String name, int capacity) {
         this.name = name;
-        this.values = new byte[0];
+        values = new byte[0];
+        enumClass = enumType;
+        instances = enumType.getEnumConstants();
         ensureCapacity(capacity);
     }
 
@@ -51,55 +55,52 @@ final public class BooleanArrayAttribute implements BooleanAttribute {
     }
 
     @Override
+    public void setEmpty(int row) {
+        values[row] = NULL;
+    }
+
+    @Override
     public String name() {
         return name;
     }
 
     @Override
     public String getString(int row) {
-        switch (values[row]) {
-            case 0:
-                return "false";
-            case 1:
-                return "true";
-            default:
-                return "";
-        }
+        byte ordinal = values[row];
+        return ordinal >= 0 ? instances[ordinal].name() : "";
     }
 
     @Override
     public void setString(int row, String value) {
-        switch (value == null ? "" : value) {
-            case "true":
-                values[row] = 1;
-                break;
-            case "false":
-                values[row] = 0;
-                break;
-            default:
-                values[row] = NULL;
-                break;
-        }
+        values[row] = isNullOrEmpty(value) ? Byte.MIN_VALUE : (byte) Enum.valueOf(this.enumClass, value).ordinal();
     }
 
     @Override
-    public boolean getBoolean(int row) {
-        switch (values[row]) {
-            default:
-            case 0:
-                return false;
-            case 1:
-                return true;
-        }
+    public T getEnum(int row) {
+        byte ordinal = values[row];
+        return ordinal == Byte.MIN_VALUE ? null : instances[ordinal];
+    }
+    @Override
+    public void setEnum(int row, T value) {
+        setOrdinal(row, value != null ? (byte) value.ordinal() : Byte.MIN_VALUE);
     }
 
     @Override
-    public void setBoolean(int row, boolean value) {
-        values[row] = (byte)(value ? 1 : 0);
+    public byte getOrdinal(int row) {
+        return values[row];
     }
 
     @Override
-    public void setEmpty(int row) {
-        values[row] = NULL;
+    public void setOrdinal(int row, byte value) {
+        values[row] = value;
+    }
+
+    @Override
+    public T[] values() {
+        return instances;
+    }
+
+    private static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 }

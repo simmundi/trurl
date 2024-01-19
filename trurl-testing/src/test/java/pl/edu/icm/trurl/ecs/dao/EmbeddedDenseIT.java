@@ -27,7 +27,7 @@ import pl.edu.icm.trurl.exampledata.DaoOfThingFactory;
 import pl.edu.icm.trurl.exampledata.Thing;
 import pl.edu.icm.trurl.exampledata.ThingDao;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.join.Join;
 import pl.edu.icm.trurl.store.join.SingleJoin;
@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class EmbeddedDenseIT {
     public static final int SIZE = 10_000;
-    Store store = new Store(new ArrayAttributeFactory(), 10_000);
+    Store store = new Store(new BasicAttributeFactory(), 10_000);
     ThingDao thingMapper;
 
     @BeforeEach
@@ -58,18 +58,18 @@ public class EmbeddedDenseIT {
         assertThat((Join)store.getJoin("coordinatesWithReverse")).isInstanceOf(SingleJoinWithReverse.class);
         assertThat((Join)store.getJoin("coordinatesWithReverseOnly")).isInstanceOf(SingleJoinWithReverseOnly.class);
 
-        assertThat(store.getSubstores().map(Store::getName)).containsExactlyInAnyOrder("coordinates",
+        assertThat(store.getSubstores().stream().map(Store::getName)).containsExactlyInAnyOrder("coordinates",
                 "coordinatesWithReverse",
                 "coordinatesWithReverseOnly");
-        assertThat(store.getSubstore("coordinates").attributes().map(Attribute::name)).containsExactlyInAnyOrder("coordinates.x",
+        assertThat(store.getSubstore("coordinates").getAllAttributes().stream().map(Attribute::name)).containsExactlyInAnyOrder("coordinates.x",
                 "coordinates.y");
-        assertThat(store.getSubstore("coordinatesWithReverse").attributes().map(Attribute::name)).containsExactlyInAnyOrder("coordinatesWithReverse.x",
+        assertThat(store.getSubstore("coordinatesWithReverse").getAllAttributes().stream().map(Attribute::name)).containsExactlyInAnyOrder("coordinatesWithReverse.x",
                 "coordinatesWithReverse.y",
                 "reverse");
-        assertThat(store.getSubstore("coordinatesWithReverseOnly").attributes().map(Attribute::name)).containsExactlyInAnyOrder("coordinatesWithReverseOnly.x",
+        assertThat(store.getSubstore("coordinatesWithReverseOnly").getAllAttributes().stream().map(Attribute::name)).containsExactlyInAnyOrder("coordinatesWithReverseOnly.x",
                 "coordinatesWithReverseOnly.y",
                 "reverse");
-        assertThat(store.attributes().map(Attribute::name)).containsExactlyInAnyOrder("index",
+        assertThat(store.getAllAttributes().stream().map(Attribute::name)).containsExactlyInAnyOrder("index",
                 "coordinatesWithReverse",
                 "coordinates");
     }

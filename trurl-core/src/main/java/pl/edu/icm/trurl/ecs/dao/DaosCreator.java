@@ -23,16 +23,16 @@ import net.snowyhollows.bento.BentoFactory;
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.dao.annotation.GwtIncompatible;
 
-public class Daos {
+public class DaosCreator {
 
     private final Bento bento;
 
     @WithFactory
-    public Daos(Bento bento) {
+    public DaosCreator(Bento bento) {
         this.bento = bento;
     }
 
-    public Daos() {
+    public DaosCreator() {
         this.bento = Bento.createRoot();
     }
 

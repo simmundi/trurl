@@ -25,6 +25,16 @@ import pl.edu.icm.trurl.ecs.index.ChunkInfo;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+/**
+ * Action is a single piece of business logic which can be applied to asingle Entity.
+ *
+ * Actions might require a context, which is an arbitrary object created on a per-chunk basis.
+ * Since all entities within a chunk are guqranteed to be processed in a single thread, the
+ * context object doesn't need to be thread-safe and its usage is deterministic across execution
+ * with different numbers of threads (including the single-threaded execution).
+ *
+ * @param <Context>
+ */
 public interface Action<Context> {
     void perform(Context context, Session session, int idx);
 

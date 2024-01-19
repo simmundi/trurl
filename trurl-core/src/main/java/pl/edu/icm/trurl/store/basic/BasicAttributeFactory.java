@@ -16,64 +16,64 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store.basic;
 
 import net.snowyhollows.bento.annotation.WithFactory;
 import net.snowyhollows.bento.category.Category;
 import net.snowyhollows.bento.category.CategoryManager;
 import pl.edu.icm.trurl.store.attribute.*;
 
-public final class ArrayAttributeFactory implements AttributeFactory {
+public final class BasicAttributeFactory implements AttributeFactory {
 
     @WithFactory
-    public ArrayAttributeFactory() {
+    public BasicAttributeFactory() {
     }
 
     @Override
     public BooleanAttribute createBoolean(String name, int defaultCapacity) {
-        return new BooleanArrayAttribute(name, defaultCapacity);
+        return new BasicBooleanAttribute(name, defaultCapacity);
     }
 
     @Override
     public ByteAttribute createByte(String name, int defaultCapacity) {
-        return new ByteArrayAttribute(name, defaultCapacity);
+        return new BasicByteAttribute(name, defaultCapacity);
     }
 
     @Override
-    public DoubleArrayAttribute createDouble(String name, int defaultCapacity) {
-        return new DoubleArrayAttribute(name, defaultCapacity);
+    public BasicDoubleAttribute createDouble(String name, int defaultCapacity) {
+        return new BasicDoubleAttribute(name, defaultCapacity);
     }
 
     @Override
     public <E extends Enum<E>> EnumAttribute<E> createEnum(String name, Class<E> enumType, int defaultCapacity) {
-        return new EnumArrayAttribute<>(enumType, name, defaultCapacity);
+        return new BasicEnumAttribute<>(enumType, name, defaultCapacity);
     }
 
     @Override
     public <E extends Category> pl.edu.icm.trurl.store.attribute.CategoryAttribute<E> createCategory(String name, CategoryManager<E> enumType, int defaultCapacity) {
-        return new CategoryAttribute<>(enumType, name, defaultCapacity);
+        return new BasicCategoryAttribute<>(enumType, name, defaultCapacity);
     }
 
     @Override
     public FloatAttribute createFloat(String name, int defaultCapacity) {
-        return new FloatArrayAttribute(name, defaultCapacity);
+        return new BasicFloatAttribute(name, defaultCapacity);
     }
 
     @Override
     public IntAttribute createInt(String name, int defaultCapacity) {
-        return new IntArrayAttribute(name, defaultCapacity);
+        return new BasicIntAttribute(name, defaultCapacity);
     }
 
     @Override
     public ShortAttribute createShort(String name, int defaultCapacity) {
-        return new ShortArrayAttribute(name, defaultCapacity);
+        return new BasicShortAttribute(name, defaultCapacity);
     }
 
     @Override
     public StringAttribute createString(String name, int defaultCapacity) {
-        return new StringArrayAttribute(name, defaultCapacity);
+        return new BasicStringAttribute(name, defaultCapacity);
     }
 
     @Override
-    public IntListAttribute createIntList(String name, int defaultCapacity) { return new IntListArrayAttribute(name, defaultCapacity); }
+    public IntListAttribute createIntList(String name, int defaultCapacity) { return new BasicIntListAttribute(name, defaultCapacity); }
 }

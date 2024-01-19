@@ -26,7 +26,7 @@ import org.apache.orc.TypeDescription;
 import org.apache.orc.Writer;
 import pl.edu.icm.trurl.io.orc.wrapper.AbstractColumnWrapper;
 import pl.edu.icm.trurl.io.store.SingleStoreWriter;
-import pl.edu.icm.trurl.store.StoreInspector;
+import pl.edu.icm.trurl.store.StoreAccess;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,11 +51,11 @@ public class OrcWriter implements SingleStoreWriter {
 
 
     @Override
-    public void write(String fileName, StoreInspector store) throws IOException {
+    public void write(String fileName, StoreAccess store) throws IOException {
         File file = new File(fileName);
         int count = store.getCounter().getCount();
         TypeDescription typeDescription = TypeDescription.createStruct();
-        List<AbstractColumnWrapper> wrappers = store.attributes().map(AbstractColumnWrapper::create).collect(Collectors.toList());
+        List<AbstractColumnWrapper> wrappers = store.getAllAttributes().stream().map(AbstractColumnWrapper::create).collect(Collectors.toList());
 
         wrappers.forEach(wrapper -> typeDescription.addField(wrapper.getName(), wrapper.getTypeDescription()));
 

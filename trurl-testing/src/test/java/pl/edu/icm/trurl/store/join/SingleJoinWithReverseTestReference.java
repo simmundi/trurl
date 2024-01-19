@@ -20,7 +20,7 @@ package pl.edu.icm.trurl.store.join;
 
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.IntAttribute;
 import pl.edu.icm.trurl.store.attribute.StringAttribute;
@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SingleJoinWithReverseTestReference {
     public static final int CAPACITY = 1000_000;
-    Store store = new Store(new ArrayAttributeFactory(), CAPACITY);
+    Store store = new Store(new BasicAttributeFactory(), CAPACITY);
 
     @Test
     void init() {
@@ -49,10 +49,10 @@ class SingleJoinWithReverseTestReference {
         assertThat(blobAttribute).isInstanceOf(StringAttribute.class);
         assertThat(reverseAttribute).isInstanceOf(IntAttribute.class);
         assertThat(join).isInstanceOf(SingleJoinWithReverse.class);
-        assertThat(store.attributes().map(Attribute::name)).containsExactlyInAnyOrder("name", "image");
-        assertThat(store.visibleAttributes().map(Attribute::name)).containsExactlyInAnyOrder("name");
-        assertThat(target.attributes().map(Attribute::name)).containsExactlyInAnyOrder("blob", "reverse");
-        assertThat(target.visibleAttributes().map(Attribute::name)).containsExactlyInAnyOrder("blob");
+        assertThat(store.getAllAttributes().stream().map(Attribute::name)).containsExactlyInAnyOrder("name", "image");
+        assertThat(store.getDataAttributes().stream().map(Attribute::name)).containsExactlyInAnyOrder("name");
+        assertThat(target.getAllAttributes().stream().map(Attribute::name)).containsExactlyInAnyOrder("blob", "reverse");
+        assertThat(target.getDataAttributes().stream().map(Attribute::name)).containsExactlyInAnyOrder("blob");
     }
 
     @Test

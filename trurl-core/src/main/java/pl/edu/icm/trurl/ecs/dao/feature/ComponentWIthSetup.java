@@ -16,8 +16,15 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs;
+package pl.edu.icm.trurl.ecs.dao.feature;
 
-public interface EngineCreationListener {
-    void onEngineCreated(Engine engine);
+/**
+ * Component requires internal setup after all the data is fetched from store,
+ * and before it is returned by the Dao.
+ *
+ * This might be viewed as a counterpart to normalize.
+ *
+ */
+public interface ComponentWIthSetup {
+    void setup();
 }

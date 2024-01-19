@@ -20,7 +20,7 @@ package pl.edu.icm.trurl.generator.writer.feature;
 
 import com.squareup.javapoet.*;
 import net.snowyhollows.bento.annotation.WithFactory;
-import pl.edu.icm.trurl.ecs.dao.annotation.EnumManagedBy;
+import pl.edu.icm.trurl.ecs.dao.annotation.CategoryManagedBy;
 import pl.edu.icm.trurl.generator.CommonTypes;
 import pl.edu.icm.trurl.generator.model.BeanMetadata;
 import pl.edu.icm.trurl.generator.model.ComponentProperty;
@@ -87,7 +87,7 @@ public class ConstructorFeature implements Feature {
         constructorBuilder.addParameter(CommonTypes.LANG_STRING, "daoPrefix");
 
         for (ComponentProperty property : properties) {
-            EnumManagedBy managedBy = property.attribute.getAnnotation(EnumManagedBy.class);
+            CategoryManagedBy managedBy = property.attribute.getAnnotation(CategoryManagedBy.class);
             TypeName param = managedBy == null
                     ? ParameterizedTypeName.get(CommonTypes.CATEGORY_MANAGER, property.unwrappedTypeName)
                     : getTypeName(managedBy);
@@ -103,7 +103,7 @@ public class ConstructorFeature implements Feature {
         return componentProperties.stream().anyMatch(p -> p.isUsingMappers());
     }
 
-    private TypeName getTypeName(EnumManagedBy managedBy) {
+    private TypeName getTypeName(CategoryManagedBy managedBy) {
         try {
             return TypeName.get(managedBy.value());
         } catch (MirroredTypeException mirroredTypeException) {

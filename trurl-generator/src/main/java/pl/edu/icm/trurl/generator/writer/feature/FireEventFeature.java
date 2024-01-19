@@ -30,11 +30,11 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Stream.of;
 
-public class LifecycleEventFeature implements Feature {
+public class FireEventFeature implements Feature {
 
     private final BeanMetadata beanMetadata;
 
-    public LifecycleEventFeature(BeanMetadata beanMetadata) {
+    public FireEventFeature(BeanMetadata beanMetadata) {
         this.beanMetadata = beanMetadata;
     }
 
@@ -49,7 +49,7 @@ public class LifecycleEventFeature implements Feature {
     }
 
     private MethodSpec overrideLifecycleEvent() {
-        MethodSpec.Builder methodSpec = MethodSpec.methodBuilder("lifecycleEvent")
+        MethodSpec.Builder methodSpec = MethodSpec.methodBuilder("fireEvent")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(CommonTypes.LIFECYCLE_EVENT, "event");

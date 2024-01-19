@@ -22,9 +22,9 @@ import com.google.common.base.Preconditions;
 import net.snowyhollows.bento.config.DefaultWorkDir;
 import net.snowyhollows.bento.config.WorkDir;
 import pl.edu.icm.trurl.ecs.dao.Dao;
-import pl.edu.icm.trurl.ecs.dao.Daos;
+import pl.edu.icm.trurl.ecs.dao.DaosCreator;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 
 import java.io.*;
 import java.util.List;
@@ -48,11 +48,11 @@ public class VnAreaExporter<T> {
     }
 
     public static <T> VnAreaExporter<T> create(WorkDir workDir, Class<T> areaDescription, String baseFilePath, int fromX, int width, int fromY, int height) throws FileNotFoundException {
-        return new VnAreaExporter<T>(workDir, new Daos().createDao(areaDescription), baseFilePath, fromX, width, fromY, height);
+        return new VnAreaExporter<T>(workDir, new DaosCreator().createDao(areaDescription), baseFilePath, fromX, width, fromY, height);
     }
 
     public static <T> VnAreaExporter<T> create(Class<T> areaDescription, String baseFilePath, int fromX, int width, int fromY, int height) throws FileNotFoundException {
-        return new VnAreaExporter<T>(new DefaultWorkDir(), new Daos().createDao(areaDescription), baseFilePath, fromX, width, fromY, height);
+        return new VnAreaExporter<T>(new DefaultWorkDir(), new DaosCreator().createDao(areaDescription), baseFilePath, fromX, width, fromY, height);
     }
 
     private VnAreaExporter(WorkDir workDir, Dao<T> dao, String baseFilePath, int fromX, int width, int fromY, int height) throws FileNotFoundException {
@@ -64,12 +64,12 @@ public class VnAreaExporter<T> {
         int size = width * height;
         File file = new File(baseFilePath);
         this.baseFileName = file.getName();
-        this.store = new Store(new ArrayAttributeFactory(), size);
+        this.store = new Store(new BasicAttributeFactory(), size);
         this.dao = dao;
         this.dao.configureStore(store);
         this.dao.attachStore(store);
         this.baseDir = file.getParentFile();
-        columns = dao.attributes().stream()
+        columns = dao.getAttributes().stream()
                 .map(c -> ColumnWrapper.from(c))
                 .collect(Collectors.toList());
         dataOut = new DataOutputStream(new BufferedOutputStream(workDir.openForWriting(new File(baseDir, baseFileName + ".vnd")), 1024 * 128));

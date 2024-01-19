@@ -16,27 +16,21 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store.basic;
 
-import net.snowyhollows.bento.category.Category;
-import net.snowyhollows.bento.category.CategoryManager;
+import pl.edu.icm.trurl.store.attribute.FloatAttribute;
 
 import java.util.Arrays;
-import java.util.Objects;
 
-final public class CategoryAttribute<T extends Category> implements pl.edu.icm.trurl.store.attribute.CategoryAttribute<T> {
+final public class BasicFloatAttribute implements FloatAttribute {
     private final String name;
-    private final CategoryManager<T> manager;
-    private byte[] values;
-    private static final byte NULL = Byte.MIN_VALUE;
-    private final T[] instances;
     private int capacity;
+    private float[] values;
+    private final static float NULL = Float.NaN;
 
-    public CategoryAttribute(CategoryManager<T> manager, String name, int capacity) {
+    public BasicFloatAttribute(String name, int capacity) {
         this.name = name;
-        values = new byte[0];
-        this.manager = manager;
-        instances = manager.values().toArray(manager.emptyArray());
+        this.values = new float[0];
         ensureCapacity(capacity);
     }
 
@@ -45,7 +39,7 @@ final public class CategoryAttribute<T extends Category> implements pl.edu.icm.t
         if (capacity > this.capacity) {
             int target = (int) Math.max(capacity, this.capacity * 1.5);
             this.capacity = target;
-            byte[] bigger = Arrays.copyOf(values, target);
+            float[] bigger = Arrays.copyOf(values, target);
             Arrays.fill(bigger, values.length, target, NULL);
             this.values = bigger;
         }
@@ -53,7 +47,7 @@ final public class CategoryAttribute<T extends Category> implements pl.edu.icm.t
 
     @Override
     public boolean isEmpty(int row) {
-        return row >= values.length || values[row] == NULL;
+        return row >= values.length || Float.isNaN(values[row]);
     }
 
     @Override
@@ -68,39 +62,22 @@ final public class CategoryAttribute<T extends Category> implements pl.edu.icm.t
 
     @Override
     public String getString(int row) {
-        byte ordinal = values[row];
-        return ordinal >= 0 ? instances[ordinal].name() : "";
+        return Float.toString(getFloat(row));
     }
 
     @Override
     public void setString(int row, String value) {
-        values[row] = isNullOrEmpty(value) ? Byte.MIN_VALUE : manager.getByName(value).ordinal();
+        setFloat(row, isNullOrEmpty(value) ? NULL : Float.parseFloat(value));
     }
 
     @Override
-    public T getEnum(int row) {
-        byte ordinal = values[row];
-        return ordinal == Byte.MIN_VALUE ? null : instances[ordinal];
-    }
-
-    @Override
-    public void setEnum(int row, T value) {
-        setOrdinal(row, value != null ? value.ordinal() : Byte.MIN_VALUE);
-    }
-
-    @Override
-    public byte getOrdinal(int row) {
+    public float getFloat(int row) {
         return values[row];
     }
 
     @Override
-    public void setOrdinal(int row, byte value) {
+    public void setFloat(int row, float value) {
         values[row] = value;
-    }
-
-    @Override
-    public T[] values() {
-        return instances;
     }
 
     private static boolean isNullOrEmpty(String value) {

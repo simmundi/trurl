@@ -22,7 +22,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.io.ReaderProvider;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
 import java.io.File;
@@ -42,7 +42,7 @@ class CsvReaderTest {
     public void load() throws IOException {
         // given
         CsvReader csvReader = new CsvReader(new ReaderProvider());
-        Store store = new Store(new ArrayAttributeFactory(), 1000);
+        Store store = new Store(new BasicAttributeFactory(), 1000);
         store.addInt("age");
         store.addEnum("letter", Letter.class);
         // todo uncomment

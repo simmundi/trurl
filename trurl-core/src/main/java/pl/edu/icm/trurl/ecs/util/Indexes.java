@@ -21,7 +21,7 @@ package pl.edu.icm.trurl.ecs.util;
 import net.snowyhollows.bento.annotation.ByName;
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.Engine;
-import pl.edu.icm.trurl.ecs.EngineConfiguration;
+import pl.edu.icm.trurl.ecs.EngineBuilder;
 import pl.edu.icm.trurl.ecs.dao.Dao;
 import pl.edu.icm.trurl.ecs.index.Chunk;
 import pl.edu.icm.trurl.ecs.index.Index;
@@ -30,20 +30,23 @@ import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+/**
+ * Utilities for creating common index types.
+ */
 public class Indexes {
     private final int defaultChunkSize;
-    private final EngineConfiguration engineConfiguration;
+    private final EngineBuilder engineBuilder;
     private final Engine engine;
 
     @WithFactory
-    public Indexes(EngineConfiguration engineConfiguration, @ByName(value = "trurl.engine.default-chunk-size", fallbackValue = "25000") int defaultChunkSize) {
-        this.engineConfiguration = engineConfiguration;
+    public Indexes(EngineBuilder engineBuilder, @ByName(value = "trurl.engine.default-chunk-size", fallbackValue = "25000") int defaultChunkSize) {
+        this.engineBuilder = engineBuilder;
         this.defaultChunkSize = defaultChunkSize;
         this.engine = null;
     }
 
     public Indexes(Engine engine, int defaultChunkSize) {
-        this.engineConfiguration = null;
+        this.engineBuilder = null;
         this.engine = engine;
         this.defaultChunkSize = defaultChunkSize;
     }
@@ -75,12 +78,9 @@ public class Indexes {
             }
             return true;
         };
-
     }
 
     public Index filtered(Index index, IntPredicate predicate) {
-
-
         return new Index () {
             @Override
             public Stream<Chunk> chunks() {
@@ -210,6 +210,6 @@ public class Indexes {
     }
 
     private Engine getEngine() {
-        return engine == null ? engineConfiguration.getEngine() : engine;
+        return engine == null ? engineBuilder.getEngine() : engine;
     }
 }

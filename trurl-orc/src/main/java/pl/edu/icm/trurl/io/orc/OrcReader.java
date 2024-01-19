@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.edu.icm.trurl.io.orc.wrapper.AbstractColumnWrapper;
 import pl.edu.icm.trurl.io.store.SingleStoreReader;
-import pl.edu.icm.trurl.store.StoreInspector;
+import pl.edu.icm.trurl.store.StoreAccess;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class OrcReader implements SingleStoreReader {
     }
 
     @Override
-    public void read(String fileName, StoreInspector store) throws IOException {
+    public void read(String fileName, StoreAccess store) throws IOException {
         File file = new File(fileName);
         TypeDescription schema;
         VectorizedRowBatch batch;
@@ -44,12 +44,12 @@ public class OrcReader implements SingleStoreReader {
             schema = reader.getSchema();
             batch = schema.createRowBatch();
             rows = reader.rows();
-            store.attributes().forEach(attribute -> attribute.ensureCapacity((int) reader.getNumberOfRows()));
+            store.getAllAttributes().forEach(attribute -> attribute.ensureCapacity((int) reader.getNumberOfRows()));
         }
         List<AbstractColumnWrapper> wrappers = new ArrayList<>();
         List<String> unusedFieldNames = new ArrayList<>(schema.getFieldNames());
 
-        store.attributes().forEach(attribute -> {
+        store.getAllAttributes().forEach(attribute -> {
             int iof = schema.getFieldNames().indexOf(attribute.name());
             if (iof >= 0) {
                 AbstractColumnWrapper wrapper = AbstractColumnWrapper.create(attribute);

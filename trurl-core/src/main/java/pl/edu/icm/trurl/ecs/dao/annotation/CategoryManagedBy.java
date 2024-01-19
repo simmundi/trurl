@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,17 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.dao.feature;
+package pl.edu.icm.trurl.ecs.dao.annotation;
 
-/**
- * Component gets an extra copy of itself
- * when it's loaded from dao.
- *
- * This might be a bit slower (costs at least an extra reference)
- * than maintaining a copy of the data by hand.
- *
- * @param <T> Should be the same class as the component
- *
- */
-public interface RequiresOriginalCopy<T> {
-    void setOriginalCopy(T other);
+import net.snowyhollows.bento.category.CategoryManager;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.SOURCE)
+@Target(ElementType.FIELD)
+public @interface CategoryManagedBy {
+    Class<? extends CategoryManager<?>> value();
 }

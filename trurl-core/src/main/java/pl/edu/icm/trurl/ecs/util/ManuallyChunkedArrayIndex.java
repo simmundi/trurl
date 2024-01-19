@@ -53,6 +53,11 @@ public class ManuallyChunkedArrayIndex implements RandomAccessIndex {
         return ids.get((int) (ids.size * random));
     }
 
+    @Override
+    public int getIdFromOrdinal(int ordinal) {
+        return ids.get(ordinal);
+    }
+
     public synchronized void add(int id) {
         ids.add(id);
     }

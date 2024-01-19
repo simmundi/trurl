@@ -3,19 +3,17 @@ package pl.edu.icm.trurl.store.join;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.exampledata.Proficiency;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.ByteAttribute;
 import pl.edu.icm.trurl.store.attribute.IntAttribute;
 import pl.edu.icm.trurl.store.attribute.IntListAttribute;
-import pl.edu.icm.trurl.store.join.ArrayJoin;
-import pl.edu.icm.trurl.store.join.RangedJoin;
 
 import static org.assertj.core.api.Assertions.*;
 
 public class StoreJoinTest {
 
-    Store store = new Store(new ArrayAttributeFactory(), 1000);
+    Store store = new Store(new BasicAttributeFactory(), 1000);
 
     @Test
     void addJoin__ArrayTyped() {
@@ -31,7 +29,7 @@ public class StoreJoinTest {
 
         // assert
         assertThat(hobbyJoin.getTarget()).isSameAs(hobbiesStore);
-        assertThat(store.visibleAttributes().map(Attribute::name)).containsExactly("name", "age");
+        assertThat(store.getDataAttributes().stream().map(Attribute::name)).containsExactly("name", "age");
         assertThat((Attribute) store.get("hobby")).isInstanceOf(IntListAttribute.class);
     }
 
@@ -49,7 +47,7 @@ public class StoreJoinTest {
 
         // assert
         assertThat(hobbyJoin.getTarget()).isSameAs(hobbiesStore);
-        assertThat(store.visibleAttributes().map(Attribute::name)).containsExactly("name", "age");
+        assertThat(store.getDataAttributes().stream().map(Attribute::name)).containsExactly("name", "age");
         assertThat((Attribute) store.get("hobby_start")).isInstanceOf(IntAttribute.class);
         assertThat((Attribute) store.get("hobby_length")).isInstanceOf(ByteAttribute.class);
     }

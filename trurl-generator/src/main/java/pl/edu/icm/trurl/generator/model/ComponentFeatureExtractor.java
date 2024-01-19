@@ -18,11 +18,11 @@
 
 package pl.edu.icm.trurl.generator.model;
 
-import pl.edu.icm.trurl.ecs.dao.feature.CanBeNormalized;
-import pl.edu.icm.trurl.ecs.dao.feature.CanResolveConflicts;
-import pl.edu.icm.trurl.ecs.dao.feature.IsDirtyMarked;
-import pl.edu.icm.trurl.ecs.dao.feature.RequiresOriginalCopy;
-import pl.edu.icm.trurl.ecs.dao.feature.RequiresSetup;
+import pl.edu.icm.trurl.ecs.dao.feature.ComponentWithNormalization;
+import pl.edu.icm.trurl.ecs.dao.feature.ComponentWithConflictResolution;
+import pl.edu.icm.trurl.ecs.dao.feature.ComponentWithDirtyMarker;
+import pl.edu.icm.trurl.ecs.dao.feature.ComponentWithOriginalCopy;
+import pl.edu.icm.trurl.ecs.dao.feature.ComponentWIthSetup;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
@@ -46,11 +46,11 @@ public class ComponentFeatureExtractor {
         this.processingEnvironment = processingEnvironment;
         types = processingEnvironment.getTypeUtils();
         elements = processingEnvironment.getElementUtils();
-        isDirtyMarkedInterface = elements.getTypeElement(IsDirtyMarked.class.getCanonicalName()).asType();
-        requiresOriginalCopyInterface = elements.getTypeElement(RequiresOriginalCopy.class.getCanonicalName()).asType();
-        canResolveConflictsInterface = elements.getTypeElement(CanResolveConflicts.class.getCanonicalName()).asType();
-        requiresSetupInterface = elements.getTypeElement(RequiresSetup.class.getCanonicalName()).asType();
-        canBeNormalized = elements.getTypeElement(CanBeNormalized.class.getCanonicalName()).asType();
+        isDirtyMarkedInterface = elements.getTypeElement(ComponentWithDirtyMarker.class.getCanonicalName()).asType();
+        requiresOriginalCopyInterface = elements.getTypeElement(ComponentWithOriginalCopy.class.getCanonicalName()).asType();
+        canResolveConflictsInterface = elements.getTypeElement(ComponentWithConflictResolution.class.getCanonicalName()).asType();
+        requiresSetupInterface = elements.getTypeElement(ComponentWIthSetup.class.getCanonicalName()).asType();
+        canBeNormalized = elements.getTypeElement(ComponentWithNormalization.class.getCanonicalName()).asType();
     }
 
     public Set<ComponentFeature> extractFeatures(TypeElement typeElement) {

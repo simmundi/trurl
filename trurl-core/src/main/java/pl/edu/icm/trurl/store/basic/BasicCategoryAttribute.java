@@ -16,21 +16,26 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store.basic;
 
-import pl.edu.icm.trurl.store.attribute.ShortAttribute;
+import net.snowyhollows.bento.category.Category;
+import net.snowyhollows.bento.category.CategoryManager;
 
 import java.util.Arrays;
 
-final public class ShortArrayAttribute implements ShortAttribute {
+final public class BasicCategoryAttribute<T extends Category> implements pl.edu.icm.trurl.store.attribute.CategoryAttribute<T> {
     private final String name;
+    private final CategoryManager<T> manager;
+    private byte[] values;
+    private static final byte NULL = Byte.MIN_VALUE;
+    private final T[] instances;
     private int capacity;
-    private short[] values;
-    private final static short NULL = Short.MIN_VALUE;
 
-    public ShortArrayAttribute(String name, int capacity) {
+    public BasicCategoryAttribute(CategoryManager<T> manager, String name, int capacity) {
         this.name = name;
-        this.values = new short[0];
+        values = new byte[0];
+        this.manager = manager;
+        instances = manager.values().toArray(manager.emptyArray());
         ensureCapacity(capacity);
     }
 
@@ -39,7 +44,7 @@ final public class ShortArrayAttribute implements ShortAttribute {
         if (capacity > this.capacity) {
             int target = (int) Math.max(capacity, this.capacity * 1.5);
             this.capacity = target;
-            short[] bigger = Arrays.copyOf(values, target);
+            byte[] bigger = Arrays.copyOf(values, target);
             Arrays.fill(bigger, values.length, target, NULL);
             this.values = bigger;
         }
@@ -62,22 +67,39 @@ final public class ShortArrayAttribute implements ShortAttribute {
 
     @Override
     public String getString(int row) {
-        return Short.toString(getShort(row));
+        byte ordinal = values[row];
+        return ordinal >= 0 ? instances[ordinal].name() : "";
     }
 
     @Override
     public void setString(int row, String value) {
-        setShort(row, isNullOrEmpty(value) ? Short.MIN_VALUE : Short.parseShort(value));
+        values[row] = isNullOrEmpty(value) ? Byte.MIN_VALUE : manager.getByName(value).ordinal();
     }
 
     @Override
-    public short getShort(int row) {
+    public T getEnum(int row) {
+        byte ordinal = values[row];
+        return ordinal == Byte.MIN_VALUE ? null : instances[ordinal];
+    }
+
+    @Override
+    public void setEnum(int row, T value) {
+        setOrdinal(row, value != null ? value.ordinal() : Byte.MIN_VALUE);
+    }
+
+    @Override
+    public byte getOrdinal(int row) {
         return values[row];
     }
 
     @Override
-    public void setShort(int row, short value) {
+    public void setOrdinal(int row, byte value) {
         values[row] = value;
+    }
+
+    @Override
+    public T[] values() {
+        return instances;
     }
 
     private static boolean isNullOrEmpty(String value) {

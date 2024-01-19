@@ -16,21 +16,21 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store.basic;
 
-import pl.edu.icm.trurl.store.attribute.StringAttribute;
+import pl.edu.icm.trurl.store.attribute.IntAttribute;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 
-final public class StringArrayAttribute implements StringAttribute {
+final public class BasicIntAttribute implements IntAttribute {
     private final String name;
-    private final ArrayList<String> strings;
     private int capacity;
+    private int[] values;
+    private final static int NULL = Integer.MIN_VALUE;
 
-    public StringArrayAttribute(String name, int capacity) {
+    public BasicIntAttribute(String name, int capacity) {
         this.name = name;
-        this.strings = new ArrayList<>(capacity);
+        values = new int[0];
         ensureCapacity(capacity);
     }
 
@@ -39,19 +39,19 @@ final public class StringArrayAttribute implements StringAttribute {
         if (capacity > this.capacity) {
             int target = (int) Math.max(capacity, this.capacity * 1.5);
             this.capacity = target;
-            this.strings.ensureCapacity(target);
-            this.strings.addAll(Collections.nCopies(target - strings.size(), null));
+            int[] bigger = Arrays.copyOf(values, target);
+            Arrays.fill(bigger, values.length, target, NULL);
+            this.values = bigger;
         }
     }
-
     @Override
     public boolean isEmpty(int row) {
-        return row >= strings.size() || isNullOrEmpty(strings.get(row));
+        return row >= values.length || values[row] == NULL;
     }
 
     @Override
     public void setEmpty(int row) {
-        strings.set(row, null);
+        values[row] = NULL;
     }
 
     @Override
@@ -61,13 +61,22 @@ final public class StringArrayAttribute implements StringAttribute {
 
     @Override
     public String getString(int row) {
-        String value = strings.get(row);
-        return isNullOrEmpty(value) ? "" : value;
+        return Integer.toString(getInt(row));
     }
 
     @Override
     public void setString(int row, String value) {
-        strings.set(row, value);
+        setInt(row, isNullOrEmpty(value) ? Integer.MIN_VALUE : Integer.parseInt(value));
+    }
+
+    @Override
+    public int getInt(int row) {
+        return values[row];
+    }
+
+    @Override
+    public void setInt(int row, int value) {
+        values[row] = value;
     }
 
     private static boolean isNullOrEmpty(String value) {

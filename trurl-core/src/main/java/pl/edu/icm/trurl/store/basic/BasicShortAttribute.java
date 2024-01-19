@@ -16,21 +16,21 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store.basic;
 
-import pl.edu.icm.trurl.store.attribute.FloatAttribute;
+import pl.edu.icm.trurl.store.attribute.ShortAttribute;
 
 import java.util.Arrays;
 
-final public class FloatArrayAttribute implements FloatAttribute {
+final public class BasicShortAttribute implements ShortAttribute {
     private final String name;
     private int capacity;
-    private float[] values;
-    private final static float NULL = Float.NaN;
+    private short[] values;
+    private final static short NULL = Short.MIN_VALUE;
 
-    public FloatArrayAttribute(String name, int capacity) {
+    public BasicShortAttribute(String name, int capacity) {
         this.name = name;
-        this.values = new float[0];
+        this.values = new short[0];
         ensureCapacity(capacity);
     }
 
@@ -39,7 +39,7 @@ final public class FloatArrayAttribute implements FloatAttribute {
         if (capacity > this.capacity) {
             int target = (int) Math.max(capacity, this.capacity * 1.5);
             this.capacity = target;
-            float[] bigger = Arrays.copyOf(values, target);
+            short[] bigger = Arrays.copyOf(values, target);
             Arrays.fill(bigger, values.length, target, NULL);
             this.values = bigger;
         }
@@ -47,7 +47,7 @@ final public class FloatArrayAttribute implements FloatAttribute {
 
     @Override
     public boolean isEmpty(int row) {
-        return row >= values.length || Float.isNaN(values[row]);
+        return row >= values.length || values[row] == NULL;
     }
 
     @Override
@@ -62,21 +62,21 @@ final public class FloatArrayAttribute implements FloatAttribute {
 
     @Override
     public String getString(int row) {
-        return Float.toString(getFloat(row));
+        return Short.toString(getShort(row));
     }
 
     @Override
     public void setString(int row, String value) {
-        setFloat(row, isNullOrEmpty(value) ? NULL : Float.parseFloat(value));
+        setShort(row, isNullOrEmpty(value) ? Short.MIN_VALUE : Short.parseShort(value));
     }
 
     @Override
-    public float getFloat(int row) {
+    public short getShort(int row) {
         return values[row];
     }
 
     @Override
-    public void setFloat(int row, float value) {
+    public void setShort(int row, short value) {
         values[row] = value;
     }
 

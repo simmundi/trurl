@@ -16,22 +16,21 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store.basic;
 
-import pl.edu.icm.trurl.store.attribute.DoubleAttribute;
+import pl.edu.icm.trurl.store.attribute.StringAttribute;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 
-final public class DoubleArrayAttribute implements DoubleAttribute {
-
+final public class BasicStringAttribute implements StringAttribute {
     private final String name;
+    private final ArrayList<String> strings;
     private int capacity;
-    private double[] values;
-    private final static double NULL = Double.NaN;
 
-    public DoubleArrayAttribute(String name, int capacity) {
+    public BasicStringAttribute(String name, int capacity) {
         this.name = name;
-        this.values = new double[0];
+        this.strings = new ArrayList<>(capacity);
         ensureCapacity(capacity);
     }
 
@@ -40,20 +39,19 @@ final public class DoubleArrayAttribute implements DoubleAttribute {
         if (capacity > this.capacity) {
             int target = (int) Math.max(capacity, this.capacity * 1.5);
             this.capacity = target;
-            double[] bigger = Arrays.copyOf(values, target);
-            Arrays.fill(bigger, values.length, target, NULL);
-            this.values = bigger;
+            this.strings.ensureCapacity(target);
+            this.strings.addAll(Collections.nCopies(target - strings.size(), null));
         }
     }
 
     @Override
     public boolean isEmpty(int row) {
-        return row >= values.length || Double.isNaN(values[row]);
+        return row >= strings.size() || isNullOrEmpty(strings.get(row));
     }
 
     @Override
     public void setEmpty(int row) {
-        values[row] = NULL;
+        strings.set(row, null);
     }
 
     @Override
@@ -63,23 +61,15 @@ final public class DoubleArrayAttribute implements DoubleAttribute {
 
     @Override
     public String getString(int row) {
-        return Double.toString(getDouble(row));
+        String value = strings.get(row);
+        return isNullOrEmpty(value) ? "" : value;
     }
 
     @Override
     public void setString(int row, String value) {
-        setDouble(row, isNullOrEmpty(value) ? NULL : Double.parseDouble(value));
+        strings.set(row, value);
     }
 
-    @Override
-    public double getDouble(int row) {
-        return values[row];
-    }
-
-    @Override
-    public void setDouble(int row, double value) {
-        values[row] = value;
-    }
     private static boolean isNullOrEmpty(String value) {
         return value == null || value.isEmpty();
     }

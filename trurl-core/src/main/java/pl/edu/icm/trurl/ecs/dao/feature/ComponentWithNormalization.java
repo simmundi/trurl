@@ -19,17 +19,15 @@
 package pl.edu.icm.trurl.ecs.dao.feature;
 
 /**
- * This component stores the id of its owner
- * Upon a conflict with another copy of the row, it can resolve the
- * conflict by inspecting the other copy and applying necessary changes
- * to itself.
+ * This component has a "normalized" value (e.g. dashes removed from ISBN, immunizations
+ * sorted by date etc.), and this normalized version is what gets persisted by a Dao.
  *
- * @param <T> Should be the same class as the component
+ * Method `normalize` will be called by the Dao as the very last step of persisting
+ * the component. There should be no additional business logic performed here, only the
+ * normalization of the values.
+ *
+ * <p>The methods of this interface will be called by the auto-generated Dao</p>
  */
-public interface CanResolveConflicts<T> {
-    T resolve(T other);
-
-    int getOwnerId();
-
-    void setOwnerId(int ownerId);
+public interface ComponentWithNormalization {
+    void normalize();
 }

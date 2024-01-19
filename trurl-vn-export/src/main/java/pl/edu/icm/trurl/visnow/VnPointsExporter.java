@@ -21,9 +21,9 @@ package pl.edu.icm.trurl.visnow;
 import net.snowyhollows.bento.config.DefaultWorkDir;
 import net.snowyhollows.bento.config.WorkDir;
 import pl.edu.icm.trurl.ecs.dao.Dao;
-import pl.edu.icm.trurl.ecs.dao.Daos;
+import pl.edu.icm.trurl.ecs.dao.DaosCreator;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 
 import java.io.*;
 import java.util.List;
@@ -42,13 +42,13 @@ public class VnPointsExporter<T extends VnCoords> {
     private VnPointsExporter(Dao<T> dao, WorkDir workDir, String baseFilePath) throws FileNotFoundException {
         File file = new File(baseFilePath);
         this.baseFileName = file.getName();
-        this.store = new Store(new ArrayAttributeFactory(), 1);
+        this.store = new Store(new BasicAttributeFactory(), 1);
         this.dao = dao;
         this.dao.configureStore(store);
         this.dao.attachStore(store);
         this.workDir = workDir;
         this.baseDir = file.getParentFile();
-        columns = dao.attributes().stream()
+        columns = dao.getAttributes().stream()
                 .filter(c -> !c.name().equals("x") && !c.name().equals("y"))
                 .map(c -> ColumnWrapper.from(c))
                 .collect(Collectors.toList());
@@ -59,7 +59,7 @@ public class VnPointsExporter<T extends VnCoords> {
 
     public static <T extends VnCoords> VnPointsExporter<T> create(Class<T> componentClass, String baseFileName) {
         try {
-            return new VnPointsExporter<>(new Daos().createDao(componentClass), new DefaultWorkDir(), baseFileName);
+            return new VnPointsExporter<>(new DaosCreator().createDao(componentClass), new DefaultWorkDir(), baseFileName);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -67,7 +67,7 @@ public class VnPointsExporter<T extends VnCoords> {
 
     public static <T extends VnCoords> VnPointsExporter<T> create(Class<T> componentClass, WorkDir workDir, String baseFileName) {
         try {
-            return new VnPointsExporter<>(new Daos().createDao(componentClass), workDir, baseFileName);
+            return new VnPointsExporter<>(new DaosCreator().createDao(componentClass), workDir, baseFileName);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }

@@ -2,20 +2,18 @@ package pl.edu.icm.trurl.store.join;
 
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.IntAttribute;
 
-import java.util.function.IntBinaryOperator;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
 class SingleJoinTest {
 
     public static final int CAPACITY = 1000_000;
-    Store store = new Store(new ArrayAttributeFactory(), CAPACITY);
+    Store store = new Store(new BasicAttributeFactory(), CAPACITY);
 
     @Test
     void init() {
@@ -27,13 +25,13 @@ class SingleJoinTest {
         images.addString("blob");
 
         // assert
-        assertThat(store.visibleAttributes().map(Attribute::name))
+        assertThat(store.getDataAttributes().stream().map(Attribute::name))
                 .containsExactly("name");
-        assertThat(store.attributes().map(Attribute::name))
+        assertThat(store.getAllAttributes().stream().map(Attribute::name))
                 .containsExactly("name", "image");
-        assertThat(images.visibleAttributes().map(Attribute::name))
+        assertThat(images.getDataAttributes().stream().map(Attribute::name))
                 .containsExactly("width", "height", "blob");
-        assertThat(store.getSubstores().map(Store::getName)).containsExactly("image");
+        assertThat(store.getSubstores().stream().map(Store::getName)).containsExactly("image");
         assertThat(store.getSubstore("image")).isSameAs(store.getJoin("image").getTarget());
     }
 

@@ -24,10 +24,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.dao.Dao;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,7 +68,7 @@ class EngineTest {
     @Test
     void construct() {
         // execute
-        new Engine(INITIAL_CAPACITY, CAPACITY_HEADROOM, daoManager, new ArrayAttributeFactory(), SESSION_CACHE_CAPACITY);
+        new Engine(INITIAL_CAPACITY, CAPACITY_HEADROOM, daoManager, new BasicAttributeFactory(), SESSION_CACHE_CAPACITY);
 
         // assert
         verify(daoA).configureStore(any());

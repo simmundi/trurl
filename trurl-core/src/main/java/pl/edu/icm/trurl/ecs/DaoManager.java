@@ -20,26 +20,24 @@ package pl.edu.icm.trurl.ecs;
 
 import net.snowyhollows.bento.BentoFactory;
 import pl.edu.icm.trurl.ecs.dao.Dao;
-import pl.edu.icm.trurl.ecs.dao.Daos;
+import pl.edu.icm.trurl.ecs.dao.DaosCreator;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public final class DaoManager {
     private final ComponentAccessor componentAccessor;
     private final Dao[] daos;
     private final ComponentToken[] tokens;
 
-    public DaoManager(ComponentAccessor componentAccessor, Map<Class<?>, BentoFactory<?>> factories, Daos daos) {
+    public DaoManager(ComponentAccessor componentAccessor, Map<Class<?>, BentoFactory<?>> factories, DaosCreator daosCreator) {
         this.componentAccessor = componentAccessor;
         this.daos = new Dao[componentAccessor.componentCount()];
         tokens = new ComponentToken[componentAccessor.componentCount()];
         for (int idx = 0; idx < componentCount(); idx++) {
             BentoFactory factory = factories.get(componentAccessor.indexToClass(idx));
-            this.daos[idx] = daos.createDao(factory);
+            this.daos[idx] = daosCreator.createDao(factory);
             tokens[idx] = new ComponentToken<>(this.daos[idx], idx);
         }
     }

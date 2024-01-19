@@ -24,7 +24,7 @@ import pl.edu.icm.trurl.ecs.Session;
 
 /**
  * This class contains pocs and examples of different approaches of using systems.
- * It's a kind of a playground.
+ * It's kind of a playground.
  * <p>
  * The point of keeping it separately from the Engine is that the Engine should be stable & mature,
  * while the addons can be more elastic and welcome experimentation.

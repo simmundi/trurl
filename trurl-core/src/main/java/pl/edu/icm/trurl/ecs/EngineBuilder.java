@@ -22,48 +22,48 @@ import net.snowyhollows.bento.BentoFactory;
 import net.snowyhollows.bento.annotation.ByName;
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.dao.Dao;
-import pl.edu.icm.trurl.ecs.dao.Daos;
+import pl.edu.icm.trurl.ecs.dao.DaosCreator;
 import pl.edu.icm.trurl.ecs.dao.annotation.GwtIncompatible;
 import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 
 import java.util.*;
 
-public class EngineConfiguration {
+public class EngineBuilder {
     private final int sessionCacheSize;
     private volatile Engine engine;
     private final ComponentAccessorCreator componentAccessorCreator;
-    private final List<EngineCreationListener> engineCreationListeners = Collections.synchronizedList(new ArrayList<>());
+    private final List<EngineBuilderListener> engineBuilderListeners = Collections.synchronizedList(new ArrayList<>());
     private final Map<Class<?>, BentoFactory<?>> componentClasses = new LinkedHashMap<>();
     private final AttributeFactory attributeFactory;
-    private final Daos daos;
+    private final DaosCreator daosCreator;
     private final int initialCapacity;
     private final int capacityHeadroom;
 
     @WithFactory
-    public EngineConfiguration(ComponentAccessorCreator componentAccessorCreator,
-                               @ByName(value = "trurl.engine.initial-capacity", fallbackValue = "200000") int initialCapacity,
-                               @ByName(value = "trurl.engine.capacity-headroom", fallbackValue = "128") int capacityHeadroom,
-                               @ByName(value = "trurl.engine.session-cache-size", fallbackValue = "20000") int sessionCacheSize,
-                               AttributeFactory attributeFactory,
-                               Daos daos) {
+    public EngineBuilder(ComponentAccessorCreator componentAccessorCreator,
+                         @ByName(value = "trurl.engine.initial-capacity", fallbackValue = "200000") int initialCapacity,
+                         @ByName(value = "trurl.engine.capacity-headroom", fallbackValue = "128") int capacityHeadroom,
+                         @ByName(value = "trurl.engine.session-cache-size", fallbackValue = "20000") int sessionCacheSize,
+                         AttributeFactory attributeFactory,
+                         DaosCreator daosCreator) {
         this.componentAccessorCreator = componentAccessorCreator;
         this.initialCapacity = initialCapacity;
         this.capacityHeadroom = capacityHeadroom;
         this.attributeFactory = attributeFactory;
         this.sessionCacheSize = sessionCacheSize;
-        this.daos = daos;
+        this.daosCreator = daosCreator;
     }
 
-    public void addEngineCreationListener(EngineCreationListener engineCreationListeners) {
+    public void addListener(EngineBuilderListener engineBuilderListeners) {
         preconditionEngineNotCreated();
-        this.engineCreationListeners.add(engineCreationListeners);
+        this.engineBuilderListeners.add(engineBuilderListeners);
     }
 
     public Engine getEngine() {
         if (engine == null) {
             engine = new Engine(initialCapacity, capacityHeadroom, getDaoManager(), attributeFactory, sessionCacheSize);
-            for (EngineCreationListener engineCreationListener : engineCreationListeners) {
-                engineCreationListener.onEngineCreated(engine);
+            for (EngineBuilderListener engineBuilderListener : engineBuilderListeners) {
+                engineBuilderListener.onEngineCreated(engine);
             }
         }
         return engine;
@@ -73,11 +73,16 @@ public class EngineConfiguration {
     public void addComponentClasses(Class<?>... componentClass) {
         preconditionEngineNotCreated();
         for (Class<?> aClass : componentClass) {
-            componentClasses.computeIfAbsent(aClass, k -> daos.createDaoFactory(k) );
+            addComponentClass(aClass);
         }
     }
 
-    public <T> void addComponentClass(Class<T> componentClass, BentoFactory<? extends Dao<T>> factory) {
+    @GwtIncompatible
+    public void addComponentClass(Class<?> componentClass) {
+        componentClasses.computeIfAbsent(componentClass, k -> daosCreator.createDaoFactory(k) );
+    }
+
+    public <T> void addComponentWithDao(Class<T> componentClass, BentoFactory<? extends Dao<T>> factory) {
         preconditionEngineNotCreated();
         componentClasses.put(componentClass, factory);
     }
@@ -85,7 +90,7 @@ public class EngineConfiguration {
     private DaoManager getDaoManager() {
         preconditionEngineNotCreated();
         ComponentAccessor componentAccessor = getComponentAccessor();
-        return new DaoManager(componentAccessor, componentClasses, daos);
+        return new DaoManager(componentAccessor, componentClasses, daosCreator);
     }
 
     private ComponentAccessor getComponentAccessor() {

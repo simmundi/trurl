@@ -8,7 +8,7 @@ A store is usually acquired using dependency injection, but it's simple enough t
 
 ```
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 
 // ...
 int CAPACITY = 1000_000

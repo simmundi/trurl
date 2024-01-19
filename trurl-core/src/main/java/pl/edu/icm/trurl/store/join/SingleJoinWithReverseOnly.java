@@ -34,7 +34,7 @@ public class SingleJoinWithReverseOnly implements Join {
     public SingleJoinWithReverseOnly(Store store, String name) {
         this.target = store.addSubstore(name);
         this.target.addInt("reverse");
-        this.target.hideAttribute("reverse");
+        this.target.markAttributeAsMeta("reverse");
         this.reverseRowAttribute = target.get("reverse");
     }
 
@@ -59,7 +59,7 @@ public class SingleJoinWithReverseOnly implements Join {
         int targetRow = reverseMap.getOrDefault(row, Integer.MIN_VALUE);
         if (size == 0) {
             if (targetRow != Integer.MIN_VALUE) {
-                target.free(targetRow);
+                target.freeIndex(targetRow);
             } else {
                 // do nothing
             }

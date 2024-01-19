@@ -8,13 +8,13 @@ public final class Entity {
     private final Session session;
     private final int sessionIndex;
 
-    public static Entity stub(int id) {
-        return new Entity(null, id);
-    }
-
     Entity(Session session, int sessionIndex) {
         this.session = session;
         this.sessionIndex = sessionIndex;
+    }
+
+    public int getId() {
+        return session == null ? sessionIndex : session.getId(sessionIndex);
     }
 
     public <T> T get(Class<T> componentClass) {
@@ -41,10 +41,6 @@ public final class Entity {
         return null;
     }
 
-    public int getId() {
-        return session == null ? sessionIndex : session.getId(sessionIndex);
-    }
-
     public Session getSession() {
         return session;
     }
@@ -60,5 +56,9 @@ public final class Entity {
     @Override
     public int hashCode() {
         return Objects.hash(sessionIndex);
+    }
+
+    public static Entity stub(int id) {
+        return new Entity(null, id);
     }
 }

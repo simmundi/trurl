@@ -19,14 +19,17 @@
 package pl.edu.icm.trurl.ecs.dao.feature;
 
 /**
- * IsDirtyMarked implements custom logic for checking whether it is "dirty"
- * (should be written back to the store) or not.
+ * <p>Component gets an extra copy of itself
+ * when it's loaded from dao.
  *
- * This custom logic seems to be required in components implementing Resolving,
- * since even a component containing exactly the same data as in the store
- * might require writing back (component can change due to a call to #resolve).
+ * <p>This might be a bit slower (costs at least an extra reference)
+ * than maintaining a copy of the data by hand.
+ *
+ * <p>The methods of this interface will be called by the auto-generated Dao</p>
+ *
+ * @param <T> MUST be the same class as the component
+ *
  */
-public interface IsDirtyMarked {
-    void markAsClean();
-    boolean isDirty();
+public interface ComponentWithOriginalCopy<T> {
+    void setOriginalCopy(T other);
 }

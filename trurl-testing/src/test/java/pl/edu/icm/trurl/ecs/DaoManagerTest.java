@@ -24,7 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.dao.Dao;
-import pl.edu.icm.trurl.ecs.dao.Daos;
+import pl.edu.icm.trurl.ecs.dao.DaosCreator;
 import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
 import pl.edu.icm.trurl.exampledata.*;
 
@@ -45,13 +45,13 @@ class DaoManagerTest {
         factories.put(Stats.class, DaoOfStatsFactory.IT);
     }
     @Spy
-    Daos daos = new Daos();
+    DaosCreator daosCreator = new DaosCreator();
 
     DaoManager daoManager;
 
     @BeforeEach
     void init() {
-        daoManager = new DaoManager(componentAccessor, factories, daos);
+        daoManager = new DaoManager(componentAccessor, factories, daosCreator);
 
     }
 

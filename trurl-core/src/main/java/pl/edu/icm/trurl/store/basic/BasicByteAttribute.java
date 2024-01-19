@@ -16,19 +16,19 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store.basic;
 
 import pl.edu.icm.trurl.store.attribute.ByteAttribute;
 
 import java.util.Arrays;
 
-final public class ByteArrayAttribute implements ByteAttribute {
+final public class BasicByteAttribute implements ByteAttribute {
     private final String name;
     private byte[] values;
     private final static byte NULL = Byte.MIN_VALUE;
     private int capacity;
 
-    public ByteArrayAttribute(String name, int capacity) {
+    public BasicByteAttribute(String name, int capacity) {
         this.name = name;
         values = new byte[0];
         ensureCapacity(capacity);

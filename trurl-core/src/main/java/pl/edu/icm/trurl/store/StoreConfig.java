@@ -27,7 +27,7 @@ import net.snowyhollows.bento.category.CategoryManager;
  * It is used by store clients to configure the store (i.e. associate
  * column names with column types).
  */
-public interface StoreConfigurer {
+public interface StoreConfig {
     void addBoolean(String name);
 
     void addByte(String name);
@@ -48,15 +48,15 @@ public interface StoreConfigurer {
 
     void addIntList(String name);
 
-    ReferenceConfigurer addReference(String name);
+    ReferenceConfig addReference(String name);
 
-    JoinConfigurer addJoin(String name);
+    JoinConfig addJoin(String name);
 
-    StoreConfigurer addSubstore(String name);
+    StoreConfig addSubstore(String name);
 
-    void hideAttribute(String name);
+    void markAttributeAsMeta(String name);
 
-    interface JoinConfigurer {
+    interface JoinConfig {
         Store rangeTyped(int minimumSize, int margin);
 
         Store arrayTyped(int minimumSize, int margin);
@@ -68,7 +68,7 @@ public interface StoreConfigurer {
         Store singleTypedWithReverseOnly();
     }
 
-    interface ReferenceConfigurer {
+    interface ReferenceConfig {
 
         void arrayTyped(int minimumSize, int margin);
 

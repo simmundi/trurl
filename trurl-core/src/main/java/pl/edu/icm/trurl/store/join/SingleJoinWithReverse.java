@@ -32,11 +32,11 @@ public class SingleJoinWithReverse implements Join {
 
     public SingleJoinWithReverse(Store store, String name) {
         store.addInt(name);
-        store.hideAttribute(name);
+        store.markAttributeAsMeta(name);
         this.rowAttribute = store.get(name);
         this.target = store.addSubstore(name);
         this.target.addInt("reverse");
-        this.target.hideAttribute("reverse");
+        this.target.markAttributeAsMeta("reverse");
         this.reverseRowAttribute = target.get("reverse");
     }
 
@@ -51,7 +51,7 @@ public class SingleJoinWithReverse implements Join {
             if (!rowAttribute.isEmpty(row)) {
                 int targetRow = rowAttribute.getInt(row);
                 rowAttribute.setEmpty(row);
-                target.free(targetRow);
+                target.freeIndex(targetRow);
             } else {
                 // do nothing
             }

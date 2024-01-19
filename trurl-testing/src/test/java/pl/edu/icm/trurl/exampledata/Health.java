@@ -18,7 +18,7 @@
 
 package pl.edu.icm.trurl.exampledata;
 
-import pl.edu.icm.trurl.ecs.dao.annotation.EnumManagedBy;
+import pl.edu.icm.trurl.ecs.dao.annotation.CategoryManagedBy;
 import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 
 @WithDao
@@ -33,7 +33,7 @@ public class Health {
     public Health() {
     }
 
-    @EnumManagedBy( value = ContaminationTypes.class )
+    @CategoryManagedBy( value = ContaminationTypes.class )
     private ContaminationType contaminationType;
 
     public float getHowMuch() {

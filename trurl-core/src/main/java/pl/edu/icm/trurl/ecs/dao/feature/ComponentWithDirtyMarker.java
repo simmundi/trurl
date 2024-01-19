@@ -19,13 +19,12 @@
 package pl.edu.icm.trurl.ecs.dao.feature;
 
 /**
- * This component has a "normalized" version (e.g. dashes removed from ISBN, immunizations
- * sorted by date etc.), and this normalized version needs to be persisted in the store.
+ * `ComponentWithDirtyMarker` implements custom logic for checking whether it is "dirty"
+ * (should be written back to the store) or not.
  *
- * Method normalize will be called by the dao as the very last step of persisting
- * the component. There should be no additional logic performed here, only the
- * normalization.
+ * <p>The methods of this interface will be called by the auto-generated Dao</p>
  */
-public interface CanBeNormalized {
-    void normalize();
+public interface ComponentWithDirtyMarker {
+    void markAsClean();
+    boolean isDirty();
 }

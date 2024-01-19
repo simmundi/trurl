@@ -22,7 +22,7 @@ import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.io.ReaderProvider;
 import pl.edu.icm.trurl.io.parser.Parser;
 import pl.edu.icm.trurl.io.store.SingleStoreReader;
-import pl.edu.icm.trurl.store.StoreInspector;
+import pl.edu.icm.trurl.store.StoreAccess;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.StubAttribute;
 
@@ -42,16 +42,16 @@ public class CsvReader implements SingleStoreReader {
 
 
     @Override
-    public void read(String file, StoreInspector store) {
+    public void read(String file, StoreAccess store) {
         load(readerProvider.readerForFile(file), store, Collections.emptyMap());
     }
 
-    public void load(Reader reader, StoreInspector store, String... columns) {
+    public void load(Reader reader, StoreAccess store, String... columns) {
         load(reader, store, Collections.emptyMap(), columns);
     }
 
 
-    private void load(Reader reader, StoreInspector store, Map<String, String> mappings, String... columns) {
+    private void load(Reader reader, StoreAccess store, Map<String, String> mappings, String... columns) {
         Parser parser = new Parser(reader);
 
         List<String> header = new ArrayList<>();

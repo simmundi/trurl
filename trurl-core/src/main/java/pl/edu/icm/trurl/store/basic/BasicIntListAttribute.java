@@ -16,7 +16,7 @@
  *
  */
 
-package pl.edu.icm.trurl.store.array;
+package pl.edu.icm.trurl.store.basic;
 
 import pl.edu.icm.trurl.store.IntSink;
 import pl.edu.icm.trurl.store.IntSource;
@@ -24,12 +24,12 @@ import pl.edu.icm.trurl.store.attribute.IntListAttribute;
 
 import java.util.Arrays;
 
-public class IntListArrayAttribute implements IntListAttribute {
+public class BasicIntListAttribute implements IntListAttribute {
     private final String name;
     private int capacity;
     private int[][] values;
 
-    public IntListArrayAttribute(String name, int capacity) {
+    public BasicIntListAttribute(String name, int capacity) {
         this.name = name;
         this.values = new int[0][0];
         ensureCapacity(capacity);

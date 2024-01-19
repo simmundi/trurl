@@ -23,7 +23,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.exampledata.*;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public class DaoSoftEnumsIT {
     @DisplayName("Should correctly map a component with a Category")
     void test() throws IOException {
         // given
-        Store store = new Store(new ArrayAttributeFactory(), 1024);
+        Store store = new Store(new BasicAttributeFactory(), 1024);
         Bento config = new Configurer().loadConfigResource("/contamination.properties").setParam("daoPrefix", "").getConfig();
         HealthDao healthMapper = config.get(DaoOfHealthFactory.IT);
         ContaminationTypes contaminationTypes = config.get(ContaminationTypesFactory.IT);

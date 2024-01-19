@@ -20,12 +20,12 @@ package pl.edu.icm.trurl.ecs.parallel.domain;
 
 import pl.edu.icm.trurl.ecs.dao.annotation.NotMapped;
 import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
-import pl.edu.icm.trurl.ecs.dao.feature.CanResolveConflicts;
-import pl.edu.icm.trurl.ecs.dao.feature.IsDirtyMarked;
-import pl.edu.icm.trurl.ecs.dao.feature.RequiresOriginalCopy;
+import pl.edu.icm.trurl.ecs.dao.feature.ComponentWithConflictResolution;
+import pl.edu.icm.trurl.ecs.dao.feature.ComponentWithDirtyMarker;
+import pl.edu.icm.trurl.ecs.dao.feature.ComponentWithOriginalCopy;
 
 @WithDao
-public class ParallelCounter implements RequiresOriginalCopy<ParallelCounter>, CanResolveConflicts<ParallelCounter>, IsDirtyMarked, HasAAndB {
+public class ParallelCounter implements ComponentWithOriginalCopy<ParallelCounter>, ComponentWithConflictResolution<ParallelCounter>, ComponentWithDirtyMarker, HasAAndB {
     private int a;
     private int b;
     private @NotMapped int ownerId;

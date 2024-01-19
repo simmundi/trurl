@@ -23,6 +23,11 @@ import net.snowyhollows.bento.annotation.ByName;
 
 import java.util.Collection;
 
+
+/**
+ * This interface forms an extension point for anyone who wants to use their own
+ * `ComponentAccessor`.
+ */
 @BentoWrapper
 public interface ComponentAccessorCreator {
     ComponentAccessor create(@ByName Collection<Class<?>> componentClasses);

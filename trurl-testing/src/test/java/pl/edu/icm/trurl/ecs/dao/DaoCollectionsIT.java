@@ -25,18 +25,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.exampledata.pizza.*;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 
 import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class DaoCollectionsIT {
     Dao<Pizza> dao;
-    Store store = new Store(new ArrayAttributeFactory(), 1000);
+    Store store = new Store(new BasicAttributeFactory(), 1000);
 
     @BeforeEach
     void before() {
-        dao = new Daos().createDao(Pizza.class);
+        dao = new DaosCreator().createDao(Pizza.class);
         dao.configureAndAttach(store);
     }
 

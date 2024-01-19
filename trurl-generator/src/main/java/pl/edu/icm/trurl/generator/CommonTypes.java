@@ -24,11 +24,11 @@ import net.snowyhollows.bento.category.CategoryManager;
 import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.dao.Dao;
+import pl.edu.icm.trurl.ecs.dao.DaosCreator;
 import pl.edu.icm.trurl.ecs.dao.LifecycleEvent;
-import pl.edu.icm.trurl.ecs.dao.Daos;
 import pl.edu.icm.trurl.store.IntSink;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.StoreConfigurer;
+import pl.edu.icm.trurl.store.StoreConfig;
 import pl.edu.icm.trurl.store.attribute.*;
 import pl.edu.icm.trurl.store.join.*;
 import pl.edu.icm.trurl.store.reference.ArrayReference;
@@ -41,12 +41,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 
 public class CommonTypes {
-    public static final ClassName COMPONENT_STORE_METADATA = ClassName.get(StoreConfigurer.class);
+    public static final ClassName COMPONENT_STORE_METADATA = ClassName.get(StoreConfig.class);
     public static final ClassName STORE = ClassName.get(Store.class);
     public static final ClassName LIFECYCLE_EVENT = ClassName.get(LifecycleEvent.class);
     public static final ClassName INT_SINK = ClassName.get(IntSink.class);
     public static final ClassName DAO = ClassName.get(Dao.class);
-    public static final ClassName DAOS = ClassName.get(Daos.class);
+    public static final ClassName DAOS = ClassName.get(DaosCreator.class);
     public static final ClassName ARRAY_JOIN = ClassName.get(ArrayJoin.class);
     public static final ClassName RANGED_JOIN = ClassName.get(RangedJoin.class);
     public static final ClassName SINGLE_JOIN = ClassName.get(SingleJoin.class);

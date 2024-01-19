@@ -19,12 +19,12 @@
 package pl.edu.icm.trurl.exampledata;
 
 import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
-import pl.edu.icm.trurl.ecs.dao.feature.CanBeNormalized;
+import pl.edu.icm.trurl.ecs.dao.feature.ComponentWithNormalization;
 
 import java.util.Locale;
 
 @WithDao
-public class Person implements CanBeNormalized {
+public class Person implements ComponentWithNormalization {
     private String name;
 
     public Person() {
