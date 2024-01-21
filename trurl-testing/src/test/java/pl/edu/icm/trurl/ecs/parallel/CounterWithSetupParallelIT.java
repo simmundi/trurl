@@ -20,7 +20,6 @@ package pl.edu.icm.trurl.ecs.parallel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.*;
 import pl.edu.icm.trurl.ecs.Session;
@@ -30,7 +29,7 @@ import pl.edu.icm.trurl.ecs.parallel.domain.*;
 import pl.edu.icm.trurl.ecs.parallel.domain.Counter;
 import pl.edu.icm.trurl.ecs.parallel.domain.ParallelCounterDao;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 import pl.edu.icm.trurl.util.Status;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -55,11 +54,11 @@ public class CounterWithSetupParallelIT {
     void test_parallel() {
         // given
         when(engine.getDaoManager()).thenReturn(daoManager);
-        Store store = new Store(new ArrayAttributeFactory(), SIZE);
-        ParallelCounterDao parallelMapper = new ParallelCounterDao("");
-        parallelMapper.configureAndAttach(store);
-        this.prepareZeroedCounters(parallelMapper);
-        parallelMapper.lifecycleEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
+        Store store = new Store(new BasicAttributeFactory(), SIZE);
+        ParallelCounterDao parallelDao = new ParallelCounterDao("");
+        parallelDao.configureAndAttach(store);
+        this.prepareZeroedCounters(parallelDao);
+        parallelDao.fireEvent(LifecycleEvent.PRE_PARALLEL_ITERATION);
 
         // execute
         Status status = Status.of("using counters in parallel: " + createMessage());
@@ -71,26 +70,26 @@ public class CounterWithSetupParallelIT {
             session.setOwnerId(chunkId + 1);
             for (int i = 0; i < PER_SESSION; i++) {
                 int id = (startId + i) % SIZE;
-                ParallelCounter counter = parallelMapper.create();
-                parallelMapper.load(session, counter, id);
+                ParallelCounter counter = parallelDao.create();
+                parallelDao.load(session, counter, id);
                 performLogicOnCounter(counter);
-                parallelMapper.save(session, counter, id);
+                parallelDao.save(session, counter, id);
             }
         });
         status.done();
 
         // assert
-        int problems = verifyAndDumpDebugInfo(parallelMapper);
+        int problems = verifyAndDumpDebugInfo(parallelDao);
         assertThat(problems).isZero();
     }
 
     @Test
     void test_sequential() {
         // given
-        Store store = new Store(new ArrayAttributeFactory(), SIZE);
-        CounterDao counterMapper = new CounterDao("");
-        counterMapper.configureAndAttach(store);
-        prepareZeroedCounters(counterMapper);
+        Store store = new Store(new BasicAttributeFactory(), SIZE);
+        CounterDao counterDao = new CounterDao("");
+        counterDao.configureAndAttach(store);
+        prepareZeroedCounters(counterDao);
 
         Status status = Status.of("using counters in sequence: " + createMessage());
         // execute
@@ -99,27 +98,27 @@ public class CounterWithSetupParallelIT {
 
             for (int i = 0; i < PER_SESSION; i++) {
                 int id = (startId + i) % SIZE;
-                Counter counter = counterMapper.create();
-                counterMapper.load(null, counter, id);
+                Counter counter = counterDao.create();
+                counterDao.load(null, counter, id);
                 performLogicOnCounter(counter);
-                counterMapper.save(counter, id);
+                counterDao.save(counter, id);
             }
         });
 
         status.done();
 
         // assert
-        int problems = verifyAndDumpDebugInfo(counterMapper);
+        int problems = verifyAndDumpDebugInfo(counterDao);
         assertThat(problems).isZero();
     }
 
     @Test
     void test_sequential_incorrect_results() {
         // given
-        Store store = new Store(new ArrayAttributeFactory(), SIZE);
-        CounterDao sequentialMapper = new CounterDao("");
-        sequentialMapper.configureAndAttach(store);
-        prepareZeroedCounters(sequentialMapper);
+        Store store = new Store(new BasicAttributeFactory(), SIZE);
+        CounterDao sequentialDao = new CounterDao("");
+        sequentialDao.configureAndAttach(store);
+        prepareZeroedCounters(sequentialDao);
 
         // execute
         Status status = Status.of("using sequential dao in parallel (which is wrong): " + createMessage());
@@ -128,16 +127,16 @@ public class CounterWithSetupParallelIT {
 
             for (int i = 0; i < PER_SESSION; i++) {
                 int id = (startId + i) % SIZE;
-                Counter counter = sequentialMapper.createAndLoad(id);
+                Counter counter = sequentialDao.createAndLoad(id);
                 performLogicOnCounter(counter);
-                sequentialMapper.save(counter, id);
+                sequentialDao.save(counter, id);
             }
         });
 
         status.done();
 
         // assert
-        int problems = verifyAndDumpDebugInfo(sequentialMapper);
+        int problems = verifyAndDumpDebugInfo(sequentialDao);
         assertThat(problems).isNotZero();
     }
 

@@ -24,36 +24,34 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.exampledata.CounterWithSetup;
 import pl.edu.icm.trurl.exampledata.CounterWithSetupDao;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 import pl.edu.icm.trurl.store.Store;
-
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class DaoSetupFeatureIT {
-    Store store = new Store(new ArrayAttributeFactory(), 1);
-    CounterWithSetupDao counterMapper = new CounterWithSetupDao("");
+    Store store = new Store(new BasicAttributeFactory(), 1);
+    CounterWithSetupDao counterDao = new CounterWithSetupDao("");
 
     @BeforeEach
     public void before() {
-        counterMapper.configureAndAttach(store);
+        counterDao.configureAndAttach(store);
     }
 
     @Test
     @DisplayName("Should save Counter and load it")
     public void normalize() {
         // given
-        CounterWithSetup counter = counterMapper.create();
+        CounterWithSetup counter = counterDao.create();
         counter.setValue(17f);
-        counterMapper.save(counter, 0);
+        counterDao.save(counter, 0);
 
         // execute
-        CounterWithSetup loaded = counterMapper.createAndLoad(0);
+        CounterWithSetup loaded = counterDao.createAndLoad(0);
 
         // assert
-        assertThat(store.attributes().collect(Collectors.toList())).hasSize(1);
+        assertThat(store.getAllAttributes()).hasSize(1);
         assertThat(loaded.getOriginalValue()).isEqualTo(17f);
         assertThat(loaded.getValue()).isEqualTo(17f);
     }

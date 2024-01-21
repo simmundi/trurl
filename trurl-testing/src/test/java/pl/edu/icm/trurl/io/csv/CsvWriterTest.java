@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -71,7 +72,7 @@ class CsvWriterTest {
         when(columnA.name()).thenReturn("a");
         when(columnB.name()).thenReturn("b");
         when(columnC.name()).thenReturn("c");
-        when(store.attributes()).thenReturn(Stream.of(columnA, columnB, columnC));
+        when(store.getAllAttributes()).thenReturn(List.of(columnA, columnB, columnC));
     }
 
     @Test

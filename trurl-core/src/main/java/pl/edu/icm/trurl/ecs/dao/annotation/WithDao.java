@@ -23,8 +23,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * POJOs marked with this annotation will have corresponding Dao classes generated on
+ * compile-time.
+ *
+ */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
 public @interface WithDao {
+    /**
+     * A prefix added to the name of any attribute used by the generated Dao.
+     * @return
+     */
     String namespace() default "";
 }

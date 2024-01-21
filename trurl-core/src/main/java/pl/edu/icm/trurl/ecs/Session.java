@@ -1,6 +1,6 @@
 package pl.edu.icm.trurl.ecs;
 
-import pl.edu.icm.trurl.util.IntMap;
+import pl.edu.icm.trurl.collection.IntMap;
 
 public class Session {
     private final IntMap<Entity> idToEntity;

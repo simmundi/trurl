@@ -21,20 +21,24 @@ package pl.edu.icm.trurl.ecs.util;
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.*;
 
+/**
+ * Service with helper methods for creating actions with typical patterns, like actions with filters
+ * based on presence of components.
+ */
 public class ActionService {
-    private final EngineConfiguration engineConfiguration;
+    private final EngineBuilder engineBuilder;
 
     @WithFactory
-    public ActionService(EngineConfiguration engineConfiguration) {
-        this.engineConfiguration = engineConfiguration;
+    public ActionService(EngineBuilder engineBuilder) {
+        this.engineBuilder = engineBuilder;
     }
 
-    public <Context, Q> Action<Context> withComponent(Class<Q> q, Systems.OneComponentSystem<Q> system) {
+    public <Context, Q> Action<Context> withComponent(Class<Q> q, Steps.OneComponentStep<Q> step) {
         return new Action<Context>() {
             ComponentToken<Q> qToken;
             @Override
             public void init() {
-                 qToken = engineConfiguration.getEngine().getDaoManager().classToToken(q);
+                 qToken = engineBuilder.getEngine().getDaoManager().classToToken(q);
             }
 
             @Override
@@ -42,19 +46,19 @@ public class ActionService {
                 if (!qToken.dao.isPresent(idx)) return;
                 Entity e = session.getEntity(idx);
                 Q qComponent = e.get(qToken);
-                system.execute(e, qComponent);
+                step.execute(e, qComponent);
             }
         };
     }
 
-    public <Context, Q, W> Action<Context> withComponents(Class<Q> q, Class<W> w, Systems.TwoComponentSystem<Q, W> system) {
+    public <Context, Q, W> Action<Context> withComponents(Class<Q> q, Class<W> w, Steps.TwoComponentStep<Q, W> step) {
         return new Action<Context>() {
             ComponentToken<Q> qToken;
             ComponentToken<W> wToken;
             @Override
             public void init() {
-                qToken = engineConfiguration.getEngine().getDaoManager().classToToken(q);
-                wToken = engineConfiguration.getEngine().getDaoManager().classToToken(w);
+                qToken = engineBuilder.getEngine().getDaoManager().classToToken(q);
+                wToken = engineBuilder.getEngine().getDaoManager().classToToken(w);
             }
 
             @Override
@@ -63,21 +67,21 @@ public class ActionService {
                 Entity e = session.getEntity(idx);
                 Q qComponent = e.get(qToken);
                 W wComponent = e.get(wToken);
-                system.execute(e, qComponent, wComponent);
+                step.execute(e, qComponent, wComponent);
             }
         };
     }
 
-    public <Context, Q, W, E> Action<Context> withComponents(Class<Q> q, Class<W> w, Class<E> e, Systems.ThreeComponentSystem<Q, W, E> system) {
+    public <Context, Q, W, E> Action<Context> withComponents(Class<Q> q, Class<W> w, Class<E> e, Steps.ThreeComponentStep<Q, W, E> step) {
         return new Action<Context>() {
             ComponentToken<Q> qToken;
             ComponentToken<W> wToken;
             ComponentToken<E> eToken;
             @Override
             public void init() {
-                qToken = engineConfiguration.getEngine().getDaoManager().classToToken(q);
-                wToken = engineConfiguration.getEngine().getDaoManager().classToToken(w);
-                eToken = engineConfiguration.getEngine().getDaoManager().classToToken(e);
+                qToken = engineBuilder.getEngine().getDaoManager().classToToken(q);
+                wToken = engineBuilder.getEngine().getDaoManager().classToToken(w);
+                eToken = engineBuilder.getEngine().getDaoManager().classToToken(e);
             }
 
             @Override
@@ -87,12 +91,12 @@ public class ActionService {
                 Q qComponent = e.get(qToken);
                 W wComponent = e.get(wToken);
                 E eComponent = e.get(eToken);
-                system.execute(e, qComponent, wComponent, eComponent);
+                step.execute(e, qComponent, wComponent, eComponent);
             }
         };
     }
 
-    public <Context, Q, W, E, R> Action<Context> withComponents(Class<Q> q, Class<W> w, Class<E> e, Class<R> r, Systems.FourComponentSystem<Q, W, E, R> system) {
+    public <Context, Q, W, E, R> Action<Context> withComponents(Class<Q> q, Class<W> w, Class<E> e, Class<R> r, Steps.FourComponentStep<Q, W, E, R> step) {
         return new Action<Context>() {
             ComponentToken<Q> qToken;
             ComponentToken<W> wToken;
@@ -100,10 +104,10 @@ public class ActionService {
             ComponentToken<R> rToken;
             @Override
             public void init() {
-                qToken = engineConfiguration.getEngine().getDaoManager().classToToken(q);
-                wToken = engineConfiguration.getEngine().getDaoManager().classToToken(w);
-                eToken = engineConfiguration.getEngine().getDaoManager().classToToken(e);
-                rToken = engineConfiguration.getEngine().getDaoManager().classToToken(r);
+                qToken = engineBuilder.getEngine().getDaoManager().classToToken(q);
+                wToken = engineBuilder.getEngine().getDaoManager().classToToken(w);
+                eToken = engineBuilder.getEngine().getDaoManager().classToToken(e);
+                rToken = engineBuilder.getEngine().getDaoManager().classToToken(r);
             }
 
             @Override
@@ -114,7 +118,7 @@ public class ActionService {
                 W wComponent = e.get(wToken);
                 E eComponent = e.get(eToken);
                 R rComponent = e.get(rToken);
-                system.execute(e, qComponent, wComponent, eComponent, rComponent);
+                step.execute(e, qComponent, wComponent, eComponent, rComponent);
             }
         };
     }

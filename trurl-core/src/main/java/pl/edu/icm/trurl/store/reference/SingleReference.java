@@ -30,7 +30,7 @@ public class SingleReference implements Reference {
 
     public SingleReference(Store store, String name) {
         store.addInt(name);
-        store.hideAttribute(name);
+        store.markAttributeAsMeta(name);
         this.idAttribute = store.get(name);
     }
 

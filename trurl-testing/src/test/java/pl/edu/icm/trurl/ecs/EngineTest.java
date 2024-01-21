@@ -24,10 +24,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.dao.Dao;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,7 +46,7 @@ class EngineTest {
     @Mock
     SessionFactory sessionFactory;
     @Mock
-    EntitySystem system;
+    Step step;
     @Mock
     Dao daoA;
     @Mock
@@ -59,7 +58,7 @@ class EngineTest {
     void before() {
         lenient().when(store.getCounter()).thenReturn(counterA);
         lenient().when(counterA.getCount()).thenReturn(300);
-        lenient().when(daoManager.allDaos()).thenAnswer(params -> List.of(
+        lenient().when(daoManager.getAllDaos()).thenAnswer(params -> List.of(
                 daoA,
                 daoB
         ));
@@ -69,7 +68,7 @@ class EngineTest {
     @Test
     void construct() {
         // execute
-        new Engine(INITIAL_CAPACITY, CAPACITY_HEADROOM, daoManager, new ArrayAttributeFactory(), SESSION_CACHE_CAPACITY);
+        new Engine(INITIAL_CAPACITY, CAPACITY_HEADROOM, daoManager, new BasicAttributeFactory(), SESSION_CACHE_CAPACITY);
 
         // assert
         verify(daoA).configureStore(any());
@@ -84,10 +83,10 @@ class EngineTest {
         Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, SESSION_CACHE_CAPACITY);
 
         // execute
-        engine.execute(system);
+        engine.execute(step);
 
         // assert
-        verify(system, times(1)).execute(any());
+        verify(step, times(1)).execute(any());
     }
 
     @Test
@@ -103,7 +102,7 @@ class EngineTest {
     }
 
     @Test
-    void getMapperSet() {
+    void getDaoManager() {
         // given
         Engine engine = new Engine(store, CAPACITY_HEADROOM, daoManager, SESSION_CACHE_CAPACITY);
 

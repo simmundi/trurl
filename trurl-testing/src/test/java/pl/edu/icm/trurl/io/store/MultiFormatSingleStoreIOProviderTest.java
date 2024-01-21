@@ -3,6 +3,7 @@ package pl.edu.icm.trurl.io.store;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.io.csv.CsvReader;
 import pl.edu.icm.trurl.io.csv.CsvWriter;
+import pl.edu.icm.trurl.io.orc.MultiFormatSingleStoreIOProvider;
 import pl.edu.icm.trurl.io.orc.OrcReader;
 import pl.edu.icm.trurl.io.orc.OrcWriter;
 

@@ -26,30 +26,30 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.exampledata.Person;
 import pl.edu.icm.trurl.exampledata.PersonDao;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 import pl.edu.icm.trurl.store.Store;
 
 @ExtendWith(MockitoExtension.class)
 public class DaoNormalizationIT {
-    Store store = new Store(new ArrayAttributeFactory(), 1);
-    PersonDao personMapper = new PersonDao("");
+    Store store = new Store(new BasicAttributeFactory(), 1);
+    PersonDao personDao = new PersonDao("");
 
     @BeforeEach
     public void before() {
-        personMapper.configureAndAttach(store);
+        personDao.configureAndAttach(store);
     }
 
     @Test
     @DisplayName("Should save Person instance with normalized name")
     public void normalize() {
         // given
-        Person person = personMapper.create();
+        Person person = personDao.create();
         person.setName("  jan KoWaLskI   ");
 
         // execute
-        personMapper.save(person, 0);
+        personDao.save(person, 0);
 
         // assert
-        Assertions.assertThat(personMapper.getName(0)).isEqualTo("JAN KOWALSKI");
+        Assertions.assertThat(personDao.getName(0)).isEqualTo("JAN KOWALSKI");
     }
 }

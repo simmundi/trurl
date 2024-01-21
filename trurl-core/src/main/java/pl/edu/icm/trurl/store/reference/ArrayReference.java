@@ -19,7 +19,7 @@
 package pl.edu.icm.trurl.store.reference;
 
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.StoreInspector;
+import pl.edu.icm.trurl.store.StoreAccess;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.IntListAttribute;
 
@@ -32,7 +32,7 @@ public final class ArrayReference implements Reference {
     private final IntListAttribute values;
     private final int minimum;
     private final int margin;
-    private final StoreInspector store;
+    private final StoreAccess store;
 
     public ArrayReference(Store store, String name, int minimum, int margin) {
         this.store = store;
@@ -40,7 +40,7 @@ public final class ArrayReference implements Reference {
         this.minimum = minimum;
         this.margin = margin;
         store.addIntList(name);
-        store.hideAttribute(name);
+        store.markAttributeAsMeta(name);
         this.values = store.get(name);
     }
 

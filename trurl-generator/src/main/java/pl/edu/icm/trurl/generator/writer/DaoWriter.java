@@ -38,10 +38,10 @@ public class DaoWriter {
     public void writeDao(ProcessingEnvironment processingEnvironment, BeanMetadata beanMetadata) {
         processingEnvironment.getMessager().printMessage(Diagnostic.Kind.OTHER, "starting: " + beanMetadata.componentName);
         ParameterizedTypeName superInterface = ParameterizedTypeName.get(CommonTypes.DAO, beanMetadata.componentName);
-        ClassName mapperName = mapperNameFor(beanMetadata.componentName);
+        ClassName daoName = daoNameFor(beanMetadata.componentName);
 
-        TypeSpec.Builder mapper =
-                TypeSpec.classBuilder(mapperName)
+        TypeSpec.Builder dao =
+                TypeSpec.classBuilder(daoName)
                         .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                         .addSuperinterface(superInterface);
 
@@ -54,29 +54,30 @@ public class DaoWriter {
                 new IsPresentFeature(beanMetadata),
                 new LoadFeature(beanMetadata),
                 new SaveFeature(beanMetadata),
-                new AttributesFeature(beanMetadata),
+                new GetAttributesFeature(beanMetadata),
                 new ColumnarAccessFeature(beanMetadata),
                 new EraseFeature(beanMetadata),
-                new GetChildMappersFeature(beanMetadata),
-                new LifecycleEventFeature(beanMetadata));
+                new GetChildDaosFeature(beanMetadata),
+                new MapEntitiesFeature(beanMetadata),
+                new FireEventFeature(beanMetadata));
 
         features.stream()
                 .flatMap(Feature::fields)
-                .forEach(field -> mapper.addField(field));
+                .forEach(field -> dao.addField(field));
 
         features.stream()
                 .flatMap(Feature::methods)
-                .forEach(method -> mapper.addMethod(method));
+                .forEach(method -> dao.addMethod(method));
 
         try {
             String packageName = ClassName.get(beanMetadata.componentClass).packageName();
-            JavaFile.builder(packageName, mapper.build()).build().writeTo(processingEnvironment.getFiler());
+            JavaFile.builder(packageName, dao.build()).build().writeTo(processingEnvironment.getFiler());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private ClassName mapperNameFor(ClassName type) {
+    private ClassName daoNameFor(ClassName type) {
         return ClassName.get(type.packageName(), type.simpleName() + "Dao");
     }
 }

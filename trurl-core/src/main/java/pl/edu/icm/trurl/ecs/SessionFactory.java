@@ -36,7 +36,7 @@ public final class SessionFactory {
     }
 
     public void lifecycleEvent(LifecycleEvent event) {
-        engine.getDaoManager().allDaos().forEach(dao -> dao.lifecycleEvent(event));
+        engine.getDaoManager().getAllDaos().forEach(dao -> dao.fireEvent(event));
     }
 
     private Session createNew() {

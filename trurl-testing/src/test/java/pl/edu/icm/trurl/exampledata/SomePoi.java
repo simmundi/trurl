@@ -18,7 +18,7 @@
 package pl.edu.icm.trurl.exampledata;
 
 import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
-import pl.edu.icm.trurl.visnow.VnCoords;
+import pl.edu.icm.trurl.io.visnow.VnCoords;
 
 @WithDao
 public class SomePoi implements VnCoords {

@@ -100,15 +100,15 @@ public class ConfigureStoreFeature implements Feature {
                     int sizeMargin = mappedCollection.map(MappedCollection::margin).orElse(2);
                     String methodName = mappedCollection.map(MappedCollection::collectionType).orElse(CollectionType.RANGE) == CollectionType.RANGE ? "rangeTyped" : "arrayTyped";
 
-                    methodSpec.addStatement("$L = ($T) daos.createDao($T.IT, daoPrefix + $S)", property.fieldName, property.getMapperType(), bentoFactoryType, property.name);
+                    methodSpec.addStatement("$L = ($T) daos.createDao($T.IT, daoPrefix + $S)", property.fieldName, property.getDaoType(), bentoFactoryType, property.name);
                     methodSpec.addStatement("$L.configureStore(meta.addJoin(daoPrefix + $S).$L($L, $L))", property.fieldName, name, methodName, sizeMin, sizeMargin);
                     break;
                 case EMBEDDED_PROP:
-                    methodSpec.addStatement("$L = ($T) daos.createDao($T.IT, daoPrefix + $S)", property.fieldName, property.getMapperType(), bentoFactoryType, property.name);
+                    methodSpec.addStatement("$L = ($T) daos.createDao($T.IT, daoPrefix + $S)", property.fieldName, property.getDaoType(), bentoFactoryType, property.name);
                     methodSpec.addStatement("$L.configureStore(meta)", property.fieldName);
                     break;
                 case EMBEDDED_DENSE_PROP:
-                    methodSpec.addStatement("$L = ($T) daos.createDao($T.IT, daoPrefix + $S)", property.fieldName, property.getMapperType(), bentoFactoryType, property.name);
+                    methodSpec.addStatement("$L = ($T) daos.createDao($T.IT, daoPrefix + $S)", property.fieldName, property.getDaoType(), bentoFactoryType, property.name);
                     ReverseReference reverseReference = Optional.ofNullable(property.attribute.getAnnotation(Mapped.class)).map(Mapped::reverse).orElse(ReverseReference.NO_REVERSE_ATTRIBUTE);
                     switch (reverseReference) {
                         case NO_REVERSE_ATTRIBUTE:

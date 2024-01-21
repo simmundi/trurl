@@ -49,7 +49,7 @@ class IndexesTest {
     Chunk chunk;
 
     @Mock
-    LooksDao looksMapper;
+    LooksDao looksDao;
 
     Looks looks1 = new Looks(Color.GOLD, Texture.ROUGH);
     Looks looks2 = new Looks(Color.BLUE, Texture.SHINY);
@@ -58,7 +58,7 @@ class IndexesTest {
     Person person3 = new Person();
     Person person2 = new Person();
     @Mock
-    PersonDao personMapper;
+    PersonDao personDao;
     @Mock
     DaoManager daoManager;
 
@@ -67,25 +67,25 @@ class IndexesTest {
         when(chunk.ids()).thenReturn(IntStream.of(0, 1, 2, 3));
         when(chunk.getChunkInfo()).thenReturn(ChunkInfo.of(0,4));
 
-        when(looksMapper.isPresent(0)).thenReturn(true);
-        when(looksMapper.createAndLoad(0)).thenReturn(looks2); // nie
-        when(looksMapper.isPresent(1)).thenReturn(true);
-        when(looksMapper.createAndLoad(1)).thenReturn(looks1); //tak
-        when(looksMapper.isPresent(2)).thenReturn(false);
-        when(looksMapper.isPresent(3)).thenReturn(false);
+        when(looksDao.isPresent(0)).thenReturn(true);
+        when(looksDao.createAndLoad(0)).thenReturn(looks2); // nie
+        when(looksDao.isPresent(1)).thenReturn(true);
+        when(looksDao.createAndLoad(1)).thenReturn(looks1); //tak
+        when(looksDao.isPresent(2)).thenReturn(false);
+        when(looksDao.isPresent(3)).thenReturn(false);
 
         person2.setName("Pomponik");
-        when(personMapper.isPresent(1)).thenReturn(true);
-        when(personMapper.createAndLoad(1)).thenReturn(person2); //tak
+        when(personDao.isPresent(1)).thenReturn(true);
+        when(personDao.createAndLoad(1)).thenReturn(person2); //tak
         person3.setName("Niewiadomska");
-        when(personMapper.isPresent(2)).thenReturn(true);
-        when(personMapper.createAndLoad(2)).thenReturn(person3); //tak
-        when(personMapper.isPresent(3)).thenReturn(false);
+        when(personDao.isPresent(2)).thenReturn(true);
+        when(personDao.createAndLoad(2)).thenReturn(person3); //tak
+        when(personDao.isPresent(3)).thenReturn(false);
 
         when(index.chunks()).thenReturn(Stream.of(chunk));
         when(engine.getDaoManager()).thenReturn(daoManager);
-        when(daoManager.classToDao(Looks.class)).thenReturn(looksMapper);
-        when(daoManager.classToDao(Person.class)).thenReturn(personMapper);
+        when(daoManager.classToDao(Looks.class)).thenReturn(looksDao);
+        when(daoManager.classToDao(Person.class)).thenReturn(personDao);
     }
 
     @Test

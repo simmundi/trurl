@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.exampledata.Color;
+import pl.edu.icm.trurl.io.visnow.VnPointsExporter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

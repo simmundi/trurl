@@ -29,7 +29,6 @@ import pl.edu.icm.trurl.store.reference.Reference;
 import pl.edu.icm.trurl.store.reference.SingleReference;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -53,9 +52,9 @@ import java.util.stream.Stream;
  * Reference and Join objects only contain meta-data, the actual data is stored in attributes
  * (accessible, but hidden by default).
  */
-public final class Store implements StoreConfigurer, StoreInspector {
+public final class Store implements StoreConfig, StoreAccess {
     private final Map<String, Attribute> allAttributes = new LinkedHashMap<>(40);
-    private final List<Attribute> visibleAttributes = Collections.synchronizedList(new ArrayList<>());
+    private final List<Attribute> dataAttributes = Collections.synchronizedList(new ArrayList<>());
     private final Map<String, Store> substores = new LinkedHashMap<>();
     private final Map<String, Join> joins = new LinkedHashMap<>();
     private final Map<String, Reference> references = new LinkedHashMap<>();
@@ -88,7 +87,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
      */
     @Override
     public void erase(int row) {
-        for (Attribute attribute : visibleAttributes) {
+        for (Attribute attribute : dataAttributes) {
             attribute.setEmpty(row);
         }
         for (Join join : joins.values()) {
@@ -99,13 +98,18 @@ public final class Store implements StoreConfigurer, StoreInspector {
         }
     }
 
+    @Override
+    public int allocateIndex() {
+        return getCounter().next();
+    }
+
     /**
      * Like erase, but also returns the row to the pool of free rows (so that it can be reused).
      * Whether child rows are also freed depends on the implementation of the specific joins
      * and references.
      */
     @Override
-    public void free(int row) {
+    public void freeIndex(int row) {
         erase(row);
         counter.free(row);
     }
@@ -118,7 +122,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
 
     @Override
     public boolean isEmpty(int row) {
-        for (Attribute attribute : visibleAttributes) {
+        for (Attribute attribute : dataAttributes) {
             if (!attribute.isEmpty(row)) {
                 return false;
             }
@@ -132,13 +136,13 @@ public final class Store implements StoreConfigurer, StoreInspector {
     }
 
     @Override
-    public Stream<Attribute> attributes() {
-        return allAttributes.values().stream();
+    public List<Attribute> getAllAttributes() {
+        return Collections.unmodifiableList(new ArrayList<>(allAttributes.values()));
     }
 
     @Override
-    public Stream<Attribute> visibleAttributes() {
-        return visibleAttributes.stream();
+    public List<Attribute> getDataAttributes() {
+        return Collections.unmodifiableList(dataAttributes);
     }
 
     @Override
@@ -164,7 +168,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
     public void addBoolean(String name) {
         Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createBoolean(name, ensuredCapacity));
         if (former == null) {
-            visibleAttributes.add(allAttributes.get(name));
+            dataAttributes.add(allAttributes.get(name));
         }
     }
 
@@ -172,7 +176,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
     public void addByte(String name) {
         Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createByte(name, ensuredCapacity));
         if (former == null) {
-            visibleAttributes.add(allAttributes.get(name));
+            dataAttributes.add(allAttributes.get(name));
         }
     }
 
@@ -180,7 +184,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
     public void addDouble(String name) {
         Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createDouble(name, ensuredCapacity));
         if (former == null) {
-            visibleAttributes.add(allAttributes.get(name));
+            dataAttributes.add(allAttributes.get(name));
         }
     }
 
@@ -189,7 +193,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
     public void addIntList(String name) {
         Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createIntList(name, ensuredCapacity));
         if (former == null) {
-            visibleAttributes.add(allAttributes.get(name));
+            dataAttributes.add(allAttributes.get(name));
         }
     }
 
@@ -197,7 +201,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
     public <E extends Enum<E>> void addEnum(String name, Class<E> enumType) {
         Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createEnum(name, enumType, ensuredCapacity));
         if (former == null) {
-            visibleAttributes.add(allAttributes.get(name));
+            dataAttributes.add(allAttributes.get(name));
         }
     }
 
@@ -205,7 +209,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
     public <E extends Category> void addCategory(String name, CategoryManager<E> enumType) {
         Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createCategory(name, enumType, ensuredCapacity));
         if (former == null) {
-            visibleAttributes.add(allAttributes.get(name));
+            dataAttributes.add(allAttributes.get(name));
         }
     }
 
@@ -213,7 +217,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
     public void addFloat(String name) {
         Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createFloat(name, ensuredCapacity));
         if (former == null) {
-            visibleAttributes.add(allAttributes.get(name));
+            dataAttributes.add(allAttributes.get(name));
         }
     }
 
@@ -221,7 +225,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
     public void addInt(String name) {
         Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createInt(name, ensuredCapacity));
         if (former == null) {
-            visibleAttributes.add(allAttributes.get(name));
+            dataAttributes.add(allAttributes.get(name));
         }
     }
 
@@ -229,7 +233,7 @@ public final class Store implements StoreConfigurer, StoreInspector {
     public void addShort(String name) {
         Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createShort(name, ensuredCapacity));
         if (former == null) {
-            visibleAttributes.add(allAttributes.get(name));
+            dataAttributes.add(allAttributes.get(name));
         }
     }
 
@@ -237,13 +241,13 @@ public final class Store implements StoreConfigurer, StoreInspector {
     public void addString(String name) {
         Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createString(name, ensuredCapacity));
         if (former == null) {
-            visibleAttributes.add(allAttributes.get(name));
+            dataAttributes.add(allAttributes.get(name));
         }
     }
 
     @Override
-    public ReferenceConfigurer addReference(String name) {
-        return new ReferenceConfigurer() {
+    public ReferenceConfig addReference(String name) {
+        return new ReferenceConfig() {
             @Override
             public void arrayTyped(int minimumSize, int margin) {
                 ArrayReference reference = new ArrayReference(Store.this, name, minimumSize, margin);
@@ -259,8 +263,8 @@ public final class Store implements StoreConfigurer, StoreInspector {
     }
 
     @Override
-    public JoinConfigurer addJoin(String name) {
-        return new JoinConfigurer() {
+    public JoinConfig addJoin(String name) {
+        return new JoinConfig() {
 
             @Override
             public Store rangeTyped(int minimum, int margin) {
@@ -299,16 +303,16 @@ public final class Store implements StoreConfigurer, StoreInspector {
     }
 
     @Override
-    public void hideAttribute(String name) {
-        visibleAttributes.remove(allAttributes.get(name));
+    public void markAttributeAsMeta(String name) {
+        dataAttributes.remove(allAttributes.get(name));
     }
 
     public String getName() {
         return name;
     }
 
-    public Stream<Store> getSubstores() {
-        return substores.values().stream();
+    public List<Store> getSubstores() {
+        return Collections.unmodifiableList(new ArrayList<>(substores.values()));
     }
 
     public Store addSubstore(String namespace) {

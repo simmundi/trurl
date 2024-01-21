@@ -43,11 +43,11 @@ public class CommonFieldsFeature implements Feature {
                                 .build());
                     } else if (property.isUsingReferences()) {
                         return reference(property);
-                    } else if (property.isUsingJoin() && property.isUsingMappers()) {
+                    } else if (property.isUsingJoin() && property.isUsingDaos()) {
                         return join(property);
                     } else if (property.isUsingJoin()) {
                         return join(property);
-                    } else if (property.isUsingMappers() && !property.isUsingJoin()) {
+                    } else if (property.isUsingDaos() && !property.isUsingJoin()) {
                         return embedded(property);
                     } else {
                         throw new RuntimeException("Unknown property type: " + property.type);
@@ -57,7 +57,7 @@ public class CommonFieldsFeature implements Feature {
 
     private Stream<? extends FieldSpec> embedded(ComponentProperty property) {
         return Stream.of(FieldSpec
-                .builder(property.getMapperType(), property.fieldName, Modifier.PRIVATE)
+                .builder(property.getDaoType(), property.fieldName, Modifier.PRIVATE)
                 .build());
     }
 
@@ -69,7 +69,7 @@ public class CommonFieldsFeature implements Feature {
 
     private Stream<FieldSpec> join(ComponentProperty property) {
         return Stream.of(FieldSpec
-                        .builder(property.getMapperType(), property.fieldName, Modifier.PRIVATE)
+                        .builder(property.getDaoType(), property.fieldName, Modifier.PRIVATE)
                         .build(),
                 FieldSpec.builder(property.getJoinType(), property.fieldName + "Join", Modifier.PRIVATE)
                         .build());

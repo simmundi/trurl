@@ -21,7 +21,7 @@ package pl.edu.icm.trurl.ecs.util;
 import pl.edu.icm.trurl.ecs.index.Chunk;
 import pl.edu.icm.trurl.ecs.index.ChunkInfo;
 import pl.edu.icm.trurl.ecs.index.RandomAccessIndex;
-import pl.edu.icm.trurl.util.IntArray;
+import pl.edu.icm.trurl.collection.IntArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +51,11 @@ public class ManuallyChunkedArrayIndex implements RandomAccessIndex {
     @Override
     public synchronized int getIdFromRatio(float random) {
         return ids.get((int) (ids.size * random));
+    }
+
+    @Override
+    public int getIdFromOrdinal(int ordinal) {
+        return ids.get(ordinal);
     }
 
     public synchronized void add(int id) {

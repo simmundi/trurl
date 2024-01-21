@@ -21,7 +21,7 @@ package pl.edu.icm.trurl.ecs.util;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.util.ConcurrentIntStack;
+import pl.edu.icm.trurl.collection.ConcurrentIntStack;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -99,7 +99,7 @@ class ConcurrentIntStackTest {
 
     @Test
     @Disabled
-    @DisplayName("This test is meant to compare the ConcurrentIntQueue to the ConcurrentLinkedDeque. It is not a real test.")
+    @DisplayName("This test is meant to compare the ConcurrentIntQueue to the ConcurrentLinkedDeque. It is not a real test, it is meant to copy-paste into JMH")
     void alternative() {
         // For small sizes, the ConcurrentLinkedDeque is about 1.3 times faster (even though it allocates millions of objects instead of six)
         // On my machine, the inflection point happens around 7 million elements, when ConcurrentLinkedDeque starts being faster.

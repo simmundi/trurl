@@ -19,7 +19,6 @@
 package pl.edu.icm.trurl.store.join;
 
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.StoreInspector;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 import pl.edu.icm.trurl.store.attribute.IntListAttribute;
 
@@ -39,7 +38,7 @@ public class ArrayJoin implements Join {
         this.minimum = minimum;
         this.margin = margin;
         store.addIntList(name);
-        store.hideAttribute(name);
+        store.markAttributeAsMeta(name);
         this.values = store.get(name);
         this.target = store.addSubstore(name);
     }
@@ -87,7 +86,7 @@ public class ArrayJoin implements Join {
             Arrays.fill(array, size, sizeWithMargin, Integer.MIN_VALUE);
             for (int i = size; i < oldArray.length; i++) {
                 if (oldArray[i] != Integer.MIN_VALUE) {
-                    target.free(oldArray[i]);
+                    target.freeIndex(oldArray[i]);
                 }
             }
         } else if (array.length == sizeWithMargin) {
@@ -98,7 +97,7 @@ public class ArrayJoin implements Join {
                     }
                 } else {
                     if (array[i] != Integer.MIN_VALUE) {
-                        target.free(array[i]);
+                        target.freeIndex(array[i]);
                         array[i] = Integer.MIN_VALUE;
                     }
                 }

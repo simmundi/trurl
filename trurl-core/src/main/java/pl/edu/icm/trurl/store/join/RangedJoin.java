@@ -43,8 +43,8 @@ public final class RangedJoin implements Join {
         store.addByte(lengthName);
         this.start = store.get(startName);
         this.length = store.get(lengthName);
-        store.hideAttribute(startName);
-        store.hideAttribute(lengthName);
+        store.markAttributeAsMeta(startName);
+        store.markAttributeAsMeta(lengthName);
         this.target = store.addSubstore(name);
     }
 

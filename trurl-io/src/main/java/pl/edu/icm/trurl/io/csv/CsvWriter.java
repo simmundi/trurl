@@ -21,7 +21,7 @@ package pl.edu.icm.trurl.io.csv;
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.io.WriterProvider;
 import pl.edu.icm.trurl.io.store.SingleStoreWriter;
-import pl.edu.icm.trurl.store.StoreInspector;
+import pl.edu.icm.trurl.store.StoreAccess;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
 import java.io.IOException;
@@ -39,14 +39,14 @@ public class CsvWriter implements SingleStoreWriter {
     }
 
     @Override
-    public void write(String outputPath, StoreInspector store) throws IOException {
+    public void write(String outputPath, StoreAccess store) throws IOException {
         try (Writer bufferedWriter = writerProvider.writerForFile(outputPath, 1024 * 1024 * 128)) {
             write(bufferedWriter, store, 0, store.getCounter().getCount());
         }
     }
 
-    private void write(Writer bufferedWriter, StoreInspector store, int fromInclusive, int toExclusive) throws IOException {
-        Attribute[] attributes = store.attributes().collect(Collectors.toList()).toArray(new Attribute[]{});
+    private void write(Writer bufferedWriter, StoreAccess store, int fromInclusive, int toExclusive) throws IOException {
+        Attribute[] attributes = store.getAllAttributes().toArray(new Attribute[]{});
 
         for (int i = 0; i < attributes.length; i++) {
             if (i != 0) {

@@ -3,5 +3,5 @@
 <module>
   <source path="ecs" />
   <source path="store" />
-  <source path="util" />
+  <source path="collection" />
 </module>

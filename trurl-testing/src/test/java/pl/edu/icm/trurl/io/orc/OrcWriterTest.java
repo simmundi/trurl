@@ -24,7 +24,7 @@ import org.junit.jupiter.api.io.TempDir;
 import pl.edu.icm.trurl.io.ReaderProvider;
 import pl.edu.icm.trurl.io.csv.CsvReader;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,9 +45,9 @@ class OrcWriterReaderTest {
     public void writeThenRead() throws IOException {
         // given
         File file = new File(tempDir, "dump.orc");
-        Store storeToWrite = new Store(new ArrayAttributeFactory(), 1024);
+        Store storeToWrite = new Store(new BasicAttributeFactory(), 1024);
         configureStore(storeToWrite);
-        Store storeToRead = new Store(new ArrayAttributeFactory(), 1024);
+        Store storeToRead = new Store(new BasicAttributeFactory(), 1024);
         configureStore(storeToRead);
         loadFromCsvResource(storeToWrite, "/store.csv");
         OrcWriter orcWriter = new OrcWriter(new OrcImplementationsService());
@@ -74,7 +74,7 @@ class OrcWriterReaderTest {
 
     private List<List<String>> dataFromStore(Store store, int rows) {
         return IntStream.range(0, rows).mapToObj(row ->
-                store.attributes()
+                store.getAllAttributes().stream()
                         .map(a -> a.isEmpty(row) ? null : a.getString(row)).collect(Collectors.toList())
         ).collect(Collectors.toList());
     }

@@ -18,7 +18,7 @@
 
 package pl.edu.icm.trurl.util;
 
-import pl.edu.icm.trurl.ecs.EntitySystem;
+import pl.edu.icm.trurl.ecs.Step;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -84,10 +84,10 @@ public class Status {
         return new Status(message, skip);
     }
 
-    public static EntitySystem of(EntitySystem system, String message) {
+    public static Step of(Step step, String message) {
         return sessionFactory -> {
             Status status = Status.of(message);
-            system.execute(sessionFactory);
+            step.execute(sessionFactory);
             status.done();
         };
     }

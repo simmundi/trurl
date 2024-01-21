@@ -44,7 +44,7 @@ public class ColumnarAccessFeature implements Feature {
     public Stream<MethodSpec> methods() {
         return Stream.of(
                 propertiesForAttributeAccess().map(this::createAttributeAccessor),
-                propertiesForMapperAccess().map(this::createMapperAccessor),
+                propertiesForDaoAccess().map(this::createDaoAccessor),
                 propertiesForSingleReferenceAccess().map(this::createSingleReferenceAccessor)
         ).flatMap(Function.identity());
     }
@@ -57,7 +57,7 @@ public class ColumnarAccessFeature implements Feature {
 
 
 
-    private Stream<ComponentProperty> propertiesForMapperAccess() {
+    private Stream<ComponentProperty> propertiesForDaoAccess() {
         return beanMetadata.getComponentProperties()
                 .stream()
                 .filter(property -> property.type == PropertyType.EMBEDDED_LIST_PROP || property.type == PropertyType.EMBEDDED_PROP);
@@ -69,7 +69,7 @@ public class ColumnarAccessFeature implements Feature {
                 .filter(property -> property.type == PropertyType.ENTITY_PROP);
     }
 
-    private MethodSpec createMapperAccessor(ComponentProperty property) {
+    private MethodSpec createDaoAccessor(ComponentProperty property) {
         return  MethodSpec.methodBuilder(property.getterName + "Dao")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(CommonTypes.DAO, property.unwrappedTypeName))

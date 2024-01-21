@@ -24,7 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.edu.icm.trurl.ecs.dao.Dao;
-import pl.edu.icm.trurl.ecs.dao.Daos;
+import pl.edu.icm.trurl.ecs.dao.DaoProducer;
 import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
 import pl.edu.icm.trurl.exampledata.*;
 
@@ -45,18 +45,18 @@ class DaoManagerTest {
         factories.put(Stats.class, DaoOfStatsFactory.IT);
     }
     @Spy
-    Daos daos = new Daos();
+    DaoProducer daoProducer = new DaoProducer();
 
     DaoManager daoManager;
 
     @BeforeEach
     void init() {
-        daoManager = new DaoManager(componentAccessor, factories, daos);
+        daoManager = new DaoManager(componentAccessor, factories, daoProducer);
 
     }
 
     @Test
-    void classToMapper() {
+    void classToDao() {
         // execute
         Looks looks = daoManager.classToDao(Looks.class).create();
         Stats stats = daoManager.classToDao(Stats.class).create();
@@ -67,7 +67,7 @@ class DaoManagerTest {
     }
 
     @Test
-    void indexToMapper() {
+    void indexToDao() {
         // execute
         Object stats = daoManager.indexToDao(1).create();
         Object looks = daoManager.indexToDao(0).create();
@@ -98,9 +98,9 @@ class DaoManagerTest {
     }
 
     @Test
-    void streamMappers() {
+    void getAllDaos() {
         // execute
-        Stream<String> results = daoManager.allDaos().stream().map(Dao::name);
+        Stream<String> results = daoManager.getAllDaos().stream().map(Dao::name);
 
         // assert
         assertThat(results).containsExactly("looks", "stats");

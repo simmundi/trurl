@@ -20,5 +20,6 @@ package pl.edu.icm.trurl.ecs.index;
 
 public interface RandomAccessIndex extends Index {
     int getIdFromRatio(float random);
+    int getIdFromOrdinal(int ordinal);
     int getCount();
 }

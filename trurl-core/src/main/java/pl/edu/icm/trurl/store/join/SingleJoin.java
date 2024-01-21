@@ -31,7 +31,7 @@ public class SingleJoin implements Join {
 
     public SingleJoin(Store store, String name) {
         store.addInt(name);
-        store.hideAttribute(name);
+        store.markAttributeAsMeta(name);
         this.rowAttribute = store.get(name);
         this.target = store.addSubstore(name);
     }
@@ -47,7 +47,7 @@ public class SingleJoin implements Join {
             if (!rowAttribute.isEmpty(row)) {
                 int targetRow = rowAttribute.getInt(row);
                 rowAttribute.setEmpty(row);
-                target.free(targetRow);
+                target.freeIndex(targetRow);
             } else {
                 // do nothing
             }

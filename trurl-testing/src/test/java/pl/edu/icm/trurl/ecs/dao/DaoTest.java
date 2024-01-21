@@ -51,7 +51,7 @@ class DaoTest {
 
     @BeforeEach
     void before() {
-        dao = new Daos().createDao(Looks.class);
+        dao = new DaoProducer().createDao(Looks.class);
         when(store.get("color")).thenReturn(colorAttribute);
         when(store.get("texture")).thenReturn(textureAttribute);
         dao.configureStore(store);

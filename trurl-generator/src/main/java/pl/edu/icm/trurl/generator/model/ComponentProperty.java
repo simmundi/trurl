@@ -171,15 +171,19 @@ public class ComponentProperty {
         return attribute != null;
     }
 
-    public boolean isUsingMappers() {
-        return getMapperType() != null;
+    public boolean isUsingDaos() {
+        return getDaoType() != null;
+    }
+
+    public boolean isListBased() {
+        return type == PropertyType.EMBEDDED_LIST_PROP || type == PropertyType.ENTITY_LIST_PROP;
     }
 
     public boolean isUsingReferences() {
         return getReferenceType() != null;
     }
 
-    public ClassName getMapperType() {
+    public ClassName getDaoType() {
         if (type == PropertyType.EMBEDDED_LIST_PROP || type == PropertyType.EMBEDDED_PROP || type == PropertyType.EMBEDDED_DENSE_PROP) {
             return ClassName.get(unwrappedTypeName.packageName(), unwrappedTypeName.simpleName() + "Dao");
         } else {

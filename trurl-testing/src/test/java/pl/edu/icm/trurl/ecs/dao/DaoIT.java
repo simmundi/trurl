@@ -30,7 +30,7 @@ import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
 import pl.edu.icm.trurl.exampledata.*;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.*;
 import pl.edu.icm.trurl.store.reference.Reference;
 
@@ -45,16 +45,16 @@ import static org.mockito.Mockito.lenient;
 @ExtendWith(MockitoExtension.class)
 public class DaoIT {
     @Spy
-    Daos daos = new Daos();
+    DaoProducer daoProducer = new DaoProducer();
     Map<Class<?>, BentoFactory<?>> factories = new HashMap<>();
     @Spy
-    DaoManager daoManager = new DaoManager(new DynamicComponentAccessor(Collections.emptyList()), factories, daos);
+    DaoManager daoManager = new DaoManager(new DynamicComponentAccessor(Collections.emptyList()), factories, daoProducer);
     @Mock
     Session session;
 
     Dao<BunchOfData> dao;
 
-    Store store = new Store(new ArrayAttributeFactory(), 1000);
+    Store store = new Store(new BasicAttributeFactory(), 1000);
     private BooleanAttribute booleanAttribute;
     private ByteAttribute byteAttribute;
     private DoubleAttribute doubleAttribute;
@@ -71,7 +71,7 @@ public class DaoIT {
     @BeforeEach
     void before() {
         assert daoManager != null;
-        dao = new Daos().createDao(BunchOfData.class);
+        dao = new DaoProducer().createDao(BunchOfData.class);
         dao.configureStore(store);
         dao.attachStore(store);
         booleanAttribute = store.get("booleanProp");

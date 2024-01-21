@@ -2,7 +2,7 @@ package pl.edu.icm.trurl.store.reference;
 
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.Attribute;
 
 import java.util.stream.IntStream;
@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.*;
 public class ArrayReferenceTest {
 
     public static final int CAPACITY = 500_000;
-    Store store = new Store(new ArrayAttributeFactory(), CAPACITY);
+    Store store = new Store(new BasicAttributeFactory(), CAPACITY);
 
     @Test
     public void init() {
@@ -24,8 +24,8 @@ public class ArrayReferenceTest {
         // assert
         assertThat(next).isInstanceOf(SingleReference.class);
         assertThat(next.attributes().stream().map(Attribute::name)).containsExactly("next");
-        assertThat(store.visibleAttributes().map(Attribute::name)).containsExactly("name");
-        assertThat(store.attributes().map(Attribute::name)).containsExactly("next", "name");
+        assertThat(store.getDataAttributes().stream().map(Attribute::name)).containsExactly("name");
+        assertThat(store.getAllAttributes().stream().map(Attribute::name)).containsExactly("next", "name");
     }
 
 

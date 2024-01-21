@@ -26,6 +26,7 @@ import pl.edu.icm.trurl.ecs.index.Index;
 import pl.edu.icm.trurl.ecs.index.RandomAccessIndex;
 import pl.edu.icm.trurl.ecs.util.Indexes;
 import pl.edu.icm.trurl.exampledata.*;
+import pl.edu.icm.trurl.util.query.QueryService;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -38,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class QueryServiceTest {
 
-    EngineConfiguration engineConfiguration;
+    EngineBuilder engineBuilder;
     Engine engine;
     Indexes indexes;
     QueryService service;
@@ -47,10 +48,10 @@ class QueryServiceTest {
 
     @BeforeEach
     void prepare() {
-        engineConfiguration = Bento.createRoot().get(EngineConfigurationFactory.IT);
-        engineConfiguration.addComponentClasses(Person.class, Stats.class, House.class);
-        engine = engineConfiguration.getEngine();
-        indexes = new Indexes(engineConfiguration, 25000);
+        engineBuilder = Bento.createRoot().get(EngineBuilderFactory.IT);
+        engineBuilder.addComponentClasses(Person.class, Stats.class, House.class);
+        engine = engineBuilder.getEngine();
+        indexes = new Indexes(engineBuilder, 25000);
 
         engine.execute(sf -> {
             Session session = sf.createOrGet();
@@ -64,7 +65,7 @@ class QueryServiceTest {
             session.close();
         });
 
-        service = new QueryService(indexes, engineConfiguration);
+        service = new QueryService(indexes, engineBuilder);
     }
 
     @Test
@@ -83,8 +84,8 @@ class QueryServiceTest {
                 result.add(entity, "unwise_" + name);
             }
         };
-        PersonDao personMapper = (PersonDao) engine.getDaoManager().classToDao(Person.class);
-        StatsDao statsMapper = (StatsDao) engine.getDaoManager().classToDao(Stats.class);
+        PersonDao personDao = (PersonDao) engine.getDaoManager().classToDao(Person.class);
+        StatsDao statsDao = (StatsDao) engine.getDaoManager().classToDao(Stats.class);
 
         // execute
         Index index = service.fixedIndexFromQuery(queryForWise);
@@ -106,11 +107,11 @@ class QueryServiceTest {
 
             chunk.ids().forEach(id -> {
                 counter.incrementAndGet();
-                assertThat(personMapper.getName(id)).isEqualTo(name);
+                assertThat(personDao.getName(id)).isEqualTo(name);
                 if (wise) {
-                    assertThat(statsMapper.getWis(id)).isEqualTo(5);
+                    assertThat(statsDao.getWis(id)).isEqualTo(5);
                 } else {
-                    assertThat(statsMapper.getWis(id)).isLessThan(5);
+                    assertThat(statsDao.getWis(id)).isLessThan(5);
                 }
             });
         });
@@ -127,19 +128,19 @@ class QueryServiceTest {
     @Disabled
     void fixedMultipleIndexesFromRawQueryInParallel() {
         // given
-        PersonDao personMapper = (PersonDao) engine.getDaoManager().classToDao(Person.class);
-        StatsDao statsMapper = (StatsDao) engine.getDaoManager().classToDao(Stats.class);
-        HouseDao houseMapper = (HouseDao) engine.getDaoManager().classToDao(House.class);
+        PersonDao personDao = (PersonDao) engine.getDaoManager().classToDao(Person.class);
+        StatsDao statsDao = (StatsDao) engine.getDaoManager().classToDao(Stats.class);
+        HouseDao houseDao = (HouseDao) engine.getDaoManager().classToDao(House.class);
 
         RawQuery<IndexType> rawQuery = (entityId, result, label) -> {
-            if (personMapper.isPresent(entityId) && statsMapper.isPresent(entityId)) {
-                String name = personMapper.getName(entityId);
-                if (statsMapper.getWis(entityId) == 5)
+            if (personDao.isPresent(entityId) && statsDao.isPresent(entityId)) {
+                String name = personDao.getName(entityId);
+                if (statsDao.getWis(entityId) == 5)
                     result.add(entityId, "wise_" + name, IndexType.PERSON);
                 else
                     result.add(entityId, "unwise_" + name, IndexType.PERSON);
             }
-            if (houseMapper.isPresent(entityId)) {
+            if (houseDao.isPresent(entityId)) {
                 result.add(entityId, label, IndexType.HOUSE);
             }
         };
@@ -166,11 +167,11 @@ class QueryServiceTest {
 
             chunk.ids().forEach(id -> {
                 counter.incrementAndGet();
-                assertThat(personMapper.getName(id)).isEqualTo(name);
+                assertThat(personDao.getName(id)).isEqualTo(name);
                 if (wise) {
-                    assertThat(statsMapper.getWis(id)).isEqualTo(5);
+                    assertThat(statsDao.getWis(id)).isEqualTo(5);
                 } else {
-                    assertThat(statsMapper.getWis(id)).isLessThan(5);
+                    assertThat(statsDao.getWis(id)).isLessThan(5);
                 }
             });
         });
@@ -178,7 +179,7 @@ class QueryServiceTest {
         index.get(IndexType.HOUSE).chunks().forEach(chunk ->
                 chunk.ids().forEach(id -> {
                     counter.incrementAndGet();
-                    assertThat(houseMapper.isPresent(id)).isTrue();
+                    assertThat(houseDao.isPresent(id)).isTrue();
                 }));
         assertThat(counter.get()).isEqualTo(engine.getCount());
         assertThat(foundNames).containsAll(asList(names));

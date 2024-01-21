@@ -33,7 +33,7 @@ public final class Engine {
         this.capacityHeadroom = capacityHeadroom;
         this.daoManager = daoManager;
         this.sessionFactory = new SessionFactory(this, sessionCacheCapacity);
-        for (Dao<?> dao : daoManager.allDaos()) {
+        for (Dao<?> dao : daoManager.getAllDaos()) {
             dao.configureStore(rootStore);
             dao.attachStore(rootStore);
         }
@@ -46,9 +46,9 @@ public final class Engine {
         this.sessionFactory = new SessionFactory(this, sessionCacheCapacity);
     }
 
-    public void execute(EntitySystem system) {
+    public void execute(Step step) {
         ensureHeadroom();
-        system.execute(sessionFactory);
+        step.execute(sessionFactory);
     }
 
     public Store getRootStore() {

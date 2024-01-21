@@ -21,6 +21,12 @@ package pl.edu.icm.trurl.ecs;
 import net.snowyhollows.bento.annotation.ImplementationSwitch;
 import pl.edu.icm.trurl.ecs.util.DynamicComponentAccessor;
 
+/**
+ * In multiple places in the API the data of different components is indexed by an integer
+ * number, for speed. A single instance of component accessor used by the engine is the
+ * single source of the truth to translate between class objects and their index, and vice-versa.
+ *
+ */
 @ImplementationSwitch(configKey = "trurl.engine.component-accessor", cases = {
         @ImplementationSwitch.When(name = "dynamic", implementation = DynamicComponentAccessor.class, useByDefault = true)
 })

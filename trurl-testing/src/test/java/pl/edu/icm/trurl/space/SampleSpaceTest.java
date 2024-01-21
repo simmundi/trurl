@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.edu.icm.trurl.stats.space.SampleSpace;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.*;

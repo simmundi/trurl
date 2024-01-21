@@ -21,10 +21,10 @@ package pl.edu.icm.trurl.store.attribute;
 import net.snowyhollows.bento.annotation.ImplementationSwitch;
 import net.snowyhollows.bento.category.Category;
 import net.snowyhollows.bento.category.CategoryManager;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 
 @ImplementationSwitch(configKey = "trurl.engine.attributeFactory", cases = {
-        @ImplementationSwitch.When(name = "array", implementation = ArrayAttributeFactory.class, useByDefault = true)
+        @ImplementationSwitch.When(name = "array", implementation = BasicAttributeFactory.class, useByDefault = true)
 })
 public interface AttributeFactory {
     BooleanAttribute createBoolean(String name, int capacity);

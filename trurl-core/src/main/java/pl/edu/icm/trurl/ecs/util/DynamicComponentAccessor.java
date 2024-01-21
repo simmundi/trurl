@@ -26,6 +26,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The default component accessor.
+ */
 public class DynamicComponentAccessor implements ComponentAccessor {
     private final Class[] componentClasses;
     private final Map<Class<?>, Integer> componentMap;

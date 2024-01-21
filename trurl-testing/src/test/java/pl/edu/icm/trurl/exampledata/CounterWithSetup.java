@@ -20,10 +20,10 @@ package pl.edu.icm.trurl.exampledata;
 
 import pl.edu.icm.trurl.ecs.dao.annotation.NotMapped;
 import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
-import pl.edu.icm.trurl.ecs.dao.feature.RequiresSetup;
+import pl.edu.icm.trurl.ecs.dao.feature.ComponentWIthSetup;
 
 @WithDao
-public class CounterWithSetup implements RequiresSetup {
+public class CounterWithSetup implements ComponentWIthSetup {
     private float value;
     @NotMapped
     private float originalValue;

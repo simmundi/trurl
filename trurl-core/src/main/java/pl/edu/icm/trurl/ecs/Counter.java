@@ -18,7 +18,7 @@
 
 package pl.edu.icm.trurl.ecs;
 
-import pl.edu.icm.trurl.util.ConcurrentIntStack;
+import pl.edu.icm.trurl.collection.ConcurrentIntStack;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

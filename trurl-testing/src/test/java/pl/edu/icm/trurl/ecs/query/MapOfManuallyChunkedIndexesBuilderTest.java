@@ -21,6 +21,7 @@ package pl.edu.icm.trurl.ecs.query;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.ecs.index.RandomAccessIndex;
+import pl.edu.icm.trurl.util.query.MapOfManuallyChunkedIndexesBuilder;
 
 import java.util.Map;
 
@@ -28,7 +29,7 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static pl.edu.icm.trurl.ecs.query.MapOfManuallyChunkedIndexesBuilder.getDefaultSizes;
+import static pl.edu.icm.trurl.util.query.MapOfManuallyChunkedIndexesBuilder.getDefaultSizes;
 
 class MapOfManuallyChunkedIndexesBuilderTest {
     private enum TestTags {

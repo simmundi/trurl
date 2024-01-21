@@ -1,16 +1,13 @@
 package pl.edu.icm.trurl.store.join;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.exampledata.Proficiency;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.FloatAttribute;
 import pl.edu.icm.trurl.store.attribute.IntAttribute;
 import pl.edu.icm.trurl.store.attribute.StringAttribute;
-import pl.edu.icm.trurl.store.join.Join;
 
-import java.util.Random;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.*;
@@ -29,7 +26,7 @@ abstract class AbstractJoinTest<J extends Join> {
 
     @BeforeEach
     void before() {
-        store = new Store(new ArrayAttributeFactory(), 10_000_000);
+        store = new Store(new BasicAttributeFactory(), 10_000_000);
         store.addString("name");
         store.addInt("size");
         Store hobbiesStore = createJoin();

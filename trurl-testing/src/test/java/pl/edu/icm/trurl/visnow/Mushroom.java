@@ -19,6 +19,7 @@ package pl.edu.icm.trurl.visnow;
 
 import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 import pl.edu.icm.trurl.exampledata.Color;
+import pl.edu.icm.trurl.io.visnow.VnCoords;
 
 @WithDao
 public class Mushroom implements VnCoords {

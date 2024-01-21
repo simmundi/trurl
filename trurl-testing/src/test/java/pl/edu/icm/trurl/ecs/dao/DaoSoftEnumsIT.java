@@ -23,7 +23,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.exampledata.*;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 
 import java.io.IOException;
 
@@ -35,9 +35,9 @@ public class DaoSoftEnumsIT {
     @DisplayName("Should correctly map a component with a Category")
     void test() throws IOException {
         // given
-        Store store = new Store(new ArrayAttributeFactory(), 1024);
+        Store store = new Store(new BasicAttributeFactory(), 1024);
         Bento config = new Configurer().loadConfigResource("/contamination.properties").setParam("daoPrefix", "").getConfig();
-        HealthDao healthMapper = config.get(DaoOfHealthFactory.IT);
+        HealthDao healthDao = config.get(DaoOfHealthFactory.IT);
         ContaminationTypes contaminationTypes = config.get(ContaminationTypesFactory.IT);
 
         ContaminationType WILD = contaminationTypes.getByOrdinal(0);
@@ -48,21 +48,21 @@ public class DaoSoftEnumsIT {
         Health health2 = new Health(0.4f, ALPHA);
         Health health3 = new Health(0.6f, DELTA);
 
-        healthMapper.configureAndAttach(store);
+        healthDao.configureAndAttach(store);
 
         // execute
-        healthMapper.save(health1, 0);
-        healthMapper.save(health2, 1);
-        healthMapper.save(health3, 2);
+        healthDao.save(health1, 0);
+        healthDao.save(health2, 1);
+        healthDao.save(health3, 2);
 
         // assert
-        assertThat(healthMapper.getContaminationType(0)).isEqualTo(contaminationTypes.getByName("WILD"));
-        assertThat(healthMapper.getContaminationType(1)).isEqualTo(contaminationTypes.getByName("ALPHA"));
-        assertThat(healthMapper.getContaminationType(2)).isEqualTo(contaminationTypes.getByName("DELTA"));
-        assertThat(healthMapper.getContaminationType(3)).isNull();
+        assertThat(healthDao.getContaminationType(0)).isEqualTo(contaminationTypes.getByName("WILD"));
+        assertThat(healthDao.getContaminationType(1)).isEqualTo(contaminationTypes.getByName("ALPHA"));
+        assertThat(healthDao.getContaminationType(2)).isEqualTo(contaminationTypes.getByName("DELTA"));
+        assertThat(healthDao.getContaminationType(3)).isNull();
 
-        assertThat(healthMapper.createAndLoad(0).getContaminationType()).isSameAs(WILD);
-        assertThat(healthMapper.createAndLoad(1).getContaminationType()).isSameAs(ALPHA);
-        assertThat(healthMapper.createAndLoad(2).getContaminationType()).isSameAs(DELTA);
+        assertThat(healthDao.createAndLoad(0).getContaminationType()).isSameAs(WILD);
+        assertThat(healthDao.createAndLoad(1).getContaminationType()).isSameAs(ALPHA);
+        assertThat(healthDao.createAndLoad(2).getContaminationType()).isSameAs(DELTA);
     }
 }

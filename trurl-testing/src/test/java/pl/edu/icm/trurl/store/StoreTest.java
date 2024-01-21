@@ -20,7 +20,7 @@ package pl.edu.icm.trurl.store;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 import pl.edu.icm.trurl.store.attribute.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class StoreTest {
 
     Store createStore() {
-        return new Store(new ArrayAttributeFactory(), 1000);
+        return new Store(new BasicAttributeFactory(), 1000);
     }
 
     @Test

@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Builder for building deterministic ManuallyChunkedIndex with out-of-order data and in parallel.
+ * Builder for deterministic ManuallyChunkedIndex with out-of-order data and in parallel.
  * <p>
  * The chunks will be ordered in natural order of the labels, the ids will be ordered in ascending order.
  * <p>

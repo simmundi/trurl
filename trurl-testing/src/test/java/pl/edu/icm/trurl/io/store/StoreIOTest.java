@@ -11,8 +11,8 @@ import pl.edu.icm.trurl.io.WriterProvider;
 import pl.edu.icm.trurl.io.csv.CsvReader;
 import pl.edu.icm.trurl.io.csv.CsvWriter;
 import pl.edu.icm.trurl.store.Store;
-import pl.edu.icm.trurl.store.array.ArrayAttributeFactory;
-import pl.edu.icm.trurl.store.array.ByteArrayAttribute;
+import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
+import pl.edu.icm.trurl.store.basic.BasicByteAttribute;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,9 +55,9 @@ class StoreIOTest {
         StoreIO storeIO = new StoreIO(singleStoreIOProvider, readerProvider, writerProvider);
         Path filePath = tempDir.resolve("test.properties");
         File file = filePath.toFile();
-        Store store = new Store(new ArrayAttributeFactory(), 10);
+        Store store = new Store(new BasicAttributeFactory(), 10);
         store.addByte("byte_column");
-        ByteArrayAttribute byteColumn = store.get("byte_column");
+        BasicByteAttribute byteColumn = store.get("byte_column");
         byteColumn.setByte(1, (byte) 8);
         store.addSubstore("oranges");
         Store substore = store.getSubstore("oranges");
@@ -81,7 +81,7 @@ class StoreIOTest {
         StoreIO storeIO = new StoreIO(singleStoreIOProvider, readerProvider, writerProvider);
         Path filePath = Paths.get(Objects.requireNonNull(this.getClass().getResource("/StoreIO/test.properties")).getPath());
         File file = filePath.toFile();
-        Store store = new Store(new ArrayAttributeFactory(), 10);
+        Store store = new Store(new BasicAttributeFactory(), 10);
         store.addByte("byte_column");
         store.addSubstore("oranges");
         Store substore = store.getSubstore("oranges");
