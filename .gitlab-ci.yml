@@ -1,0 +1,18 @@
+default:
+  image: openjdk:11.0.11-jdk
+
+stages:
+  - build
+  - publish
+
+build-job:
+  stage: build
+  script:
+    - ./gradlew clean build
+
+publish-job:
+  stage: publish
+  script:
+    - ./gradlew publish
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
