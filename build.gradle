@@ -29,7 +29,7 @@ subprojects {
 
     ext {
         guavaVersion = '30.1-jre'
-        bentoVersion = '1.6.2'
+        bentoVersion = '1.7.0'
         geotoolsVersion = '26-RC'
         grasshopperVersion = '4.0'
         univocityVersion = '2.8.4'
