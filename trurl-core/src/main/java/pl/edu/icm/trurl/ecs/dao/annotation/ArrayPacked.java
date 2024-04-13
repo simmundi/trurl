@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2024 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,8 @@
 
 package pl.edu.icm.trurl.ecs.dao.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.FIELD, ElementType.TYPE})
-public @interface Mapped {
-    Type type() default Type.SPARSE;
-    ReverseReference reverse() default ReverseReference.NO_REVERSE_ATTRIBUTE;
+public @interface ArrayPacked {
+    String name();
+    int offset() default 0;
+    int length() default -1;
 }

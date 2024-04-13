@@ -33,8 +33,8 @@ public class ActionService {
         this.engineBuilder = engineBuilder;
     }
 
-    public <Context, Q> Action<Context> withComponent(Class<Q> q, Steps.OneComponentStep<Q> step) {
-        return new Action<Context>() {
+    public <Context, Q> ContextualAction<Context> withComponent(Class<Q> q, Steps.OneComponentStep<Q> step) {
+        return new ContextualAction<Context>() {
             ComponentToken<Q> qToken;
             @Override
             public void init() {
@@ -51,8 +51,8 @@ public class ActionService {
         };
     }
 
-    public <Context, Q, W> Action<Context> withComponents(Class<Q> q, Class<W> w, Steps.TwoComponentStep<Q, W> step) {
-        return new Action<Context>() {
+    public <Context, Q, W> ContextualAction<Context> withComponents(Class<Q> q, Class<W> w, Steps.TwoComponentStep<Q, W> step) {
+        return new ContextualAction<Context>() {
             ComponentToken<Q> qToken;
             ComponentToken<W> wToken;
             @Override
@@ -72,8 +72,8 @@ public class ActionService {
         };
     }
 
-    public <Context, Q, W, E> Action<Context> withComponents(Class<Q> q, Class<W> w, Class<E> e, Steps.ThreeComponentStep<Q, W, E> step) {
-        return new Action<Context>() {
+    public <Context, Q, W, E> ContextualAction<Context> withComponents(Class<Q> q, Class<W> w, Class<E> e, Steps.ThreeComponentStep<Q, W, E> step) {
+        return new ContextualAction<Context>() {
             ComponentToken<Q> qToken;
             ComponentToken<W> wToken;
             ComponentToken<E> eToken;
@@ -96,8 +96,8 @@ public class ActionService {
         };
     }
 
-    public <Context, Q, W, E, R> Action<Context> withComponents(Class<Q> q, Class<W> w, Class<E> e, Class<R> r, Steps.FourComponentStep<Q, W, E, R> step) {
-        return new Action<Context>() {
+    public <Context, Q, W, E, R> ContextualAction<Context> withComponents(Class<Q> q, Class<W> w, Class<E> e, Class<R> r, Steps.FourComponentStep<Q, W, E, R> step) {
+        return new ContextualAction<Context>() {
             ComponentToken<Q> qToken;
             ComponentToken<W> wToken;
             ComponentToken<E> eToken;

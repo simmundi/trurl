@@ -51,7 +51,7 @@ public class SaveFeature implements Feature {
         MethodSpec.Builder methodSpec = MethodSpec
                 .methodBuilder("save")
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(CommonTypes.ABSTRACT_SESSION, "session")
+                .addParameter(CommonTypes.SESSION, "session")
                 .addParameter(beanMetadata.componentName, "component")
                 .addParameter(TypeName.INT, "row")
                 .addAnnotation(Override.class);

@@ -35,6 +35,28 @@ import java.util.List;
 
 public class DaoWriter {
 
+    public void writeDenseDao(ProcessingEnvironment processingEnvironment, BeanMetadata beanMetadata) {
+        ParameterizedTypeName superInterface = ParameterizedTypeName.get(CommonTypes.DAO, beanMetadata.componentName);
+        ClassName denseDaoName = denseDaoNameFor(beanMetadata.componentName);
+        ClassName daoName = daoNameFor(beanMetadata.componentName);
+
+        TypeSpec.Builder mapper =
+                TypeSpec.classBuilder(denseDaoName)
+                        .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                        .addSuperinterface(superInterface);
+        Feature denseDaoFeature = new DenseDaoFeature(beanMetadata, daoName);
+
+        denseDaoFeature.fields().forEach(field -> mapper.addField(field));
+        denseDaoFeature.methods().forEach(method -> mapper.addMethod(method));
+
+        try {
+            String packageName = ClassName.get(beanMetadata.componentClass).packageName();
+            JavaFile.builder(packageName, mapper.build()).build().writeTo(processingEnvironment.getFiler());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void writeDao(ProcessingEnvironment processingEnvironment, BeanMetadata beanMetadata) {
         processingEnvironment.getMessager().printMessage(Diagnostic.Kind.OTHER, "starting: " + beanMetadata.componentName);
         ParameterizedTypeName superInterface = ParameterizedTypeName.get(CommonTypes.DAO, beanMetadata.componentName);
@@ -79,5 +101,9 @@ public class DaoWriter {
 
     private ClassName daoNameFor(ClassName type) {
         return ClassName.get(type.packageName(), type.simpleName() + "Dao");
+    }
+
+    private ClassName denseDaoNameFor(ClassName type) {
+        return ClassName.get(type.packageName(), type.simpleName() + "DenseDao");
     }
 }

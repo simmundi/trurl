@@ -27,7 +27,7 @@ import pl.edu.icm.trurl.ecs.index.RandomAccessIndex;
 import pl.edu.icm.trurl.ecs.query.ManuallyChunkedIndexBuilder;
 import pl.edu.icm.trurl.ecs.query.Query;
 import pl.edu.icm.trurl.ecs.query.RawQuery;
-import pl.edu.icm.trurl.ecs.util.Action;
+import pl.edu.icm.trurl.ecs.util.ContextualAction;
 import pl.edu.icm.trurl.ecs.util.Indexes;
 import pl.edu.icm.trurl.ecs.util.IteratingStepBuilder;
 
@@ -50,7 +50,7 @@ public class QueryService {
         ManuallyChunkedIndexBuilder<T> indexBuilder = new ManuallyChunkedIndexBuilder<>();
         Step step = IteratingStepBuilder.iteratingOver(indexes.allEntities())
                 .withoutContext()
-                .perform(Action.of(entity -> query.process(entity, indexBuilder, ChunkInfo.DEFAULT_LABEL)))
+                .perform(ContextualAction.of(entity -> query.process(entity, indexBuilder, ChunkInfo.DEFAULT_LABEL)))
                 .build();
 
         engineBuilder.getEngine().execute(step);

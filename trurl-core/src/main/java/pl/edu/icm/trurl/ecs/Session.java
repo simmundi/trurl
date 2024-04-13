@@ -2,11 +2,15 @@ package pl.edu.icm.trurl.ecs;
 
 import pl.edu.icm.trurl.collection.IntMap;
 
+import java.util.HashMap;
+import java.util.HashSet;
+
 public class Session {
     private final IntMap<Entity> idToEntity;
     private final DaoManager daoManager;
     private final Engine engine;
     private final Object[][] components;
+    private final boolean[] toDelete;
     private final Entity[] entities;
     private final int[] ids;
     private int ownerId;
@@ -14,6 +18,7 @@ public class Session {
 
     Session(Engine engine, int capacity) {
         idToEntity = new IntMap<>(capacity);
+        toDelete = new boolean[capacity];
         this.daoManager = engine.getDaoManager();
         int componentCount = daoManager.componentCount();
         components = new Object[componentCount][capacity];
@@ -25,13 +30,17 @@ public class Session {
 
     public void clear() {
         idToEntity.clear();
-        for (int i = 0; i < components.length; i++) {
+        for (int i = 0; i < counter; i++) {
+            if (toDelete[i]) {
+                engine.getRootStore().freeIndex(ids[i]);
+            }
+            toDelete[i] = false;
             Object[] component = components[i];
             for (int j = 0; j < component.length; j++) {
                 component[j] = null;
             }
         }
-        for (int i = 0; i < entities.length; i++) {
+        for (int i = 0; i < counter; i++) {
             entities[i] = null;
         }
         counter = 0;
@@ -49,6 +58,9 @@ public class Session {
     public void flush(ComponentToken<?>... tokens) {
         for (ComponentToken token : tokens) {
             for (int i = 0; i < counter; i++) {
+                if (toDelete[i]) {
+                    continue;
+                }
                 if (components[token.index][i] != null) {
                     token.dao.save(this, components[token.index][i], ids[i]);
                 }
@@ -100,6 +112,10 @@ public class Session {
     public Entity getEntity(int id) {
         Entity entity  = idToEntity.get(id);
         return entity != null ? entity : createEmptyEntity(id);
+    }
+
+    protected void deleteEntityBySessionIndex(int sessionIndex) {
+        toDelete[sessionIndex] = true;
     }
 
     private Entity createEmptyEntity(int id) {

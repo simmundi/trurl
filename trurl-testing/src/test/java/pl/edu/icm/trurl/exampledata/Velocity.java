@@ -16,10 +16,32 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.util;
+package pl.edu.icm.trurl.exampledata;
 
-/**
- * A version of ContextualAction that doesn't require a shared context.
- */
-public interface Action extends ContextualAction<Void> {
+import pl.edu.icm.trurl.ecs.dao.annotation.Mapped;
+import pl.edu.icm.trurl.ecs.dao.annotation.ReverseReference;
+import pl.edu.icm.trurl.ecs.dao.annotation.Type;
+import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
+
+@WithDao
+@Mapped(type = Type.DENSE, reverse = ReverseReference.WITH_REVERSE_ATTRIBUTE)
+public class Velocity {
+    private float dx;
+    private float dy;
+
+    public float getDx() {
+        return dx;
+    }
+
+    public void setDx(float dx) {
+        this.dx = dx;
+    }
+
+    public float getDy() {
+        return dy;
+    }
+
+    public void setDy(float dy) {
+        this.dy = dy;
+    }
 }

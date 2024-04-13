@@ -62,7 +62,10 @@ public class DaoGenerator extends AbstractProcessor {
 
             beanFinder
                     .findBeans(processingEnvironment, roundEnv)
-                    .forEach(beanMetadata -> daoWriter.writeDao(processingEnvironment, beanMetadata));
+                    .forEach(beanMetadata -> {
+                        daoWriter.writeDao(processingEnvironment, beanMetadata);
+                        daoWriter.writeDenseDao(processingEnvironment, beanMetadata);
+                    });
 
 
         } catch (Exception e) {

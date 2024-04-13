@@ -53,6 +53,10 @@ public final class Entity {
         return sessionIndex == entity.sessionIndex && Objects.equals(session, entity.session);
     }
 
+    public void delete() {
+        session.deleteEntityBySessionIndex(sessionIndex);
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(sessionIndex);

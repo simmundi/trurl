@@ -51,13 +51,13 @@
      private static class IteratingStep<Context> implements Config, ActionConfig<Context>, Step {
          private final Supplier<Index> index;
          private boolean parallel = false;
-         private final List<Action<Context>> actions = new ArrayList<>();
+         private final List<ContextualAction<Context>> actions = new ArrayList<>();
          private boolean persistAll = true;
          private Class<?>[] componentsToPersist;
          private boolean flush = true;
          private final boolean clear = true;
          private Function contextFactory;
-         private Action[] operationsArray;
+         private ContextualAction[] operationsArray;
 
          IteratingStep(Supplier<Index> index, boolean parallel) {
              this.index = index;
@@ -73,7 +73,7 @@
              }
 
              ComponentToken<?>[] tokens = flushSelected ? Arrays.stream(componentsToPersist).map(c -> daoManager.classToToken(c)).toArray(ComponentToken[]::new) : null;
-             for (Action action : operationsArray) {
+             for (ContextualAction action : operationsArray) {
                  action.init();
              }
              if (parallel) {
@@ -83,14 +83,21 @@
                  final Session session = sessionFactory.createOrGet();
                  int ownerId = chunk.getChunkInfo().getChunkId() + 1;
                  session.setOwnerId(ownerId);
+                 Object[] privateContexts = new Object[actions.size()];
+                 for (int i = 0; i < actions.size(); i++) {
+                     privateContexts[i] = actions.get(i).initPrivateContext(session, chunk.getChunkInfo());
+                 }
 
                  Context context = (Context) contextFactory.apply(chunk);
                  chunk.ids().forEach(id -> {
-                             for (Action action : operationsArray) {
-                                 action.perform(context, session, id);
+                             for (int i = 0; i < operationsArray.length; i++) {
+                                 operationsArray[i].perform(context, session, id, privateContexts[i]);
                              }
                          }
                  );
+                 for (int i = 0; i < actions.size(); i++) {
+                     actions.get(i).closePrivateContext(privateContexts[i]);
+                 }
                  if (flush) {
                      if (persistAll) {
                          session.flush();
@@ -141,14 +148,14 @@
 
 
          @Override
-         public ActionConfig<Context> perform(Action<Context> action) {
+         public ActionConfig<Context> perform(ContextualAction<Context> action) {
              actions.add(action);
              return this;
          }
 
          @Override
          public Step build() {
-             operationsArray = actions.toArray(new Action[0]);
+             operationsArray = actions.toArray(new ContextualAction[0]);
              return this;
          }
      }
@@ -167,7 +174,7 @@
      }
 
      public interface ActionConfig<Context> {
-         ActionConfig<Context> perform(Action<Context> action);
+         ActionConfig<Context> perform(ContextualAction<Context> action);
 
          Step build();
      }

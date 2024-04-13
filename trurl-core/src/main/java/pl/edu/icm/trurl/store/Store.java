@@ -28,7 +28,9 @@ import pl.edu.icm.trurl.store.reference.ArrayReference;
 import pl.edu.icm.trurl.store.reference.Reference;
 import pl.edu.icm.trurl.store.reference.SingleReference;
 
+import java.io.PrintWriter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -334,5 +336,36 @@ public final class Store implements StoreConfig, StoreAccess {
 
     public int getEnsuredCapacity() {
         return ensuredCapacity;
+    }
+
+    public void debug(PrintWriter out, List<String> levels) {
+
+        String prefix = levels.isEmpty() ? "" : levels.stream().collect(Collectors.joining(".", "", " "));
+
+        out.println( prefix + "Store " + name);
+        out.println("Attributes:");
+        allAttributes.values().forEach(a -> {
+            out.println(a.name() + (dataAttributes.contains(a) ? "" : "*") + " " + a.getClass().getSimpleName());
+
+        });
+        out.println("Joins:");
+        joins.values().forEach(j -> {
+            out.println(j.getTarget() + " " + j.getClass().getSimpleName());
+        });
+        out.println("References:");
+        references.values().forEach(r -> {
+            out.println(r.getClass().getSimpleName());
+        });
+        out.println("Substores:");
+        AtomicInteger workaround = new AtomicInteger();
+        substores.values().forEach(s -> {
+            List<String> newLevels = new ArrayList<>(levels);
+            newLevels.add(Integer.toString(workaround.incrementAndGet()));
+            s.debug(out, levels);
+        });
+    }
+
+    public void printDebug() {
+        debug(new PrintWriter(System.out, true), Collections.emptyList());
     }
 }

@@ -20,6 +20,8 @@ package pl.edu.icm.trurl.ecs.index;
 
 public class ChunkInfo {
 
+    public static final ChunkInfo NO_CHUNK = new ChunkInfo(-1, -1);
+
     public static final String DEFAULT_LABEL = "";
 
     private final int chunkId;
