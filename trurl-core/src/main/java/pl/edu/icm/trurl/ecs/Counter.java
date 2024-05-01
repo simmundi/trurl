@@ -45,8 +45,6 @@ final public class Counter {
         this.freeStack = new ConcurrentIntStack(freeListSize);
     }
 
-    private final Object x = new Object();
-
     public int next() {
         int free = freeStack.shift();
         return free == Integer.MIN_VALUE ? count.getAndIncrement() : free;

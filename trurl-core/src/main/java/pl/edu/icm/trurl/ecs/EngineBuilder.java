@@ -29,6 +29,11 @@ import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 import java.util.*;
 
 public class EngineBuilder {
+
+    public static final String INITIAL_CAPACITY = "trurl.engine.initial-capacity";
+    public static final String CAPACITY_HEADROOM = "trurl.engine.capacity-headroom";
+    public static final String SESSION_CACHE_SIZE = "trurl.engine.session-cache-size";
+
     private final int sessionCacheSize;
     private volatile Engine engine;
     private final ComponentAccessorCreator componentAccessorCreator;
@@ -41,9 +46,9 @@ public class EngineBuilder {
 
     @WithFactory
     public EngineBuilder(ComponentAccessorCreator componentAccessorCreator,
-                         @ByName(value = "trurl.engine.initial-capacity", fallbackValue = "200000") int initialCapacity,
-                         @ByName(value = "trurl.engine.capacity-headroom", fallbackValue = "128") int capacityHeadroom,
-                         @ByName(value = "trurl.engine.session-cache-size", fallbackValue = "20000") int sessionCacheSize,
+                         @ByName(value = INITIAL_CAPACITY, fallbackValue = "200000") int initialCapacity,
+                         @ByName(value = CAPACITY_HEADROOM, fallbackValue = "128") int capacityHeadroom,
+                         @ByName(value = SESSION_CACHE_SIZE, fallbackValue = "20000") int sessionCacheSize,
                          AttributeFactory attributeFactory,
                          DaoProducer daoProducer) {
         this.componentAccessorCreator = componentAccessorCreator;

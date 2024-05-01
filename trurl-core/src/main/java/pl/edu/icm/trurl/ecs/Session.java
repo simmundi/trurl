@@ -3,14 +3,12 @@ package pl.edu.icm.trurl.ecs;
 import pl.edu.icm.trurl.collection.IntMap;
 
 import java.util.Arrays;
-import java.util.BitSet;
 
 public class Session {
     private final IntMap<Entity> idToEntity;
     private final DaoManager daoManager;
     private final Engine engine;
     private final Object[][] components;
-    private final BitSet toDelete;
     private final Entity[] entities;
     private final int[] ids;
     private int ownerId;
@@ -18,7 +16,6 @@ public class Session {
 
     Session(Engine engine, int capacity) {
         idToEntity = new IntMap<>(capacity);
-        toDelete = new BitSet(capacity);
         this.daoManager = engine.getDaoManager();
         int componentCount = daoManager.componentCount();
         components = new Object[componentCount][capacity];
@@ -30,12 +27,11 @@ public class Session {
 
     public void clear() {
         idToEntity.clear();
-        toDelete.stream().forEach(i -> engine.getRootStore().freeIndex(ids[i]));
+        // .stream() is unavailable for BitSet in GWT
         for (int i = 0; i < components.length; i++) {
             Arrays.fill(components[i], 0, counter, null);
         }
         Arrays.fill(entities, 0, counter, null);
-        toDelete.clear();
         counter = 0;
     }
 
@@ -49,13 +45,19 @@ public class Session {
     }
 
     public void flush(ComponentToken<?>... tokens) {
+        for (int i = 0; i < counter; i++) {
+            if (ids[i] < 0) {
+                engine.getRootStore().getCounter().free(~ids[i]);
+            }
+        }
         for (ComponentToken token : tokens) {
             for (int i = 0; i < counter; i++) {
-                if (toDelete.get(i)) {
+                int id = ids[i];
+                if (id < 0) {
                     continue;
                 }
                 if (components[token.index][i] != null) {
-                    token.dao.save(this, components[token.index][i], ids[i]);
+                    token.dao.save(this, components[token.index][i], id);
                 }
             }
         }
@@ -108,7 +110,10 @@ public class Session {
     }
 
     protected void deleteEntityBySessionIndex(int sessionIndex) {
-        toDelete.set(sessionIndex);
+        if (ids[sessionIndex] < 0) {
+            return;
+        }
+        ids[sessionIndex] = ~ids[sessionIndex];
     }
 
     private Entity createEmptyEntity(int id) {

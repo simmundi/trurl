@@ -18,6 +18,7 @@
 
 package pl.edu.icm.trurl.store;
 
+import net.snowyhollows.bento.annotation.GwtIncompatible;
 import net.snowyhollows.bento.category.Category;
 import net.snowyhollows.bento.category.CategoryManager;
 import pl.edu.icm.trurl.ecs.Counter;
@@ -338,6 +339,7 @@ public final class Store implements StoreConfig, StoreAccess {
         return ensuredCapacity;
     }
 
+    @GwtIncompatible
     public void debug(PrintWriter out, List<String> levels) {
 
         String prefix = levels.isEmpty() ? "" : levels.stream().collect(Collectors.joining(".", "", " "));
@@ -365,6 +367,7 @@ public final class Store implements StoreConfig, StoreAccess {
         });
     }
 
+    @GwtIncompatible
     public void printDebug() {
         debug(new PrintWriter(System.out, true), Collections.emptyList());
     }
