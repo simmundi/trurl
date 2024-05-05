@@ -17,6 +17,10 @@ public final class Entity {
         return session == null ? sessionIndex : session.getId(sessionIndex);
     }
 
+    int getSessionIndex() {
+        return sessionIndex;
+    }
+
     public <T> T get(Class<T> componentClass) {
         return session.get(componentClass, sessionIndex);
     }

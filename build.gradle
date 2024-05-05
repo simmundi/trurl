@@ -1,5 +1,5 @@
 group 'pl.simmundi.trurl'
-version '1.5-SNAPSHOT'
+version 'main-SNAPSHOT'
 
 subprojects {
     apply plugin: 'java-library'

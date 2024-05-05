@@ -35,6 +35,15 @@ public class Session {
         counter = 0;
     }
 
+    public <T> T getIfAvailable(int id, ComponentToken<T> token) {
+        Entity entity = idToEntity.get(id);
+        if (entity == null) {
+            return null;
+        } else {
+            return (T) components[token.index][entity.getSessionIndex()];
+        }
+    }
+
     public void flush() {
         flush(daoManager.allTokens());
     }
