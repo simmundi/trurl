@@ -31,6 +31,7 @@ public enum PropertyType {
     BOOLEAN_PROP(CommonTypes.BOOLEAN_COLUMN),
     ENUM_PROP(CommonTypes.ENUM_COLUMN),
     SOFT_ENUM_PROP(CommonTypes.CATEGORY_COLUMN),
+    OBJECT_PROP(CommonTypes.OBJECT_COLUMN),
     EMBEDDED_DENSE_PROP(),
     EMBEDDED_PROP(),
     EMBEDDED_LIST_PROP(),

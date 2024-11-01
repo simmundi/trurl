@@ -70,6 +70,7 @@ public class CommonTypes {
     public static final ClassName FLOAT_COLUMN = ClassName.get(FloatAttribute.class);
     public static final ClassName BYTE_COLUMN = ClassName.get(ByteAttribute.class);
     public static final ClassName SHORT_COLUMN = ClassName.get(ShortAttribute.class);
+    public static final ClassName OBJECT_COLUMN = ClassName.get(ObjectAttribute.class);
     public static final ClassName STRING_COLUMN = ClassName.get(StringAttribute.class);
     public static final ClassName ENUM_COLUMN = ClassName.get(EnumAttribute.class);
     public static final ClassName BOOLEAN_COLUMN = ClassName.get(BooleanAttribute.class);

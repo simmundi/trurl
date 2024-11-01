@@ -139,6 +139,9 @@ public class LoadFeature implements Feature {
                 case FLOAT_PROP:
                     methodSpec.addStatement("component.$L($L.getFloat(row))", property.setterName, property.fieldName);
                     break;
+                case OBJECT_PROP:
+                    methodSpec.addStatement("component.$L($L.getObject(row))", property.setterName, property.fieldName);
+                    break;
                 case SHORT_PROP:
                     methodSpec.addStatement("component.$L($L.getShort(row))", property.setterName, property.fieldName);
                     break;

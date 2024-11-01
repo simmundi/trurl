@@ -118,6 +118,9 @@ public class ColumnarAccessFeature implements Feature {
             case FLOAT_PROP:
                 methodSpec.addStatement("return $L.getFloat(row)", property.fieldName);
                 break;
+            case OBJECT_PROP:
+                methodSpec.addStatement("return $L.getObject(row)", property.fieldName);
+                break;
             case SHORT_PROP:
                 methodSpec.addStatement("return $L.getShort(row)", property.fieldName);
                 break;

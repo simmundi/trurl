@@ -157,6 +157,8 @@ public class ComponentProperty {
             return PropertyType.SOFT_ENUM_PROP;
         } else if (optionalAttribute.flatMap(e -> Optional.ofNullable(e.getAnnotation(Mapped.class))).map(m -> m.type() == Type.DENSE).orElse(false)) {
             return PropertyType.EMBEDDED_DENSE_PROP;
+        } else if (optionalAttribute.filter(e -> e.getAnnotation(Blob.class) != null).isPresent()) {
+            return PropertyType.OBJECT_PROP;
         } else {
             return PropertyType.EMBEDDED_PROP;
         }

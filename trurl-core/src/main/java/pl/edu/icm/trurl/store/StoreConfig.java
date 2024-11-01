@@ -40,6 +40,8 @@ public interface StoreConfig {
 
     void addFloat(String name);
 
+    void addObject(String name);
+
     void addInt(String name);
 
     void addShort(String name);

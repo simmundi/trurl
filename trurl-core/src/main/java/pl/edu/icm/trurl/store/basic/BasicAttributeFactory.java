@@ -65,6 +65,11 @@ public final class BasicAttributeFactory implements AttributeFactory {
     }
 
     @Override
+    public ObjectAttribute createObject(String name, int capacity) {
+        return new BasicObjectAttribute(name, capacity);
+    }
+
+    @Override
     public ShortAttribute createShort(String name, int defaultCapacity) {
         return new BasicShortAttribute(name, defaultCapacity);
     }

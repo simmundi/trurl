@@ -121,6 +121,9 @@ public class SaveFeature implements Feature {
                 case FLOAT_PROP:
                     methodSpec.addStatement("$L.setFloat(row, component.$L())", property.fieldName, property.getterName);
                     break;
+                case OBJECT_PROP:
+                    methodSpec.addStatement("$L.setObject(row, component.$L())", property.fieldName, property.getterName);
+                    break;
                 case SHORT_PROP:
                     methodSpec.addStatement("$L.setShort(row, component.$L())", property.fieldName, property.getterName);
                     break;

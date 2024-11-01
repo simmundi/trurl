@@ -88,6 +88,9 @@ public class ConfigureStoreFeature implements Feature {
                 case FLOAT_PROP:
                     methodSpec.addStatement("meta.addFloat(daoPrefix + $S)", name);
                     break;
+                case OBJECT_PROP:
+                    methodSpec.addStatement("meta.addObject(daoPrefix + $S)", name);
+                    break;
                 case SHORT_PROP:
                     methodSpec.addStatement("meta.addShort(daoPrefix + $S)", name);
                     break;

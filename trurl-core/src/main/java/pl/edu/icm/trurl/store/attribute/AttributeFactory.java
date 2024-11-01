@@ -24,7 +24,7 @@ import net.snowyhollows.bento.category.CategoryManager;
 import pl.edu.icm.trurl.store.basic.BasicAttributeFactory;
 
 @ImplementationSwitch(configKey = "trurl.engine.attributeFactory", cases = {
-        @ImplementationSwitch.When(name = "array", implementation = BasicAttributeFactory.class, useByDefault = true)
+        @ImplementationSwitch.When(name = "basic", implementation = BasicAttributeFactory.class, useByDefault = true)
 })
 public interface AttributeFactory {
     BooleanAttribute createBoolean(String name, int capacity);
@@ -40,6 +40,8 @@ public interface AttributeFactory {
     FloatAttribute createFloat(String name, int capacity);
 
     IntAttribute createInt(String name, int capacity);
+
+    ObjectAttribute createObject(String name, int capacity);
 
     ShortAttribute createShort(String name, int capacity);
 

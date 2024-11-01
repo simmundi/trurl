@@ -225,6 +225,14 @@ public final class Store implements StoreConfig, StoreAccess {
     }
 
     @Override
+    public void addObject(String name) {
+        Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createObject(name, ensuredCapacity));
+        if (former == null) {
+            dataAttributes.add(allAttributes.get(name));
+        }
+    }
+
+    @Override
     public void addInt(String name) {
         Attribute former = allAttributes.putIfAbsent(name, attributeFactory.createInt(name, ensuredCapacity));
         if (former == null) {

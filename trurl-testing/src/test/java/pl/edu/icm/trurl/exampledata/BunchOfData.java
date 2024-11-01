@@ -19,9 +19,11 @@
 package pl.edu.icm.trurl.exampledata;
 
 import pl.edu.icm.trurl.ecs.Entity;
+import pl.edu.icm.trurl.ecs.dao.annotation.Blob;
 import pl.edu.icm.trurl.ecs.dao.annotation.WithDao;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -36,6 +38,8 @@ public class BunchOfData {
     private float floatProp;
     private int intProp;
     private short shortProp;
+    @Blob
+    private Date dateProp;
     private String stringProp;
     private Looks looksProp;
     private List<Stats> statsProp = new ArrayList<>();
@@ -132,6 +136,14 @@ public class BunchOfData {
         this.statsProp = statsProp;
     }
 
+    public Date getDateProp() {
+        return dateProp;
+    }
+
+    public void setDateProp(Date dateProp) {
+        this.dateProp = dateProp;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -148,6 +160,7 @@ public class BunchOfData {
                 && enumProp == that.enumProp
                 && Objects.equals(stringProp, that.stringProp)
                 && Objects.equals(looksProp, that.looksProp)
+                && Objects.equals(dateProp, that.dateProp)
                 && statsProp.equals(that.statsProp);
     }
 
