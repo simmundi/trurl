@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2024 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,18 @@
 
 package pl.edu.icm.trurl.ecs;
 
-public interface Step {
+import pl.edu.icm.trurl.ecs.index.Index;
+import pl.edu.icm.trurl.ecs.util.RangeIndex;
 
-    void execute(SessionFactory sessionFactory);
+public class EngineIndexes {
 
+    private final Engine engine;
+
+    EngineIndexes(Engine engine) {
+        this.engine = engine;
+    }
+
+    public Index allEntities() {
+        return new RangeIndex(() -> 0, () -> engine.getCount(), Integer.MAX_VALUE);
+    }
 }

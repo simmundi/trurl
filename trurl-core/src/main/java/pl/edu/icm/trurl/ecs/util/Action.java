@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,59 @@
 
 package pl.edu.icm.trurl.ecs.util;
 
+import pl.edu.icm.trurl.ecs.Engine;
+import pl.edu.icm.trurl.ecs.Entity;
+import pl.edu.icm.trurl.ecs.Session;
+import pl.edu.icm.trurl.ecs.index.ChunkInfo;
+
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 /**
- * A version of ContextualAction that doesn't require a shared context.
+ * Action is a single piece of business logic which can be applied to a single Entity.
+ *
+ * Actions might require a public context, which is an arbitrary object created on a per-chunk basis,
+ * shared by multiple addActions.
+ *
+ * Actions can also create private contexts, which are created on a per-chunk basis and are private to the action.
+ *
+ * Since all entities within a chunk are guaranteed to be processed in a single thread, the
+ * context objects don't need to be thread-safe and their usage is deterministic across execution
+ * with different numbers of threads (including the single-threaded execution).
+ *
+ * Any user of an action should first call its init() method at least once.
+ *
+ * Then, for each chunk of entities (even if it's only one), the user should call initPrivateContext(),
+ * passing in the chunkInfo (can be ChunkInfo.NO_CHUNK if entity was not accessed in a chunk) and a session.
+ * The returned object should then be passed to the perform() method with each entity to process (it can be null,
+ * at the Action's discretion).
+ *
+ * Finally, after the last call to perform(), the user should call closePrivateContext().
+ *
+ * Implementations are free to ignore the context objects if they don't need them or allow calling
+ * without the context objects.
+ *
+ * @param <Context>
  */
-public interface Action extends ContextualAction<Void> {
+public interface Action<Context> {
+
+    default void init(Engine engine) {}
+
+    default void startIteration() {}
+
+    void perform(Context context, Session session, int idx);
+
+    default Context startChunk(Session session, ChunkInfo chunkInfo) { return null; }
+
+    default void endChunk(Context context) {  }
+
+    static<Context> Action<Context> of(BiConsumer<Context, Entity> consumer) {
+        return (context, session, idx) -> consumer.accept(context, session.getEntity(idx));
+    }
+
+    static<Context> Action<Context> of(Consumer<Entity> consumer) {
+        return (context, session, idx) -> consumer.accept(session.getEntity(idx));
+    }
+
+    default void endIteration() {}
 }

@@ -74,7 +74,7 @@ final class EntityEncoder {
     }
 
     static String encode(int id) {
-        return id == Entity.NULL_ID ? null : Integer.toString(id, 36);
+        return id == Entity.NULL_ID ? "" : Integer.toString(id, 36);
     }
 
     static int decode(String id) {

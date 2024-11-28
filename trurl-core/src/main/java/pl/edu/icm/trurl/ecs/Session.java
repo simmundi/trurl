@@ -1,11 +1,11 @@
 package pl.edu.icm.trurl.ecs;
 
-import pl.edu.icm.trurl.collection.IntMap;
-
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 
-public class Session {
-    private final IntMap<Entity> idToEntity;
+final public class Session {
+    private final HashMap<Integer, Entity> idToEntity;
     private final DaoManager daoManager;
     private final Engine engine;
     private final Object[][] components;
@@ -13,12 +13,14 @@ public class Session {
     private final int[] ids;
     private int ownerId;
     private int counter;
+    private ComponentToken<?>[] tokens;
 
     Session(Engine engine, int capacity) {
-        idToEntity = new IntMap<>(capacity);
+        idToEntity = new HashMap<>(capacity);
         this.daoManager = engine.getDaoManager();
         int componentCount = daoManager.componentCount();
         components = new Object[componentCount][capacity];
+        tokens = Arrays.copyOf(daoManager.allTokens(), daoManager.allTokens().length);
         ids = new int[capacity];
         entities = new Entity[capacity];
         this.engine = engine;
@@ -44,13 +46,45 @@ public class Session {
         }
     }
 
+    public void setDefaultFlushTokensToAll() {
+        tokens = Arrays.copyOf(daoManager.allTokens(), daoManager.allTokens().length);
+    }
+
+    public void setDefaultFlushTokens(ComponentToken<?>... tokens) {
+        this.tokens = Arrays.copyOf(tokens, tokens.length);
+    }
+
     public void flush() {
-        flush(daoManager.allTokens());
+        flush(tokens);
     }
 
     public void close() {
         flush();
         clear();
+    }
+
+    public Collection<Entity> findEntitiesInSession() {
+        return idToEntity.values();
+    }
+
+    public Entity findEntityInSession(int id) {
+        return idToEntity.get(id);
+    }
+
+    public void evictEntity(Entity entity) {
+        internalEvictEntity(entity.getSessionIndex());
+    }
+
+    public void flushEntity(Entity entity) {
+        internalFlushEntity(entity.getSessionIndex());
+    }
+
+    void internalFlushEntity(int sessionIndex) {
+        throw new UnsupportedOperationException("not yet");
+    }
+
+    void internalEvictEntity(int sessionIndex) {
+        throw new UnsupportedOperationException("not yet");
     }
 
     public void flush(ComponentToken<?>... tokens) {

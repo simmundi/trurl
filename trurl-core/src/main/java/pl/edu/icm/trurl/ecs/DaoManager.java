@@ -66,6 +66,10 @@ public final class DaoManager {
         return tokens[componentAccessor.classToIndex(componentClass)];
     }
 
+    public <T> Dao<T> tokenToDao(ComponentToken<T> token) {
+        return token.dao;
+    }
+
     ComponentToken[] allTokens() {
         return tokens;
     }

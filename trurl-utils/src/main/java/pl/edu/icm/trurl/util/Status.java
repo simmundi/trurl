@@ -18,7 +18,8 @@
 
 package pl.edu.icm.trurl.util;
 
-import pl.edu.icm.trurl.ecs.Step;
+import pl.edu.icm.trurl.ecs.Engine;
+import pl.edu.icm.trurl.ecs.EntitySystem;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -84,11 +85,19 @@ public class Status {
         return new Status(message, skip);
     }
 
-    public static Step of(Step step, String message) {
-        return sessionFactory -> {
-            Status status = Status.of(message);
-            step.execute(sessionFactory);
-            status.done();
+    public static EntitySystem of(EntitySystem system, String message) {
+        return new EntitySystem() {
+            @Override
+            public void onAddedToEngine(Engine engine) {
+                system.onAddedToEngine(engine);
+            }
+
+            @Override
+            public void execute(Engine engine) {
+                Status status = Status.of(message);
+                system.execute(engine);
+                status.done();
+            }
         };
     }
 }

@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 /**
  * Utilities for creating common index types.
  */
+@Deprecated
 public class Indexes {
     private final int defaultChunkSize;
     private final EngineBuilder engineBuilder;

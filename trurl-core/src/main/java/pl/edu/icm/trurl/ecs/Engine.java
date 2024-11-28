@@ -19,6 +19,7 @@
 package pl.edu.icm.trurl.ecs;
 
 import pl.edu.icm.trurl.ecs.dao.Dao;
+import pl.edu.icm.trurl.ecs.index.Index;
 import pl.edu.icm.trurl.store.Store;
 import pl.edu.icm.trurl.store.attribute.AttributeFactory;
 
@@ -27,6 +28,8 @@ public final class Engine {
     private final Store rootStore;
     private final DaoManager daoManager;
     private final SessionFactory sessionFactory;
+    private final EngineIndexes indexes = new EngineIndexes(this);
+
 
     public Engine(int initialCapacity, int capacityHeadroom, DaoManager daoManager, AttributeFactory attributeFactory, int sessionCacheCapacity) {
         this.rootStore = new Store(attributeFactory, initialCapacity + capacityHeadroom);
@@ -46,9 +49,8 @@ public final class Engine {
         this.sessionFactory = new SessionFactory(this, sessionCacheCapacity);
     }
 
-    public void execute(Step step) {
-        ensureHeadroom();
-        step.execute(sessionFactory);
+    public Session getSession() {
+        return sessionFactory.createOrGet();
     }
 
     public Store getRootStore() {
@@ -70,5 +72,9 @@ public final class Engine {
     private void ensureHeadroom() {
         int targetCapacity = rootStore.getCounter().getCount() + capacityHeadroom;
         rootStore.ensureCapacity(targetCapacity);
+    }
+
+    public EngineIndexes getIndexes() {
+        return indexes;
     }
 }

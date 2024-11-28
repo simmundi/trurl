@@ -53,6 +53,14 @@ public interface Dao<T> {
         return this.create().getClass().getSimpleName().toLowerCase(Locale.ROOT);
     }
 
+
+    /**
+     * Get this Dao's store. The store is set when the Dao is attached to a store.
+     *
+     * For
+     * @return
+     */
+    Store getStore();
     /**
      * Configures the passed store to contain all the required attributes. It also creates all the
      * necessary joins and references, and configures recursively any substores created.

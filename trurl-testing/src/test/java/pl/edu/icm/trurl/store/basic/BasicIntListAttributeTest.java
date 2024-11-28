@@ -19,6 +19,7 @@
 package pl.edu.icm.trurl.store.basic;
 
 import org.assertj.core.api.*;
+import org.checkerframework.checker.fenum.qual.SwingTextOrientation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -79,6 +80,36 @@ class BasicIntListAttributeTest {
     void name() {
         // execute & assert
         assertThat(attribute.name()).isEqualTo("abcde");
+    }
+
+    @Test
+    @DisplayName("Should handle <null> values when getting 36-encoded string")
+    void getString__nulls() {
+        // given
+
+        int[] values = new int[]{4, 5, 10, Integer.MIN_VALUE, 12, 13, Integer.MIN_VALUE};
+        attribute.saveInts(10, values.length, idx -> values[idx]);
+
+        // execute
+        String result = attribute.getString(10);
+
+        // assert
+        assertThat(result).isEqualTo("4,5,a,,c,d,");
+    }
+
+    @Test
+    @DisplayName("Should handle <null> values when setting a 36-encoded string")
+    void setString__nulls() {
+        // given
+        int row = 10;
+        attribute.setString(row, "4,5,a,,c,d,");
+
+        // execute
+        int[] result = new int[7];
+        attribute.loadInts(row, (idx, value) -> result[idx] = value);
+
+        // assert
+        assertThat(result).containsExactly(4, 5, 10, Integer.MIN_VALUE, 12, 13, Integer.MIN_VALUE);
     }
 
     @Test

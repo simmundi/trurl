@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
+ * Copyright (c) 2024 ICM Epidemiological Model Team at Interdisciplinary Centre for Mathematical and Computational Modelling, University of Warsaw.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,12 @@
  *
  */
 
-package pl.edu.icm.trurl.ecs.query;
+package pl.edu.icm.trurl.ecs;
 
-import pl.edu.icm.trurl.ecs.Entity;
+public interface EntitySystem {
 
-public interface Query<T> {
-    void process(Entity entity, Query.Result<T> result, String label);
+    void onAddedToEngine(Engine engine);
 
-    interface Result<T> {
-        default void add(Entity entity, String tag) {
-            add(entity, tag, null);
-        }
+    void execute(Engine engine);
 
-        void add(Entity entity, String tag, T tagClassifier);
-    }
 }

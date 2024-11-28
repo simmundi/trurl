@@ -20,7 +20,7 @@ package pl.edu.icm.trurl.ecs;
 
 import pl.edu.icm.trurl.ecs.dao.LifecycleEvent;
 
-public final class SessionFactory {
+final class SessionFactory {
     private final Engine engine;
     private final int expectedEntityCount;
     private final ThreadLocal<Session> sessions;
