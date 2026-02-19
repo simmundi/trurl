@@ -1,13 +1,10 @@
 dependencies {
-    testAnnotationProcessor project(':trurl-generator')
     testImplementation project(':trurl-core')
     testImplementation project(':trurl-io')
     testImplementation project(':trurl-orc')
     testImplementation project(':trurl-utils')
     testImplementation project(':trurl-xml')
     testImplementation project(':trurl-stats')
-    testImplementation project(':trurl-sql')
-    testImplementation project(':trurl-vn-export')
     testImplementation "it.unimi.dsi:fastutil:${fastutilVersion}"
     testImplementation "net.snowyhollows.bento:bento-config:${bentoVersion}"
 

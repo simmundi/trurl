@@ -14,7 +14,7 @@ subprojects {
     task sourceJar(type: Jar) {
         from sourceSets.main.allJava
         from layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main")
-        classifier 'sources'
+        archiveClassifier = 'sources'
     }
 
     repositories {
@@ -41,6 +41,7 @@ subprojects {
         slf4jVersion = '1.7.30'
         orcVersion = '1.7.0'
         hadoopVersion = '3.3.1'
+        gdxVersion = '1.11.0'
 
         junitVersion = '4.12'
         mockitoVersion = '3.11.2'

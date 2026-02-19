@@ -18,8 +18,6 @@
 
 package pl.edu.icm.trurl.ecs;
 
-import pl.edu.icm.trurl.ecs.dao.LifecycleEvent;
-
 final class SessionFactory {
     private final Engine engine;
     private final int expectedEntityCount;
@@ -33,10 +31,6 @@ final class SessionFactory {
 
     public Session createOrGet() {
         return sessions.get();
-    }
-
-    public void lifecycleEvent(LifecycleEvent event) {
-        engine.getDaoManager().getAllDaos().forEach(dao -> dao.fireEvent(event));
     }
 
     private Session createNew() {

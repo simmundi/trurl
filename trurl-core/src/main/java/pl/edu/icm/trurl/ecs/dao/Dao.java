@@ -88,7 +88,7 @@ public interface Dao<T> {
     }
 
     /**
-     * Verifies if an instane of the component is present in the given index.
+     * Verifies if an instance of the component is present in the given index.
      * @param index - the row to verify. Iff the store is the root store, the index is the
      *            entity identifier.
      * @return

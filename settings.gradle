@@ -6,8 +6,9 @@ include 'trurl-core',
         'trurl-xml',
         'trurl-utils',
         'trurl-testing',
-        'trurl-sql',
         'trurl-all',
         'trurl-stats',
-        'trurl-vn-export'
+        'sim-world2d',
+        'sim-tiled',
+        'sim-trurl-gdx'
 

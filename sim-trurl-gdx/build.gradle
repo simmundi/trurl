@@ -1,0 +1,27 @@
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+dependencies {
+    annotationProcessor "net.snowyhollows.bento:bento-generator:${bentoVersion}"
+    annotationProcessor project(":trurl-generator")
+    implementation "net.snowyhollows.bento:bento-core:${bentoVersion}"
+    compileOnly "com.badlogicgames.gdx:gdx:${gdxVersion}"
+    api project(":sim-world2d")
+    implementation project(":trurl-core")
+}
+
+publishing {
+    publications {
+        gdxPublication(MavenPublication) {
+            from components.java
+            artifact sourceJar
+
+            groupId rootProject.getGroup()
+            artifactId project.name
+            version rootProject.getVersion()
+        }
+    }
+}

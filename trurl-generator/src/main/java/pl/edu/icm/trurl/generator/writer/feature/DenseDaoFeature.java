@@ -91,6 +91,7 @@ public class DenseDaoFeature implements Feature {
         return Stream.of(
                 constructor(),
                 attachStore(),
+                getStore(),
                 configureStore(),
                 create(),
                 isPresent(),
@@ -272,6 +273,16 @@ public class DenseDaoFeature implements Feature {
                 .addParameter(CommonTypes.STORE, "store")
                 .addStatement("join = store.getJoin(dao.name())")
                 .addStatement("dao.attachStore(join.getTarget())")
+                .build();
+    }
+
+    private MethodSpec getStore() {
+        return MethodSpec
+                .methodBuilder("getStore")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(CommonTypes.STORE)
+                .addStatement("return dao.getStore()")
                 .build();
     }
 }

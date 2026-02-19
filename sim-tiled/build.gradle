@@ -1,0 +1,34 @@
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+dependencies {
+    annotationProcessor project(":trurl-generator")
+    annotationProcessor "net.snowyhollows.bento:bento-generator:${bentoVersion}"
+    implementation project(":sim-world2d")
+    implementation "net.snowyhollows.bento:bento-core:${bentoVersion}"
+    implementation project(":trurl-core")
+    implementation project(":trurl-io")
+    implementation project(":trurl-xml")
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${juniJupiterApiVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${juniJupiterApiVersion}"
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+    testImplementation "org.assertj:assertj-core:${assertJVersion}"
+}
+
+publishing {
+    publications {
+        tiledPublication(MavenPublication) {
+            from components.java
+            artifact sourceJar
+
+            groupId rootProject.getGroup()
+            artifactId project.name
+            version rootProject.getVersion()
+        }
+    }
+}

@@ -10,9 +10,7 @@ dependencies {
     api project(":trurl-io")
     api project(":trurl-orc")
     api project(":trurl-utils")
-    api project(":trurl-sql")
     api project(":trurl-stats")
-    api project(":trurl-vn-export")
     api project(":trurl-xml")
 }
 

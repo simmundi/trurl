@@ -73,17 +73,25 @@ class Stateful {
 }
 ```
 
-Simulation logic in ECS frameworks is expressed in terms of _Systems_. In a slight departure from the naming tradition - Trurl represents them by instances of `Step`. A step is a piece of code that reads or changes the state of any number of entities, usually iterating through their subset. Steps depend on components, and can be packaged alongside them to provide cross-cutting functionalities.
+Simulation logic in ECS frameworks is expressed in terms of _Systems_. In Trurl, they are implemented as `EntityProcessor` chains. An `EntityProcessor` is a piece of code that reads or changes the state of an entity. 
 
-We could imagine a step that iterates through all entities that have both a `SpriteRepresentation` and a `Position` - and displays them on the screen (and indeed, such steps and components are already available off-the-shelf in Trurl, as add-ons).
+Unlike traditional "Horizontal Loop" systems that iterate through all entities in multiple passes, Trurl uses **Vertical Composition**. This means an entity is processed through the entire logic chain (e.g., Update -> Physics -> Render) in a single pass, keeping its data "hot" in the CPU cache.
 
-Or a step that implements random walk for any stateful entity which is `IDLE` and is applicable to any component that has a `Position` and `Stateful`.
+We could imagine a processor that updates a `Position` based on a `Velocity` - and another that displays a sprite on the screen. Indeed, such processors and components are already available off-the-shelf in Trurl, as add-ons.
 
-Or we could imagine a step that verifies if two entities with a `Person` and `Position` component being close enough - simulate a chat, based on their age and sex.
+Or we could imagine a processor that verifies if two entities with a `Person` and `Position` component are close enough to simulate a chat, based on their age and sex.
 
-Thanks to the steps being generic and composable - we could create a composit step, running the three steps above in sequence. After seeding the simulation with some people (i.e., entities with `Position`, `Representation` and `Person` components), we could see them walking around, stopping and chatting.
+Thanks to processors being generic and composable, we can create a composite processor by chaining them:
+```java
+EntityProcessor fullChain = EntityProcessor.chain(
+    movementProcessor,
+    collisionProcessor,
+    renderingProcessor
+);
+```
+After seeding the simulation with some people (i.e., entities with `Position`, `Representation` and `Person` components) and running them through an `EntityExecutor`, we could see them walking around, stopping and chatting.
 
-From the software engineering point of view, the crucial aspect of the above is that the `Steps` don't need to depend on each other, but only on the fact that entities contain certain components.
+From the software engineering point of view, the crucial aspect of the above is that the processors don't need to depend on each other, but only on the fact that entities contain certain components.
 
 ### Do I need a dataframe implementation?
 
@@ -109,4 +117,4 @@ You can try browsing through the docs (very much in flux):
 
 - [Store API](./store.md) describes how to use the dataframe aspect of Trurl, read and write data.
 - [Dependency Injection and configuration](./di.md) describes how to use Bento, Trurl's DI container.
-- [Engine API](./ecs.md) describes how to use the ECS aspect of Trurl, read and write data.
+- [Engine and Entity Processing](./ecs.md) describes how to use the ECS aspect of Trurl, read and write data.

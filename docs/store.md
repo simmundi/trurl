@@ -126,38 +126,44 @@ class Person {
 }
 ```
 
-Some of the generated methods will be:
-
-// TODO
+The generated `DaoOfPerson` (accessible via `DaoOfPersonFactory.IT`) will provide methods to `load` and `save` `Person` objects from/to the store. It also takes care of `isPresent` checks and `erase` operations.
 
 ## Store API
 
-// TODO
+The `Store` provides a low-level API for managing attributes and indices:
+
+- `allocateIndex()`: Allocates a new row index in the store.
+- `freeIndex(row)`: Recycles a row index.
+- `ensureCapacity(capacity)`: Resizes the underlying attributes.
+- `get(name)`: Returns the `Attribute` instance for a given column.
 
 ### Columns and empty values
 
-// TODO
+All attributes in Trurl are "nullable" in a sense that they can be empty. For primitive types, a special guard value (like `Integer.MIN_VALUE`) is used to represent an empty cell. You can check this via `attribute.isEmpty(row)` or set it via `attribute.setEmpty(row)`.
 
 ### Substores - one-to-many and one-to-one relationships between rows
 
-#### hidden attributes
+Substores allow for hierarchical data structures. A store can have any number of substores, which are themselves `Store` instances.
 
-#### array-typed
+#### Joins
 
-#### range-typed
+A `Join` connects a row in the current store to one or more rows in a **Substore**.
 
-// TODO
+- `singleTyped()`: A 1:1 relationship.
+- `arrayTyped()` / `rangeTyped()`: 1:N relationships.
 
 ### References to other rows
 
-// TODO
+A `Reference` connects a row to one or more rows in the **Root Store** (Entities). This is used for global relationships between entities.
 
 ### Categories
 
+Trurl integrates with Bento's `Category` system to provide efficient, typed storage for categorical data (a more powerful alternative to Enums).
+
 ### Dynamic Active Record API
 
-// TODO
+The `Store` also supports a more dynamic way of accessing data without pre-generated DAOs, primarily useful for debugging or generic data processing tools.
 
-### Parallel execution - chunks and locks
+### Parallel execution
 
-// TODO
+Trurl supports parallel processing of store data. While the `EntityProcessor` system is the preferred way to execute logic, the underlying `Store` and its `Counter` are thread-safe and can be used for custom parallel iterations.

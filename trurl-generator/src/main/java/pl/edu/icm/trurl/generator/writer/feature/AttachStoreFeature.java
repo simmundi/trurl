@@ -42,7 +42,18 @@ public class AttachStoreFeature implements Feature {
 
     @Override
     public Stream<MethodSpec> methods() {
-        return Stream.of(overrideAttachStore(beanMetadata));
+        return Stream.of(overrideAttachStore(beanMetadata), overrideGetStore());
+    }
+
+    private MethodSpec overrideGetStore() {
+        return MethodSpec
+                .methodBuilder("getStore")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .returns(CommonTypes.STORE)
+                .addStatement("if (store == null) throw new IllegalStateException(\"Store is not attached\")")
+                .addStatement("return store")
+                .build();
     }
 
     private MethodSpec overrideAttachStore(BeanMetadata beanMetadata) {

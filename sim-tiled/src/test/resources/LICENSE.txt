@@ -1,0 +1,7 @@
+The basictiles.png tileset comes from from https://opengameart.org/comment/61618
+
+It is authored by Lanea Zimmerman (Sharm) and has been released under the following licenses:
+
+- https://creativecommons.org/licenses/by/4.0/
+- https://creativecommons.org/licenses/by/3.0/
+- https://opengameart.org/content/oga-by-30-faq
