@@ -33,6 +33,9 @@ import static org.mockito.Mockito.*;
 public class EntityExecutorTest {
 
     @Mock
+    private EngineBuilder engineBuilder;
+
+    @Mock
     private Engine engine;
 
     @Mock
@@ -41,8 +44,9 @@ public class EntityExecutorTest {
     @Test
     public void testExecute() {
         // given
+        when(engineBuilder.getEngine()).thenReturn(engine);
         when(engine.getSession()).thenReturn(session);
-        EntityExecutor executor = new EntityExecutor(engine);
+        EntityExecutor executor = new EntityExecutor(engineBuilder);
         List<String> events = new ArrayList<>();
         EntityProcessor processor = EntityProcessor.from(new EntityProcessor.StatefulProcessor<Void>() {
             @Override
@@ -72,8 +76,9 @@ public class EntityExecutorTest {
     @Test
     public void testChunkAsEntityPattern() {
         // given
+        when(engineBuilder.getEngine()).thenReturn(engine);
         when(engine.getSession()).thenReturn(session);
-        EntityExecutor executor = new EntityExecutor(engine);
+        EntityExecutor executor = new EntityExecutor(engineBuilder);
 
         // Components for our reified chunks
         class ChunkComponent {

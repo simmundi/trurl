@@ -3,6 +3,12 @@ package pl.edu.icm.trurl.gdx.service;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTile;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
+import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.EngineBuilder;
 import pl.edu.icm.trurl.ecs.Entity;
@@ -10,9 +16,10 @@ import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.world2d.model.DaoOfNamedFactory;
 import pl.edu.icm.trurl.world2d.model.Named;
 import pl.edu.icm.trurl.world2d.model.display.*;
+import pl.edu.icm.trurl.world2d.model.space.BoundingBox;
+import pl.edu.icm.trurl.world2d.model.space.DaoOfBoundingBoxFactory;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class TextureEntitiesService {
 
@@ -26,6 +33,7 @@ public class TextureEntitiesService {
         engineBuilder.addComponentWithDao(AnimationComponent.class, DaoOfAnimationComponentFactory.IT);
         engineBuilder.addComponentWithDao(TextureRegionComponent.class, DaoOfTextureRegionComponentFactory.IT);
         engineBuilder.addComponentWithDao(Displayable.class, DaoOfDisplayableFactory.IT);
+        engineBuilder.addComponentWithDao(BoundingBox.class, DaoOfBoundingBoxFactory.IT);
         this.engineBuilder = engineBuilder;
     }
 
@@ -135,6 +143,85 @@ public class TextureEntitiesService {
         textureRegionComponent.setHeight((short) region.height);
         entity.getOrCreate(Named.class).setName(name);
         return entity;
+    }
+
+    public void loadTmxTileset(String tmxPath) {
+        TmxMapLoader loader = new TmxMapLoader();
+        TiledMap map = loader.load(tmxPath);
+        Map<String, Entity> textures = new HashMap<>();
+        Map<TiledMapTile, Entity> tilesToEntities = new HashMap<>();
+
+        map.getTileSets().forEach(tileSet -> {
+            tileSet.forEach(tile -> {
+                if (tile instanceof StaticTiledMapTile) {
+                    StaticTiledMapTile staticTile = (StaticTiledMapTile) tile;
+                    String name = tile.getProperties().get("name", String.class);
+                    if (name != null) {
+                        Entity entity = createEntityFromTiledTile(tile, name, textures);
+                        tilesToEntities.put(tile, entity);
+                    }
+                }
+            });
+
+            // Second pass for animations
+            tileSet.forEach(tile -> {
+                if (tile instanceof AnimatedTiledMapTile) {
+                    AnimatedTiledMapTile animatedTile = (AnimatedTiledMapTile) tile;
+                    String name = tile.getProperties().get("name", String.class);
+                    if (name != null) {
+                        Entity animationEntity = session().createEntity();
+                        animationEntity.getOrCreate(Named.class).setName(name);
+                        AnimationComponent animationComponent = animationEntity.getOrCreate(AnimationComponent.class);
+                        StaticTiledMapTile[] frameTiles = animatedTile.getFrameTiles();
+                        int[] intervals = animatedTile.getAnimationIntervals();
+                        for (int i = 0; i < frameTiles.length; i++) {
+                            StaticTiledMapTile frameTile = frameTiles[i];
+                            Entity frameEntity = tilesToEntities.get(frameTile);
+                            if (frameEntity == null) {
+                                frameEntity = createEntityFromTiledTile(frameTile, name + "_frame_" + frameTile.getId(), textures);
+                                tilesToEntities.put(frameTile, frameEntity);
+                            }
+                            animationComponent.getFrames().add(AnimationFrame.of(frameEntity, intervals[i] / 1000f));
+                        }
+                    }
+                }
+            });
+        });
+        maybeFlush();
+    }
+
+    private Entity createEntityFromTiledTile(TiledMapTile tile, String name, Map<String, Entity> textures) {
+        TextureRegion region = tile.getTextureRegion();
+        String texturePath = "unknown";
+        if (tile.getProperties().containsKey("imagePath")) {
+            texturePath = tile.getProperties().get("imagePath", String.class);
+        } else if (tile instanceof StaticTiledMapTile) {
+            // LibGDX TmxMapLoader doesn't store the source path in the texture region easily.
+            // But sometimes it's in the properties if we put it there or if we use a custom loader.
+            // For now, let's try to get it from the texture's user data or similar if available,
+            // but standard LibGDX doesn't do it.
+        }
+
+        Entity textureEntity = textures.computeIfAbsent(texturePath, this::createTextureEntity);
+        Entity regionEntity = session().createEntity();
+        TextureRegionComponent textureRegionComponent = regionEntity.getOrCreate(TextureRegionComponent.class);
+        textureRegionComponent.setTexture(textureEntity);
+        textureRegionComponent.setX((short) region.getRegionX());
+        textureRegionComponent.setY((short) region.getRegionY());
+        textureRegionComponent.setWidth((short) region.getRegionWidth());
+        textureRegionComponent.setHeight((short) region.getRegionHeight());
+        regionEntity.getOrCreate(Named.class).setName(name);
+
+        // Copy other properties
+        tile.getProperties().getKeys().forEachRemaining(key -> {
+            if (!"name".equals(key) && !"imagePath".equals(key)) {
+                Object value = tile.getProperties().get(key);
+                // We could potentially store these properties in some component if we have one for generic properties
+            }
+        });
+
+        maybeFlush();
+        return regionEntity;
     }
 
     // TODO:

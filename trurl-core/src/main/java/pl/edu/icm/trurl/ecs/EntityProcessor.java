@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public interface EntityProcessor {
+public interface EntityProcessor extends LifecycleProcessor {
 
     void run(Session session, int entityId);
 
@@ -15,10 +15,12 @@ public interface EntityProcessor {
     }
 
     void rawRun(Session session, int entityId, Entity entity);
-    
+
+    @Override
     default void onBegin(Session session) {
     }
 
+    @Override
     default void onEnd(Session session) {
     }
 
@@ -66,7 +68,7 @@ public interface EntityProcessor {
                 flattened.add(new BasicInternalLink((session, entityId, entity, next) -> {
                     processor.rawRun(session, entityId, entity);
                     next.runInternal(session, entityId, entity);
-                }));
+                }, processor));
             }
         }
 
@@ -125,14 +127,6 @@ public interface EntityProcessor {
 
     static <C> EntityProcessor from(StatefulProcessor<C> logic, java.util.function.Supplier<C> supplier) {
         return new TopLevelChain(new StatefulInternalLink<>(logic, supplier));
-    }
-
-    interface LifecycleProcessor {
-        default void onBegin(Session session) {
-        }
-
-        default void onEnd(Session session) {
-        }
     }
 
     @FunctionalInterface
@@ -207,14 +201,20 @@ public interface EntityProcessor {
 
     class BasicInternalLink extends InternalLink {
         private final ProcessorWithNext logic;
+        private final LifecycleProcessor lifecycle;
 
         public BasicInternalLink(ProcessorWithNext logic) {
-            this(logic, FinalLink.INSTANCE);
+            this(logic, null, FinalLink.INSTANCE);
         }
 
-        private BasicInternalLink(ProcessorWithNext logic, InternalLink nextLink) {
+        public BasicInternalLink(ProcessorWithNext logic, LifecycleProcessor lifecycle) {
+            this(logic, lifecycle, FinalLink.INSTANCE);
+        }
+
+        private BasicInternalLink(ProcessorWithNext logic, LifecycleProcessor lifecycle, InternalLink nextLink) {
             super(nextLink);
             this.logic = logic;
+            this.lifecycle = lifecycle;
         }
 
         @Override
@@ -224,17 +224,23 @@ public interface EntityProcessor {
 
         @Override
         public void onBeginInternal(Session session) {
+            if (lifecycle != null) {
+                lifecycle.onBegin(session);
+            }
             nextLink.onBeginInternal(session);
         }
 
         @Override
         public void onEndInternal(Session session) {
+            if (lifecycle != null) {
+                lifecycle.onEnd(session);
+            }
             nextLink.onEndInternal(session);
         }
 
         @Override
         public InternalLink withNext(InternalLink next) {
-            return new BasicInternalLink(this.logic, next);
+            return new BasicInternalLink(this.logic, this.lifecycle, next);
         }
 
         @Override

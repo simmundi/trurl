@@ -11,6 +11,15 @@ dependencies {
     compileOnly "com.badlogicgames.gdx:gdx:${gdxVersion}"
     api project(":sim-world2d")
     implementation project(":trurl-core")
+
+    testImplementation "com.badlogicgames.gdx:gdx:${gdxVersion}"
+    testImplementation "com.badlogicgames.gdx:gdx-backend-headless:${gdxVersion}"
+    testImplementation "com.badlogicgames.gdx:gdx-platform:${gdxVersion}:natives-desktop"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${juniJupiterApiVersion}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${juniJupiterApiVersion}"
+    testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    testImplementation "org.mockito:mockito-junit-jupiter:${mockitoVersion}"
+    testImplementation "org.assertj:assertj-core:${assertJVersion}"
 }
 
 publishing {

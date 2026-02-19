@@ -142,6 +142,42 @@ public class EntityProcessorTest {
     }
 
     @Test
+    public void testChainLifecyclePropagation() {
+        // given
+        List<String> results = new ArrayList<>();
+        EntityProcessor processor = new EntityProcessor() {
+            @Override
+            public void run(Session session, int entityId) {}
+
+            @Override
+            public void rawRun(Session session, int entityId, Entity entity) {}
+
+            @Override
+            public void onBegin(Session session) {
+                results.add("begin");
+            }
+
+            @Override
+            public void onEnd(Session session) {
+                results.add("end");
+            }
+        };
+
+        // Case 1: Direct execution
+        results.clear();
+        processor.onBegin(session);
+        processor.onEnd(session);
+        assertThat(results).as("Direct execution should trigger lifecycle").containsExactly("begin", "end");
+
+        // Case 2: Chained execution
+        results.clear();
+        EntityProcessor chained = EntityProcessor.chain(processor);
+        chained.onBegin(session);
+        chained.onEnd(session);
+        assertThat(results).as("Chained execution should trigger lifecycle").containsExactly("begin", "end");
+    }
+
+    @Test
     public void testBasicFromConsumer() {
         // given
         AtomicInteger counter = new AtomicInteger();

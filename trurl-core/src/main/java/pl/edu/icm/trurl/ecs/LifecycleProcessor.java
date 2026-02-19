@@ -18,25 +18,10 @@
 
 package pl.edu.icm.trurl.ecs;
 
-import net.snowyhollows.bento.annotation.WithFactory;
-
-public class EntityExecutor {
-    private final EngineBuilder engineBuilder;
-
-    @WithFactory
-    public EntityExecutor(EngineBuilder engineBuilder) {
-        this.engineBuilder = engineBuilder;
+public interface LifecycleProcessor {
+    default void onBegin(Session session) {
     }
 
-    public void execute(Source source, EntityProcessor processor) {
-        EntityProcessor reified = processor.reify();
-        Session session = engineBuilder.getEngine().getSession();
-        try {
-            reified.onBegin(session);
-            source.forEach(id -> reified.run(session, id));
-            reified.onEnd(session);
-        } finally {
-            session.flush();
-        }
+    default void onEnd(Session session) {
     }
 }

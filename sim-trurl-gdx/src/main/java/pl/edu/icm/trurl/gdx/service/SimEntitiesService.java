@@ -9,6 +9,8 @@ import pl.edu.icm.trurl.world2d.model.display.Displayable;
 import pl.edu.icm.trurl.world2d.model.display.GraphicsTransform;
 import pl.edu.icm.trurl.world2d.model.display.TextureRegionComponent;
 import pl.edu.icm.trurl.world2d.model.space.BoundingBox;
+import pl.edu.icm.trurl.world2d.model.space.DaoOfBoundingBoxFactory;
+import pl.edu.icm.trurl.world2d.model.space.DaoOfVelocityFactory;
 import pl.edu.icm.trurl.world2d.model.space.Velocity;
 import pl.edu.icm.trurl.world2d.service.AnimationResolver;
 import pl.edu.icm.trurl.world2d.service.GlobalTimer;
@@ -25,6 +27,8 @@ public class SimEntitiesService {
 
     @WithFactory
     public SimEntitiesService(NameService nameService, GlobalTimer globalTimer, AnimationResolver animationResolver, EngineBuilder engineBuilder) {
+        engineBuilder.addComponentWithDao(BoundingBox.class, DaoOfBoundingBoxFactory.IT);
+        engineBuilder.addComponentWithDao(Velocity.class, DaoOfVelocityFactory.IT);
         this.nameService = nameService;
         this.globalTimer = globalTimer;
         this.animationResolver = animationResolver;

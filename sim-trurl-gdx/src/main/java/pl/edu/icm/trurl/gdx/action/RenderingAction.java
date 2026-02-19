@@ -29,7 +29,8 @@ public class RenderingAction implements EntityProcessor {
     public RenderingAction(AnimationResolver animationResolver,
                            GdxTileTextureLoader textureLoader,
                            EngineBuilder engineBuilder,
-                           DisplayListener displayListener, Renderer renderer) {
+                           DisplayListener displayListener,
+                           Renderer renderer) {
         this.animationResolver = animationResolver;
         this.textureLoader = textureLoader;
         this.displayListener = displayListener;
