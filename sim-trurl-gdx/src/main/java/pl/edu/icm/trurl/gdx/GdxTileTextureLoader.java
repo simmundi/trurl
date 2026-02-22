@@ -26,6 +26,14 @@ public class GdxTileTextureLoader  {
         engineBuilder.addComponentWithDao(AnimationComponent.class, DaoOfAnimationComponentFactory.IT);
     }
 
+    public void registerTexture(String path, Texture texture) {
+        textures.put(path, texture);
+    }
+
+    public void registerRegion(Entity representation, TextureRegion region) {
+        textureRegions.put(representation.getId(), region);
+    }
+
     public TextureRegion getRegion(Entity representation) {
         int id = representation.getId();
         TextureRegion textureRegion = textureRegions.get(id);

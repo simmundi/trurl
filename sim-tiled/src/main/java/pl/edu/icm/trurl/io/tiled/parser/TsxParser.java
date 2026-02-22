@@ -4,7 +4,7 @@ import pl.edu.icm.trurl.io.tiled.model.TileMetadata;
 import pl.edu.icm.trurl.io.tiled.model.TilesetMetadata;
 import pl.edu.icm.trurl.xml.Parser;
 
-import javax.xml.stream.XMLEventReader;
+import pl.edu.icm.trurl.xml.pull.XmlPullParser;
 import javax.xml.stream.XMLStreamException;
 
 import static javax.xml.namespace.QName.valueOf;
@@ -13,8 +13,8 @@ public class TsxParser extends Parser {
 
     private final String tsxPath;
 
-    public TsxParser(XMLEventReader reader, String tsxPath) {
-        super(reader, null);
+    public TsxParser(XmlPullParser reader, String tsxPath) {
+        super(reader);
         this.tsxPath = tsxPath;
     }
 

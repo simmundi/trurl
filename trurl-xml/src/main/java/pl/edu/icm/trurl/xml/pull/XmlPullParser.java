@@ -16,15 +16,11 @@
  *
  */
 
-package pl.edu.icm.trurl.world2d.level;
- 
-import pl.edu.icm.trurl.ecs.Session;
-import java.util.function.Consumer;
- 
-/**
- * Interface for providing a stream of EntityPrototypes from a source (ASCII, TMX, etc.).
- */
-public interface LevelSource {
-    default void prepare(Session session) {}
-    void forEach(Consumer<EntityPrototype> consumer);
+package pl.edu.icm.trurl.xml.pull;
+
+import java.io.IOException;
+
+public interface XmlPullParser {
+    XmlEvent next() throws IOException;
+    XmlEvent peek() throws IOException;
 }

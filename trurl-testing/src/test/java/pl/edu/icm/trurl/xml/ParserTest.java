@@ -20,14 +20,9 @@ package pl.edu.icm.trurl.xml;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import pl.edu.icm.trurl.xml.pull.XmlPullParserImpl;
 
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import java.io.StringReader;
 import java.util.HashMap;
@@ -37,20 +32,45 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@ExtendWith(MockitoExtension.class)
 class ParserTest {
 
     public static final QName QNAME_A = new QName("a");
     public static final QName QNAME_B = new QName("b");
     public static final QName QNAME_C = new QName("c");
 
-    private XMLEventReader reader;
     private Parser parser;
 
-    @Mock
-    private ParserExecution parserExecution;
-    @Mock
-    private ParserExecution otherParserExecution;
+    private ParserExecution parserExecution = new ParserExecution() {
+        public int count = 0;
+        @Override
+        public void execute() {
+            count++;
+        }
+    };
+
+    private ParserExecution otherParserExecution = new ParserExecution() {
+        public int count = 0;
+        @Override
+        public void execute() {
+            count++;
+        }
+    };
+
+    private void verify(ParserExecution execution, int times) {
+        if (execution == parserExecution) {
+            assertThat(((MockExecution)parserExecution).count).isEqualTo(times);
+        } else {
+            assertThat(((MockExecution)otherParserExecution).count).isEqualTo(times);
+        }
+    }
+
+    private static class MockExecution implements ParserExecution {
+        public int count = 0;
+        @Override
+        public void execute() {
+            count++;
+        }
+    }
 
     // -------------------- TESTS --------------------
 
@@ -58,16 +78,14 @@ class ParserTest {
     @DisplayName("Should execute lambda and consume the <b> tag")
     void inElement() throws XMLStreamException {
         // given
+        MockExecution mockExecution = new MockExecution();
         initParser("<a><b></b></a>");
-        reader.nextEvent(); // start document
-        reader.nextEvent(); // start a
-
-        // execute
-        parser.inElement(QNAME_B, parserExecution);
+        parser.inElement(QNAME_A, () -> {
+            parser.inElement(QNAME_B, mockExecution);
+        });
 
         // assert
-        verify(parserExecution, times(1)).execute();
-        assertThat(reader.peek().asEndElement().getName()).isEqualTo(QNAME_A);
+        assertThat(mockExecution.count).isEqualTo(1);
     }
 
     @Test
@@ -87,32 +105,29 @@ class ParserTest {
     @DisplayName("Should execute lambda and consume the <b> tag")
     void inOptionalElement() throws XMLStreamException {
         // given
+        MockExecution mockExecution = new MockExecution();
         initParser("<a><b></b></a>");
-        reader.nextEvent(); // start document
-        reader.nextEvent(); // start a
-
-        // execute
-        parser.inOptionalElement(QNAME_B, parserExecution);
+        parser.inElement(QNAME_A, () -> {
+            parser.inOptionalElement(QNAME_B, mockExecution);
+        });
 
         // assert
-        verify(parserExecution, times(1)).execute();
-        assertThat(reader.peek().asEndElement().getName()).isEqualTo(QNAME_A);
+        assertThat(mockExecution.count).isEqualTo(1);
     }
 
     @Test
     @DisplayName("Should not execute lambda and not consume anything")
     void inOptionalElement__no_execution() throws XMLStreamException {
         // given
+        MockExecution mockExecution = new MockExecution();
         initParser("<a><c/></a>");
-        reader.nextEvent(); // start document
-        reader.nextEvent(); // start a
-
-        // execute
-        parser.inOptionalElement(QNAME_B, parserExecution);
+        parser.inElement(QNAME_A, () -> {
+            parser.inOptionalElement(QNAME_B, mockExecution);
+            parser.inElement(QNAME_C, () -> {});
+        });
 
         // assert
-        verify(parserExecution, times(0)).execute();
-        assertThat(reader.peek().asStartElement().getName()).isEqualTo(QNAME_C);
+        assertThat(mockExecution.count).isEqualTo(0);
     }
 
     @Test
@@ -120,11 +135,9 @@ class ParserTest {
     void fromElement() throws XMLStreamException {
         // given
         initParser("<a><b></b></a>");
-        reader.nextEvent(); // start document
-        reader.nextEvent(); // start a
-
-        // execute
-        int result = parser.fromElement(QNAME_B, () -> 4);
+        int result = parser.fromElement(QNAME_A, () -> {
+            return parser.fromElement(QNAME_B, () -> 4);
+        });
 
         // assert
         assertThat(result).isEqualTo(4);
@@ -135,30 +148,26 @@ class ParserTest {
     void skipSiblingsUntil() throws XMLStreamException {
         // given
         initParser("<a>x <x></x><y></y> a b c<b></b></a>");
-        reader.nextEvent(); // start document
-        reader.nextEvent(); // start a
-
-        // execute
-        parser.skipSiblingsUntil(QNAME_B);
-
-        // assert
-        assertThat(reader.peek().asStartElement().getName()).isEqualTo(QNAME_B);
+        parser.inElement(QNAME_A, () -> {
+            // execute
+            parser.skipSiblingsUntil(QNAME_B);
+            parser.inElement(QNAME_B, () -> {});
+        });
     }
 
     @Test
     @DisplayName("Should not execute lambda three times, once for each <b> tag")
     void forEach() throws XMLStreamException {
         // given
+        MockExecution mockExecution = new MockExecution();
         initParser("<a><b></b><b></b><b></b><c></c></a>");
-        reader.nextEvent(); // start document
-        reader.nextEvent(); // start a
-
-        // execute
-        parser.forEach(QNAME_B, parserExecution);
+        parser.inElement(QNAME_A, () -> {
+            parser.forEach(QNAME_B, mockExecution);
+            parser.inElement(QNAME_C, () -> {});
+        });
 
         // assert
-        verify(parserExecution, times(3)).execute();
-        assertThat(reader.peek().asStartElement().getName()).isEqualTo(QNAME_C);
+        assertThat(mockExecution.count).isEqualTo(3);
     }
 
     @Test
@@ -166,29 +175,32 @@ class ParserTest {
     void caseIf() throws XMLStreamException {
         // execute
         initParser("<a></a>");
-        Map.Entry<QName, ParserExecution> result = parser.caseIf(QNAME_A, parserExecution);
+        MockExecution mockExecution = new MockExecution();
+        Map.Entry<QName, ParserExecution> result = parser.caseIf(QNAME_A, mockExecution);
 
         // assert
-        assertThat(result).isEqualTo(new HashMap.SimpleEntry<>(QNAME_A, parserExecution));
+        assertThat(result.getKey()).isEqualTo(QNAME_A);
+        assertThat(result.getValue()).isEqualTo(mockExecution);
     }
 
     @Test
     @DisplayName("Should execute one lambda 2 times and the other 3, once for each <b> and <c> tag")
     void forEachSwitch() throws XMLStreamException {
         // given
+        MockExecution mockB = new MockExecution();
+        MockExecution mockC = new MockExecution();
         initParser("<a><b></b><c></c><c></c><b></b><c></c><x></x></a>");
-        reader.nextEvent(); // start document
-        reader.nextEvent(); // start a
-
-        // execute
-        parser.forEachSwitch(
-                parser.caseIf(QNAME_B, parserExecution),
-                parser.caseIf(QNAME_C, otherParserExecution)
-        );
+        parser.inElement(QNAME_A, () -> {
+            // execute
+            parser.forEachSwitch(
+                    parser.caseIf(QNAME_B, mockB),
+                    parser.caseIf(QNAME_C, mockC)
+            );
+        });
 
         // assert
-        verify(parserExecution, times(2)).execute();
-        verify(otherParserExecution, times(3)).execute();
+        assertThat(mockB.count).isEqualTo(2);
+        assertThat(mockC.count).isEqualTo(3);
     }
 
     @Test
@@ -259,9 +271,6 @@ class ParserTest {
     // -------------------- PRIVATE --------------------
 
     private void initParser(String xml) throws XMLStreamException {
-        reader = XMLInputFactory
-                .newFactory()
-                .createXMLEventReader(new StringReader(xml));
-        parser = new Parser(reader, XMLOutputFactory.newFactory());
+        parser = new Parser(new XmlPullParserImpl(new StringReader(xml)));
     }
 }

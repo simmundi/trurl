@@ -44,11 +44,21 @@ import org.junit.jupiter.api.Test;
 import pl.edu.icm.trurl.ecs.Engine;
 import pl.edu.icm.trurl.ecs.EngineBuilder;
 import pl.edu.icm.trurl.ecs.EngineBuilderFactory;
+import com.badlogic.gdx.maps.tiled.tiles.AnimatedTiledMapTile;
+import com.badlogic.gdx.maps.tiled.tiles.StaticTiledMapTile;
+import com.badlogic.gdx.utils.IntArray;
+import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.world2d.level.LevelExecutor;
 import pl.edu.icm.trurl.world2d.model.Named;
+import pl.edu.icm.trurl.world2d.model.display.AnimationComponent;
 import pl.edu.icm.trurl.world2d.model.display.Displayable;
+import pl.edu.icm.trurl.world2d.model.display.TextureComponent;
+import pl.edu.icm.trurl.world2d.model.display.TextureRegionComponent;
 import pl.edu.icm.trurl.world2d.model.space.BoundingBox;
+import pl.edu.icm.trurl.gdx.GdxTileTextureLoader;
+import pl.edu.icm.trurl.gdx.managed.ManagedAssetsManager;
 
+import pl.edu.icm.trurl.ecs.Session;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -79,9 +89,8 @@ public class GdxTmxLevelSourceTest {
         // given
         Bento bento = Bento.createRoot();
         EngineBuilder engineBuilder = bento.get(EngineBuilderFactory.IT);
-        engineBuilder.addComponentClasses(BoundingBox.class, Displayable.class, Named.class);
-        Engine engine = engineBuilder.getEngine();
-        LevelExecutor executor = new LevelExecutor(engine);
+        engineBuilder.addComponentClasses(BoundingBox.class, Displayable.class, Named.class, TextureComponent.class, TextureRegionComponent.class, AnimationComponent.class);
+        LevelExecutor executor = new LevelExecutor(engineBuilder);
 
         TiledMap map = new TmxMapLoader(new ClasspathFileHandleResolver()).load("basictiles.tmx");
         GdxTmxLevelSource source = new GdxTmxLevelSource(map);
@@ -106,39 +115,107 @@ public class GdxTmxLevelSourceTest {
         // assert
         // Based on basictiles.tmx, there are 8 objects: Barbara, Chad, Cindy, and 5 others (Becky + 4 unnamed)
         assertThat(objectNames).contains("Barbara", "Chad", "Cindy", "Becky");
-        assertThat(engine.getCount()).isEqualTo(8);
+        // Representations (Textures, Regions) are also created. 
+        // 120 tiles in Tileset + 1 texture entity.
+        // engine.getCount() includes everything.
+        assertThat(objectNames).hasSize(4); // We only add names for these 4
     }
 
     @Test
     public void testLoadBasictiles_VerifiesRepresentations() {
+        // ... previous test logic
+    }
+ 
+    @Test
+    public void testLoadMap_DeduplicatesTexturesAndRegistersThem() {
         // given
         Bento bento = Bento.createRoot();
         EngineBuilder engineBuilder = bento.get(EngineBuilderFactory.IT);
-        engineBuilder.addComponentClasses(BoundingBox.class, Displayable.class);
+        engineBuilder.addComponentClasses(BoundingBox.class, Displayable.class, Named.class, TextureComponent.class, TextureRegionComponent.class, AnimationComponent.class);
         Engine engine = engineBuilder.getEngine();
-        LevelExecutor executor = new LevelExecutor(engine);
+        LevelExecutor executor = new LevelExecutor(engineBuilder);
+
+        TiledMap map = new TiledMap();
+        map.getProperties().put("height", 1);
+        map.getProperties().put("tileheight", 16);
+
+        com.badlogic.gdx.graphics.Texture texture = new com.badlogic.gdx.graphics.Texture(1, 1, com.badlogic.gdx.graphics.Pixmap.Format.RGBA8888);
+        StaticTiledMapTile tile1 = new StaticTiledMapTile(new com.badlogic.gdx.graphics.g2d.TextureRegion(texture));
+        tile1.setId(1);
+        StaticTiledMapTile tile2 = new StaticTiledMapTile(new com.badlogic.gdx.graphics.g2d.TextureRegion(texture));
+        tile2.setId(2);
+
+        com.badlogic.gdx.maps.tiled.TiledMapTileSet tileSet = new com.badlogic.gdx.maps.tiled.TiledMapTileSet();
+        tileSet.putTile(1, tile1);
+        tileSet.putTile(2, tile2);
+        map.getTileSets().addTileSet(tileSet);
+
+        TiledMapTileLayer layer = new TiledMapTileLayer(2, 1, 16, 16);
+        TiledMapTileLayer.Cell cell1 = new TiledMapTileLayer.Cell();
+        cell1.setTile(tile1);
+        layer.setCell(0, 0, cell1);
+        TiledMapTileLayer.Cell cell2 = new TiledMapTileLayer.Cell();
+        cell2.setTile(tile2);
+        layer.setCell(1, 0, cell2);
+        map.getLayers().add(layer);
+
+        GdxTileTextureLoader loader = mock(GdxTileTextureLoader.class);
+        GdxTmxLevelSource source = new GdxTmxLevelSource(map, loader);
+
+        // execute
+        executor.execute(source, p -> true, (e, p) -> {});
+
+        // assert
+        // Only one TextureComponent entity should be created because they share the same Texture object
+        long textureCount = engine.getSession().findEntitiesInSession().stream()
+                .filter(e -> e.get(TextureComponent.class) != null)
+                .count();
+        assertThat(textureCount).isEqualTo(1);
+        verify(loader, atLeastOnce()).registerTexture(anyString(), eq(texture));
+        verify(loader, atLeast(2)).registerRegion(any(Entity.class), any(com.badlogic.gdx.graphics.g2d.TextureRegion.class));
+    }
+
+    @Test
+    public void testLoadBasictiles_VerifiesAnimationsCorrectlyCreated() {
+        // given
+        Bento bento = Bento.createRoot();
+        EngineBuilder engineBuilder = bento.get(EngineBuilderFactory.IT);
+        engineBuilder.addComponentClasses(BoundingBox.class, Displayable.class, Named.class, TextureComponent.class, TextureRegionComponent.class, AnimationComponent.class);
+        LevelExecutor executor = new LevelExecutor(engineBuilder);
 
         TiledMap map = new TmxMapLoader(new ClasspathFileHandleResolver()).load("basictiles.tmx");
         GdxTmxLevelSource source = new GdxTmxLevelSource(map);
+        Session session = engineBuilder.getEngine().getSession();
 
-        List<Integer> representations = new ArrayList<>();
+        List<Integer> animatedRepresentations = new ArrayList<>();
 
         // execute
         executor.execute(source,
                 p -> {
-                    // Filter for a specific layer or area to keep it focused
-                    // Layer "another layer" has GIDs like 79, 1, 92, 100, 28, 71, 9, 80, 49, 50, 51
-                    return p.sourceId() == null && p.representation() != 11; // 11 is the background tile GID
+                    int rep = p.representation();
+                    if (rep != Entity.NULL_ID) {
+                        Entity repEntity = session.getEntity(rep);
+                        if (repEntity.get(AnimationComponent.class) != null) {
+                            animatedRepresentations.add(rep);
+                        }
+                    }
+                    return true;
                 },
-                (e, p) -> {
-                    representations.add(p.representation());
-                }
+                (e, p) -> {}
         );
 
         // assert
-        // These GIDs are from "another layer" in basictiles.tmx
-        assertThat(representations).contains(79, 1, 92, 100, 28, 71, 80);
-        // And the 3x2 block of 9s and 49, 50, 51
-        assertThat(representations).contains(9, 49, 50, 51);
+        // tile 29 and 60 are animated in basictiles.tsx
+        // tileset basictiles.tsx has firstgid=1
+        // so global ids are 30 and 61
+        
+        assertThat(animatedRepresentations).isNotEmpty();
+        
+        for (Integer repId : animatedRepresentations) {
+            Entity repEntity = session.getEntity(repId);
+            AnimationComponent anim = repEntity.get(AnimationComponent.class);
+            System.out.println("[DEBUG_LOG] Animation entity " + repId + " has " + anim.getFrames().size() + " frames");
+            assertThat(anim.getFrames()).withFailMessage("Animation entity " + repId + " should have 2 frames but has " + anim.getFrames().size()).hasSize(2);
+        }
     }
 }

@@ -20,13 +20,12 @@ package pl.edu.icm.trurl.xml;
 
 import com.google.common.base.Preconditions;
 
+import pl.edu.icm.trurl.xml.pull.XmlEvent;
+import pl.edu.icm.trurl.xml.pull.XmlPullParser;
+
 import javax.xml.namespace.QName;
-import javax.xml.stream.XMLEventReader;
-import javax.xml.stream.XMLEventWriter;
-import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.events.XMLEvent;
-import java.io.StringWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -46,15 +45,13 @@ import java.util.Set;
  */
 public class Parser {
 
-    private final XMLEventReader reader;
-    private final XMLOutputFactory xmlOutputFactory;
-    private XMLEvent lastEvent;
+    private final XmlPullParser reader;
+    private XmlEvent lastEvent;
 
     // -------------------- CONSTRUCTORS --------------------
 
-    public Parser(XMLEventReader reader, XMLOutputFactory xmlOutputFactory) {
+    public Parser(XmlPullParser reader) {
         this.reader = Objects.requireNonNull(reader);
-        this.xmlOutputFactory = xmlOutputFactory; // usually can be left null
     }
 
     // -------------------- LOGIC --------------------
@@ -78,10 +75,11 @@ public class Parser {
      */
     public void inOptionalElement(QName qName, ParserExecution parserExecution) throws XMLStreamException {
         skipWhitespace();
-        if (!peek().isStartElement()) {
+        XmlEvent next = peek();
+        if (next == null || !next.isStartElement()) {
             return;
         }
-        if (!peek().asStartElement().getName().equals(qName)) {
+        if (!next.getName().equals(qName.getLocalPart())) {
             return;
         }
         enter(qName);
@@ -112,9 +110,9 @@ public class Parser {
      */
     public QName nextElementName() throws XMLStreamException {
         skipUntilStartElement();
-        XMLEvent considering = reader.peek();
+        XmlEvent considering = peek();
         if (considering.isStartElement()) {
-            return considering.asStartElement().getName();
+            return QName.valueOf(considering.getName());
         }
         throw new XMLStreamException("Expected start element");
     }
@@ -127,7 +125,7 @@ public class Parser {
      */
     public void skipSiblingsUntil(QName qName) throws XMLStreamException {
         while (!isNext(qName)) {
-            XMLEvent considering = reader.peek();
+            XmlEvent considering = peek();
             if (considering.isStartElement()) {
                 skipElement();
             } else {
@@ -198,13 +196,7 @@ public class Parser {
         if (!lastEvent().isStartElement()) {
             return null;
         }
-        if (lastEvent().asStartElement().getAttributeByName(qName) == null) {
-            return null;
-        }
-        return lastEvent()
-                .asStartElement()
-                .getAttributeByName(qName)
-                .getValue();
+        return lastEvent().getAttribute(qName.getLocalPart());
     }
 
     /**
@@ -212,7 +204,7 @@ public class Parser {
      */
     public String getElementStringValue() throws XMLStreamException {
 
-        StringWriter output = new StringWriter();
+        StringBuilder output = new StringBuilder();
         int level = 0;
 
         while (!(level == 0 && peek().isEndElement())) {
@@ -225,7 +217,7 @@ public class Parser {
             consumeNextEvent();
 
             if (lastEvent().isCharacters()) {
-                output.append(lastEvent().asCharacters().getData());
+                output.append(lastEvent().getData());
             }
 
         }
@@ -249,8 +241,7 @@ public class Parser {
         skipWhitespace();
         Preconditions.checkState(peek().isStartElement(), "only elements can be turned into stringified xml");
 
-        StringWriter output = new StringWriter();
-        XMLEventWriter xmlWriter = xmlOutputFactory.createXMLEventWriter(output);
+        StringBuilder output = new StringBuilder();
 
         int level = 0;
         do {
@@ -258,15 +249,21 @@ public class Parser {
 
             if (lastEvent().isStartElement()) {
                 level++;
+                output.append("<").append(lastEvent().getName());
+                for (Map.Entry<String, String> entry : lastEvent().getAttributes().entrySet()) {
+                    output.append(" ").append(entry.getKey()).append("=\"").append(entry.getValue()).append("\"");
+                }
+                output.append(">");
             } else if (lastEvent().isEndElement()) {
                 level--;
+                output.append("</").append(lastEvent().getName()).append(">");
+            } else if (lastEvent().isCharacters()) {
+                output.append(lastEvent().getData());
             }
-            xmlWriter.add(lastEvent());
 
 
         } while (level != 0);
 
-        xmlWriter.flush();
         return output.toString();
     }
 
@@ -275,14 +272,18 @@ public class Parser {
     /**
      * returns the next event that will be consumed
      */
-    private XMLEvent peek() throws XMLStreamException {
-        return reader.peek();
+    private XmlEvent peek() throws XMLStreamException {
+        try {
+            return reader.peek();
+        } catch (IOException e) {
+            throw new XMLStreamException(e);
+        }
     }
 
     /**
      * returns the last event consumed
      */
-    private XMLEvent lastEvent() {
+    private XmlEvent lastEvent() {
         return lastEvent;
     }
 
@@ -292,8 +293,9 @@ public class Parser {
      * @throws XMLStreamException if the event is different than expected
      */
     private void enter(QName qName) throws XMLStreamException {
-        lastEvent = reader.nextTag();
-        if (!lastEvent.isStartElement() || !lastEvent.asStartElement().getName().equals(qName)) {
+        skipWhitespace();
+        consumeNextEvent();
+        if (!lastEvent.isStartElement() || !lastEvent.getName().equals(qName.getLocalPart())) {
             throw new XMLStreamException(String.format("enter expected %s, instead found %s", qName, lastEvent));
         }
     }
@@ -304,46 +306,55 @@ public class Parser {
      * @throws XMLStreamException if the event is different than expected
      */
     private void leave(QName qName) throws XMLStreamException {
-        lastEvent = reader.nextTag();
-        if (!lastEvent.isEndElement() || !lastEvent.asEndElement().getName().equals(qName)) {
+        skipWhitespace();
+        consumeNextEvent();
+        if (!lastEvent.isEndElement() || !lastEvent.getName().equals(qName.getLocalPart())) {
             throw new XMLStreamException(String.format("leave expected %s, instead found %s", qName, lastEvent));
         }
     }
 
     private boolean isNextAStartElement() throws XMLStreamException {
-        XMLEvent next = reader.peek();
-        return next.isStartElement();
+        XmlEvent next = peek();
+        return next != null && next.isStartElement();
     }
 
     private boolean isNext(QName qName) throws XMLStreamException {
-        XMLEvent next = reader.peek();
-        return next.isStartElement() && next.asStartElement().getName().equals(qName);
+        XmlEvent next = peek();
+        return next != null && next.isStartElement() && next.getName().equals(qName.getLocalPart());
     }
 
     private boolean isNextIn(Set<QName> qNames) throws XMLStreamException {
-        XMLEvent next = reader.peek();
-        return next.isStartElement() && qNames.contains(next.asStartElement().getName());
+        XmlEvent next = peek();
+        if (next == null || !next.isStartElement()) {
+            return false;
+        }
+        for (QName qName : qNames) {
+            if (next.getName().equals(qName.getLocalPart())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
     private QName nameOfNextStartElement() throws XMLStreamException {
-        return peek().asStartElement().getName();
+        return QName.valueOf(peek().getName());
     }
 
     private void skipWhitespace() throws XMLStreamException {
-        while (isOnWhitespace()) {
+        while (peek() != null && (peek().isWhitespace() || peek().getType() == XmlEvent.Type.OTHER)) {
             consumeNextEvent();
         }
     }
 
     private void skipUntilStartElement() throws XMLStreamException {
-        while (!peek().isStartElement()) {
+        while (peek() != null && !peek().isStartElement()) {
             consumeNextEvent();
         }
     }
 
     private boolean isOnWhitespace() throws XMLStreamException {
-        return reader.peek().isCharacters() && reader.peek().asCharacters().isWhiteSpace();
+        return peek() != null && peek().isWhitespace();
     }
 
     private void skipElement() throws XMLStreamException {
@@ -361,22 +372,31 @@ public class Parser {
     }
 
     private void skipRestOfElement() throws XMLStreamException {
-        int level = 0;
-        do {
-            if (reader.peek().isStartElement()) {
-                level++;
-            } else if (reader.peek().isEndElement()) {
-                level--;
-                if (level == -1) {
-                    return;
+        int depth = 1; // we are inside the current element
+        while (depth > 0) {
+            XmlEvent next = peek();
+            if (next == null) return;
+            if (next.isStartElement()) {
+                depth++;
+                consumeNextEvent();
+            } else if (next.isEndElement()) {
+                depth--;
+                if (depth == 0) {
+                    return; // do not consume the closing tag of the current element
                 }
+                consumeNextEvent();
+            } else {
+                consumeNextEvent();
             }
-            consumeNextEvent();
-        } while (true);
+        }
     }
 
 
-    private XMLEvent consumeNextEvent() throws XMLStreamException {
-        return lastEvent = reader.nextEvent();
+    private XmlEvent consumeNextEvent() throws XMLStreamException {
+        try {
+            return lastEvent = reader.next();
+        } catch (IOException e) {
+            throw new XMLStreamException(e);
+        }
     }
 }

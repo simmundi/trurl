@@ -4,7 +4,7 @@ import pl.edu.icm.trurl.io.tiled.TiledCartographer;
 import pl.edu.icm.trurl.io.tiled.TiledSingleMap;
 import pl.edu.icm.trurl.xml.Parser;
 
-import javax.xml.stream.XMLEventReader;
+import pl.edu.icm.trurl.xml.pull.XmlPullParser;
 import javax.xml.stream.XMLStreamException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,8 +20,8 @@ import static javax.xml.namespace.QName.valueOf;
 public class TmxParser extends Parser {
     private final Pattern DIGITS = Pattern.compile("\\d+");
 
-    public TmxParser(XMLEventReader reader) {
-        super(reader, null);
+    public TmxParser(XmlPullParser reader) {
+        super(reader);
     }
 
     public void loadMap(TiledCartographer cartographer) throws XMLStreamException {

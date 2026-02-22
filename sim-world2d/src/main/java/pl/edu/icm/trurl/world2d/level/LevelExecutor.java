@@ -20,6 +20,7 @@ package pl.edu.icm.trurl.world2d.level;
 
 import net.snowyhollows.bento.annotation.WithFactory;
 import pl.edu.icm.trurl.ecs.Engine;
+import pl.edu.icm.trurl.ecs.EngineBuilder;
 import pl.edu.icm.trurl.ecs.Entity;
 import pl.edu.icm.trurl.ecs.Session;
 import pl.edu.icm.trurl.world2d.model.display.Displayable;
@@ -29,15 +30,19 @@ import pl.edu.icm.trurl.world2d.model.space.BoundingBox;
  * Orchestrates the creation of entities from a LevelSource.
  */
 public class LevelExecutor {
-    private final Engine engine;
+    private final EngineBuilder engineBuilder;
 
-    public LevelExecutor(Engine engine) {
-        this.engine = engine;
+    @WithFactory
+    public LevelExecutor(EngineBuilder engine) {
+        this.engineBuilder = engine;
     }
 
     public void execute(LevelSource source, EntityCreatorPredicate filter, LevelEntityCustomizer customizer) {
-        Session session = engine.getSession();
+        Session session = engineBuilder.getEngine().getSession();
         try {
+            // Phase 0: Prepare
+            source.prepare(session);
+            
             source.forEach(prototype -> {
                 // Phase 1: Filter
                 if (filter.test(prototype)) {
